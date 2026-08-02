@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercearia Marques - Controle de Estoque & Validades</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #09090b; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff !important; color: #000000 !important; }
+            .print-card { border: 1px solid #cccccc !important; }
+            aside { display: none !important; }
+            main { padding: 0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
+
+    <!-- TELA DE LOGIN BLOQUEANTE -->
+    <div id="tela-login" class="fixed inset-0 bg-black z-[999] flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl max-w-md w-full space-y-6 shadow-2xl text-center">
+            <div class="flex justify-center mb-2">
+                <div class="w-20 h-20 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl shadow-lg shadow-emerald-950/40">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-emerald-400 tracking-wide">MERCEARIA MARQUES</h2>
+                <p class="text-xs text-zinc-400 mt-1">Sistema de Gestão de Estoque & Controle de Validades</p>
+            </div>
+
+            <form onsubmit="fazerLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-zinc-400 mb-1">Usuário</label>
+                    <input type="text" id="login-usuario" required placeholder="admin" value="admin" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-zinc-400 mb-1">Senha</label>
+                    <input type="password" id="login-senha" required placeholder="••••••••" value="123456" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <p id="login-erro" class="text-rose-500 text-xs text-center font-semibold hidden">Usuário ou senha incorretos!</p>
+
+                <button type="submit" id="btn-entrar" class="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black py-3 rounded-xl text-sm transition-all shadow-lg shadow-emerald-950/40">
+                    ENTRAR NO SISTEMA
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside class="w-full md:w-64 bg-zinc-900 border-b md:border-b-0 md:border-r border-zinc-800 p-5 flex flex-col justify-between shrink-0 no-print">
+        <div>
+            <div class="flex items-center gap-3 px-2 py-3 mb-6 border-b border-zinc-800">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-black tracking-wider text-emerald-400 leading-tight">MERCEARIA MARQUES</h1>
+                    <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-semibold block">Estoque & Validades</span>
+                </div>
+            </div>
+
+            <!-- MENU DE NAVEGAÇÃO -->
+            <nav class="space-y-1.5" id="nav-menu">
+                <button onclick="navegar('dashboard')" id="btn-dashboard" class="nav-btn active flex items-center gap-3 w-full px-4 py-3 rounded-xl font-bold text-sm transition-all text-emerald-400 bg-emerald-500/10 border-l-4 border-emerald-400">
+                    <i class="fa-solid fa-chart-pie text-base"></i> Dashboard
+                </button>
+
+                <button onclick="navegar('farol')" id="btn-farol" class="nav-btn flex items-center justify-between w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <span class="flex items-center gap-3">
+                        <i class="fa-solid fa-traffic-light text-base text-amber-400"></i> Farol de Validade
+                    </span>
+                    <span id="badge-farol-risco" class="bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden">0</span>
+                </button>
+
+                <button onclick="navegar('estoque')" id="btn-estoque" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-boxes-stacked text-base text-emerald-400"></i> Estoque & Lotes
+                </button>
+
+                <button onclick="navegar('pdv')" id="btn-pdv" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-cash-register text-base text-emerald-400"></i> PDV / Vendas (FEFO)
+                </button>
+
+                <button onclick="navegar('liquidacao')" id="btn-liquidacao" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-tags text-base text-yellow-400"></i> Liquidação & Ofertas
+                </button>
+
+                <button onclick="navegar('perdas')" id="btn-perdas" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-dumpster text-base text-rose-400"></i> Perdas & Descartes
+                </button>
+
+                <button onclick="navegar('clientes')" id="btn-clientes" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-users text-base"></i> Clientes & Caderneta
+                </button>
+
+                <button onclick="fazerLogout()" class="nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl font-semibold text-sm transition-all text-rose-500 hover:bg-rose-950/40 mt-6 border border-rose-900/40">
+                    <i class="fa-solid fa-right-from-bracket text-base"></i> Sair
+                </button>
+            </nav>
+        </div>
+
+        <div class="mt-8 pt-4 border-t border-zinc-800 px-2 text-xs text-zinc-500">
+            <p>© 2026 <strong class="text-emerald-400">Mercearia Marques</strong></p>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto space-y-6">
+
+        <!-- ================= SEÇÃO: DASHBOARD ================= -->
+        <section id="secao-dashboard" class="secao-conteudo space-y-6">
+            <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-2xl">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-3xl font-extrabold text-emerald-400 tracking-tight">Painel de Controle</h2>
+                        <span class="bg-emerald-500/10 text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-full border border-emerald-500/30 flex items-center gap-2">
+                            <i class="fa-regular fa-calendar text-emerald-400"></i>
+                            Hoje: <strong id="dataAtualExtenso" class="text-emerald-300">--/--/----</strong>
+                        </span>
+                    </div>
+                    <p class="text-sm text-zinc-400 mt-1">Visão geral do estoque, produtos perto do vencimento e vendas da Mercearia Marques.</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2.5 no-print">
+                    <button onclick="abrirModalNovoLote()" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-emerald-950/30">
+                        <i class="fa-solid fa-plus"></i> + Entrada de Lote/Validade
+                    </button>
+                </div>
+            </header>
+
+            <!-- CARDS DE MÉTRICAS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 hover:border-emerald-500/50 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Vendas Hoje</p>
+                            <h3 class="text-2xl font-black text-white mt-1" id="dash-vendas-dia">R$ 0,00</h3>
+                        </div>
+                        <div class="p-3 bg-zinc-800 text-emerald-400 border border-zinc-700 rounded-xl">
+                            <i class="fa-solid fa-cart-shopping text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-zinc-400 mt-3">Total faturado no PDV hoje</p>
+                </div>
+
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 hover:border-rose-500/50 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Vencendo em 7 Dias</p>
+                            <h3 class="text-2xl font-black text-rose-400 mt-1" id="dash-critico-count">0 Lotes</h3>
+                        </div>
+                        <div class="p-3 bg-rose-500/10 text-rose-400 border border-rose-500/30 rounded-xl">
+                            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-rose-300 font-medium mt-3">Risco crítico de perda</p>
+                </div>
+
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 hover:border-amber-500/50 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-amber-400 uppercase tracking-wider">Vencendo em 30 Dias</p>
+                            <h3 class="text-2xl font-black text-amber-400 mt-1" id="dash-atencao-count">0 Lotes</h3>
+                        </div>
+                        <div class="p-3 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-xl">
+                            <i class="fa-solid fa-clock text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-amber-300 font-medium mt-3">Ponto de atenção / Liquidação</p>
+                </div>
+
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Prejuízo por Vencimento (Mês)</p>
+                            <h3 class="text-2xl font-black text-white mt-1" id="dash-perdas-mes">R$ 0,00</h3>
+                        </div>
+                        <div class="p-3 bg-zinc-800 text-rose-400 border border-zinc-700 rounded-xl">
+                            <i class="fa-solid fa-dumpster text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-zinc-400 mt-3">Total descartado no ciclo ativo</p>
+                </div>
+            </div>
+
+            <!-- GRÁFICOS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+                    <h3 class="text-lg font-extrabold text-emerald-400 uppercase tracking-wide mb-4">Saúde das Validades do Estoque</h3>
+                    <div class="relative h-72">
+                        <canvas id="validadeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800">
+                    <h3 class="text-lg font-extrabold text-emerald-400 uppercase tracking-wide mb-4">Vendas vs Perdas</h3>
+                    <div class="relative h-72 flex items-center justify-center">
+                        <canvas id="comparativoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO: FAROL DE VALIDADE (FEFO) ================= -->
+        <section id="secao-farol" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-2xl">
+                <div>
+                    <h2 class="text-2xl font-black text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-traffic-light"></i> Farol de Validade & Gestão por Lotes
+                    </h2>
+                    <p class="text-zinc-400 text-sm mt-1">Monitore os produtos por ordem de vencimento (FEFO - Primeiro que vence é o primeiro que sai).</p>
+                </div>
+
+                <div class="flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-xl border border-zinc-700 text-xs">
+                    <span class="font-bold text-zinc-400">Total de Lotes Monitorados:</span>
+                    <span class="font-black text-emerald-400 text-base" id="farol-kpi-total-lotes">0</span>
+                </div>
+            </div>
+
+            <!-- FILTROS DO FAROL -->
+            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <button onclick="filtrarFarol('todos')" id="btn-farol-todos" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-zinc-950">Todos</button>
+                    <button onclick="filtrarFarol('critico')" id="btn-farol-critico" class="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-rose-400 hover:bg-rose-950/40">🔴 Crítico (&le; 7 Dias)</button>
+                    <button onclick="filtrarFarol('atencao')" id="btn-farol-atencao" class="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-amber-400 hover:bg-amber-950/40">🟡 Atenção (&le; 30 Dias)</button>
+                    <button onclick="filtrarFarol('ok')" id="btn-farol-ok" class="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-emerald-400 hover:bg-emerald-950/40">🟢 OK (&gt; 30 Dias)</button>
+                    <button onclick="filtrarFarol('vencido')" id="btn-farol-vencido" class="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-purple-400 hover:bg-purple-950/40">⬛ Vencidos (Descarte)</button>
+                </div>
+
+                <div class="w-full md:w-80 bg-zinc-800 px-3 py-2 rounded-xl border border-zinc-700 flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-emerald-400"></i>
+                    <input type="text" id="input-pesquisar-farol" onkeyup="renderizarFarolValidade()" placeholder="Pesquisar lote, produto, código EAN..." class="bg-transparent text-white focus:outline-none text-xs w-full">
+                </div>
+            </div>
+
+            <!-- TABELA DO FAROL -->
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 overflow-x-auto">
+                <table class="w-full text-left text-sm text-zinc-300">
+                    <thead class="text-xs uppercase bg-zinc-800 text-emerald-400 border-b border-zinc-700">
+                        <tr>
+                            <th class="p-3">Status Risco</th>
+                            <th class="p-3">Produto / Cód. EAN</th>
+                            <th class="p-3">Nº Lote</th>
+                            <th class="p-3 text-center">Data Validade</th>
+                            <th class="p-3 text-center">Dias Restantes</th>
+                            <th class="p-3 text-center">Qtd Lote</th>
+                            <th class="p-3">Localização</th>
+                            <th class="p-3 text-right">Ações Rápidas</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800" id="tabela-farol-body"></tbody>
+                </table>
+            </div>
+        </section>
+<!-- ================= SEÇÃO: ESTOQUE E LOTES ================= -->
+        <section id="secao-estoque" class="secao-conteudo hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-2xl">
+                <div>
+                    <h2 class="text-2xl font-black text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-stacked"></i> Cadastro de Produtos & Gestão de Lotes
+                    </h2>
+                    <p class="text-zinc-400 text-sm mt-1">Cadastre os produtos do mercado e controle os lotes de entrada com suas respectivas validades.</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2.5">
+                    <button onclick="abrirModalNovoProduto()" class="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-4 py-2.5 rounded-xl text-sm font-bold transition-all">
+                        <i class="fa-solid fa-plus text-emerald-400"></i> + Cadastrar Produto
+                    </button>
+                    <button onclick="abrirModalNovoLote()" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-emerald-950/30">
+                        <i class="fa-solid fa-box-archive"></i> + Entrada de Lote
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARDS DE MÉTRICAS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+                    <p class="text-xs font-bold text-emerald-400 uppercase">Produtos Cadastrados</p>
+                    <h3 class="text-3xl font-black text-white mt-1" id="est-kpi-total-prods">0</h3>
+                    <p class="text-xs text-zinc-500 mt-1">Itens no catálogo</p>
+                </div>
+
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+                    <p class="text-xs font-bold text-amber-400 uppercase">Total de Lotes Ativos</p>
+                    <h3 class="text-3xl font-black text-amber-400 mt-1" id="est-kpi-total-lotes">0</h3>
+                    <p class="text-xs text-zinc-500 mt-1">Fracionados por validade</p>
+                </div>
+
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800">
+                    <p class="text-xs font-bold text-emerald-400 uppercase">Valor Total em Estoque</p>
+                    <h3 class="text-3xl font-black text-emerald-400 mt-1" id="est-kpi-valor-total">R$ 0,00</h3>
+                    <p class="text-xs text-zinc-500 mt-1">Preço de venda acumulado</p>
+                </div>
+            </div>
+
+            <!-- BARRA DE PESQUISA -->
+            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex items-center gap-3">
+                <i class="fa-solid fa-magnifying-glass text-emerald-400 text-lg ml-2"></i>
+                <input type="text" id="input-pesquisar-estoque" onkeyup="renderizarEstoque()" placeholder="Pesquisar por nome do produto, código EAN, categoria..." class="w-full bg-transparent text-white focus:outline-none text-sm placeholder-zinc-500">
+            </div>
+
+            <!-- TABELA DE PRODUTOS -->
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 overflow-x-auto">
+                <table class="w-full text-left text-sm text-zinc-300">
+                    <thead class="text-xs uppercase bg-zinc-800 text-emerald-400 border-b border-zinc-700">
+                        <tr>
+                            <th class="p-3">Código EAN</th>
+                            <th class="p-3">Produto / Marca</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3 text-center">Qtd Total</th>
+                            <th class="p-3">Preço Custo</th>
+                            <th class="p-3">Preço Venda</th>
+                            <th class="p-3 text-center">Lotes Ativos</th>
+                            <th class="p-3 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800" id="tabela-estoque-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO: PDV / VENDAS (FEFO) ================= -->
+        <section id="secao-pdv" class="secao-conteudo hidden space-y-6">
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-cash-register"></i> Frente de Caixa / PDV Inteligente
+                    </h2>
+                    <p class="text-zinc-400 text-sm mt-1">Ao vender, o sistema dá baixa automática no lote com validade mais próxima (Metodologia FEFO).</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- LEITOR E BUSCA -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 space-y-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-emerald-400">
+                            <i class="fa-solid fa-barcode"></i> Escanear Código EAN ou Digitar Nome do Produto
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" id="pdv-busca-input" list="dl-pdv-produtos" onkeypress="verificarEnterPDV(event)" placeholder="Bipe o código de barras ou digite o nome do produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-400 font-mono">
+                            <datalist id="dl-pdv-produtos"></datalist>
+                            <button onclick="adicionarItemPDVPorInput()" class="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-6 py-3 rounded-xl text-sm transition-all shrink-0">
+                                Adicionar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CARRINHO DE ITENS -->
+                    <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                            <i class="fa-solid fa-basket-shopping text-emerald-400"></i> Itens da Venda Atual
+                        </h3>
+                        <div class="overflow-x-auto border border-zinc-800 rounded-xl">
+                            <table class="w-full text-left text-xs text-zinc-300">
+                                <thead class="uppercase bg-zinc-800 text-emerald-400 border-b border-zinc-700">
+                                    <tr>
+                                        <th class="p-3">Produto</th>
+                                        <th class="p-3 text-center">Lote Usado (FEFO)</th>
+                                        <th class="p-3 text-center">Qtd</th>
+                                        <th class="p-3">Preço Un.</th>
+                                        <th class="p-3">Subtotal</th>
+                                        <th class="p-3 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-zinc-800" id="pdv-carrinho-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FINALIZAÇÃO DA VENDA -->
+                <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-5 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-400">Resumo da Venda</h3>
+
+                        <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-2">
+                            <span class="text-xs text-zinc-400 font-bold uppercase block">Total a Pagar</span>
+                            <span class="text-4xl font-black text-emerald-400 block" id="pdv-total-txt">R$ 0,00</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-1">Cliente / Fiado (Opcional)</label>
+                            <select id="pdv-cliente-select" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-emerald-400">
+                                <option value="">Venda Balcão (Cliente Não Identificado)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-zinc-400 mb-1">Forma de Pagamento</label>
+                            <select id="pdv-forma-pagamento" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-white text-xs font-bold focus:outline-none focus:border-emerald-400">
+                                <option value="Dinheiro">💵 Dinheiro</option>
+                                <option value="Pix">⚡ Pix</option>
+                                <option value="Cartão de Débito">💳 Cartão de Débito</option>
+                                <option value="Cartão de Crédito">💳 Cartão de Crédito</option>
+                                <option value="Caderneta/Fiado">📖 Caderneta (A Prazo)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-4 border-t border-zinc-800">
+                        <button onclick="finalizarVendaPDV()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black py-4 rounded-xl text-base transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check-double"></i> FINALIZAR VENDA
+                        </button>
+                        <button onclick="limparCarrinhoPDV()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 py-2 rounded-xl text-xs font-semibold">
+                            Cancelar / Limpar Venda
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO: LIQUIDAÇÃO & OFERTAS ================= -->
+        <section id="secao-liquidacao" class="secao-conteudo hidden space-y-6">
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-yellow-400 flex items-center gap-2">
+                        <i class="fa-solid fa-tags"></i> Gerador de Liquidação & Tabela de Descontos
+                    </h2>
+                    <p class="text-zinc-400 text-sm mt-1">Aplique descontos estratégicos em produtos perto de vencer e divulgue a lista no WhatsApp para queimar estoque rápido.</p>
+                </div>
+
+                <button onclick="divulgarOfertasWhatsApp()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-emerald-950/40">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Divulgar Ofertas no Whats
+                </button>
+            </div>
+
+            <div id="lista-liquidacao-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </section>
+
+        <!-- ================= SEÇÃO: PERDAS & DESCARTES ================= -->
+        <section id="secao-perdas" class="secao-conteudo hidden space-y-6">
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-rose-400 flex items-center gap-2">
+                        <i class="fa-solid fa-dumpster"></i> Registro de Perdas & Quebras de Estoque
+                    </h2>
+                    <p class="text-zinc-400 text-sm mt-1">Acompanhe o valor exato perdido com produtos vencidos ou avariados para controle financeiro.</p>
+                </div>
+
+                <button onclick="abrirModalBaixaPerda()" class="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-rose-950/40">
+                    <i class="fa-solid fa-minus-circle"></i> Registrar Perda / Descarte
+                </button>
+            </div>
+
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Total Perdição no Ciclo</span>
+                    <span class="text-2xl font-black text-rose-400" id="perdas-kpi-total">R$ 0,00</span>
+                </div>
+                <div class="overflow-x-auto border border-zinc-800 rounded-xl">
+                    <table class="w-full text-left text-xs text-zinc-300">
+                        <thead class="uppercase bg-zinc-800 text-rose-400 border-b border-zinc-700">
+                            <tr>
+                                <th class="p-3">Data Descarte</th>
+                                <th class="p-3">Produto / Lote</th>
+                                <th class="p-3 text-center">Qtd Descartada</th>
+                                <th class="p-3">Motivo</th>
+                                <th class="p-3">Prejuízo (R$)</th>
+                                <th class="p-3">Registrado Por</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-zinc-800" id="tabela-perdas-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO: CLIENTES & CADERNETA ================= -->
+        <section id="secao-clientes" class="secao-conteudo hidden space-y-6">
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-users"></i> Clientes & Caderneta de Fiado
+                    </h2>
+                    <p class="text-zinc-400 text-sm mt-1">Gerencie clientes cadastrados e controle os débitos pendentes da caderneta.</p>
+                </div>
+
+                <button onclick="abrirModalNovoCliente()" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold px-4 py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-emerald-950/30">
+                    <i class="fa-solid fa-user-plus"></i> + Novo Cliente
+                </button>
+            </div>
+
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 overflow-x-auto">
+                <
+<!-- ================= MODAIS ================= -->
+
+    <!-- MODAL NOVO PRODUTO (CATÁLOGO) -->
+    <div id="modal-novo-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-xl font-bold text-emerald-400 flex items-center gap-2" id="modal-produto-titulo">
+                    <i class="fa-solid fa-basket-shopping"></i> Cadastrar Produto no Catálogo
+                </h3>
+                <button onclick="fecharModalNovoProduto()" class="text-zinc-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="form-produto" onsubmit="salvarProdutoCat(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="prod-id">
+
+                <div>
+                    <label class="block text-zinc-400 text-xs font-semibold mb-1">Código de Barras (EAN-13)</label>
+                    <input type="text" id="prod-ean" placeholder="Ex: 7891000100103 (Bipe ou Digite)" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <div>
+                    <label class="block text-zinc-400 text-xs font-semibold mb-1">Nome do Produto & Marca <span class="text-rose-400">*</span></label>
+                    <input type="text" id="prod-nome" required placeholder="Ex: Leite Integral Parmalat 1L" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 text-xs font-semibold mb-1">Categoria</label>
+                        <select id="prod-categoria" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400">
+                            <option value="Laticínios">Laticínios & Frios</option>
+                            <option value="Mercearia">Mercearia / Grãos</option>
+                            <option value="Bebidas">Bebidas</option>
+                            <option value="Padaria">Padaria / Biscoitos</option>
+                            <option value="Hortifruti">Hortifruti</option>
+                            <option value="Limpeza">Limpeza & Higiene</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 text-xs font-semibold mb-1">Unidade de Medida</label>
+                        <select id="prod-unidade" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400">
+                            <option value="Un">Unidade (Un)</option>
+                            <option value="Kg">Quilo (Kg)</option>
+                            <option value="L">Litro (L)</option>
+                            <option value="Pacote">Pacote (Pct)</option>
+                            <option value="Caixa">Caixa (Cx)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 text-xs font-semibold mb-1">Preço Custo (R$)</label>
+                        <input type="number" step="0.01" id="prod-preco-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-rose-300 font-bold focus:outline-none focus:border-emerald-400">
+                    </div>
+                    <div>
+                        <label class="block text-emerald-400 text-xs font-bold mb-1">Preço Venda Balcão (R$)</label>
+                        <input type="number" step="0.01" id="prod-preco-venda" required placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-emerald-400 font-bold focus:outline-none focus:border-emerald-400">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 text-xs font-semibold mb-1">Estoque Mínimo (Alerta)</label>
+                        <input type="number" id="prod-estoque-minimo" value="5" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 text-xs font-semibold mb-1">Localização Padrão</label>
+                        <input type="text" id="prod-localizacao" placeholder="Ex: Gôndola A3, Geladeira 2" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalNovoProduto()" class="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl font-medium text-sm">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl text-sm">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ENTRADA DE LOTE COM VALIDADE (O MAIS IMPORTANTE) -->
+    <div id="modal-novo-lote" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-box-archive"></i> Nova Entrada de Lote & Validade
+                </h3>
+                <button onclick="fecharModalNovoLote()" class="text-zinc-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="form-lote" onsubmit="salvarEntradaLote(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="lote-id">
+
+                <div>
+                    <label class="block text-amber-400 text-xs font-bold uppercase mb-1">Produto (Digite Nome ou EAN)</label>
+                    <input type="text" id="lote-produto-input" list="dl-lote-produtos" onchange="selecionarProdutoParaLote(this.value)" placeholder="Busque pelo produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-xs">
+                    <datalist id="dl-lote-produtos"></datalist>
+                    <input type="hidden" id="lote-produto-id">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 text-xs font-semibold mb-1">Número do Lote</label>
+                        <input type="text" id="lote-numero" placeholder="Ex: LT-2026-A" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-amber-400 text-xs font-black uppercase mb-1">Data de Validade <span class="text-rose-400">*</span></label>
+                        <input type="date" id="lote-validade" required class="w-full bg-zinc-800 border border-amber-500/50 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-400">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 text-xs font-semibold mb-1">Quantidade Recebida</label>
+                        <input type="number" id="lote-qtd" required min="1" placeholder="Ex: 24" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 text-xs font-semibold mb-1">Local Físico</label>
+                        <input type="text" id="lote-localizacao" placeholder="Ex: Gôndola B ou Estoque" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalNovoLote()" class="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl font-medium text-sm">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold rounded-xl text-sm">Cadastrar Lote</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL BAIXA DE PERDA / DESCARTE -->
+    <div id="modal-baixa-perda" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-xl font-bold text-rose-400 flex items-center gap-2">
+                    <i class="fa-solid fa-dumpster"></i> Baixa por Perda / Descarte
+                </h3>
+                <button onclick="fecharModalBaixaPerda()" class="text-zinc-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="form-perda" onsubmit="salvarBaixaPerda(event)" class="space-y-3 text-sm">
+                <div>
+                    <label class="block text-rose-400 text-xs font-bold uppercase mb-1">Selecione o Lote Avariado/Vencido</label>
+                    <input type="text" id="perda-lote-input" list="dl-perda-lotes" onchange="selecionarLoteParaPerda(this.value)" placeholder="Busque o lote..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white text-xs focus:outline-none">
+                    <datalist id="dl-perda-lotes"></datalist>
+                    <input type="hidden" id="perda-lote-id">
+                </div>
+
+                <div>
+                    <label class="block text-zinc-400 text-xs font-semibold mb-1">Quantidade Descartada</label>
+                    <input type="number" id="perda-qtd" required min="1" placeholder="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white font-bold focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-zinc-400 text-xs font-semibold mb-1">Motivo do Descarte</label>
+                    <select id="perda-motivo" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none">
+                        <option value="Vencimento">Data de Validade Expirada</option>
+                        <option value="Avaria / Quebrado">Embalagem Avariada / Quebrada</option>
+                        <option value="Consumo Interno">Consumo Interno do Mercado</option>
+                        <option value="Outros">Outros Motivos</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalBaixaPerda()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl text-sm">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-sm">Registrar Perda</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CLIENTE -->
+    <div id="modal-novo-cliente" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-xl font-bold text-emerald-400 flex items-center gap-2" id="modal-cliente-titulo">
+                    <i class="fa-solid fa-user-plus"></i> Novo Cliente / Caderneta
+                </h3>
+                <button onclick="fecharModalNovoCliente()" class="text-zinc-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <form id="form-cliente" onsubmit="salvarCliente(event)" class="space-y-3 text-sm">
+                <input type="hidden" id="cli-id">
+                <div>
+                    <label class="block text-zinc-400 text-xs font-semibold mb-1">Nome Completo <span class="text-rose-400">*</span></label>
+                    <input type="text" id="cli-nome" required placeholder="Nome do cliente" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 text-xs font-semibold mb-1">Telefone / WhatsApp</label>
+                    <input type="text" id="cli-telefone" placeholder="(21) 90000-0000" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 text-xs font-semibold mb-1">Endereço</label>
+                    <input type="text" id="cli-endereco" placeholder="Rua, número, complemento" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 text-xs font-semibold mb-1">Limite do Fiado (R$)</label>
+                    <input type="number" step="0.01" id="cli-limite-fiado" value="200.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-emerald-400 font-bold focus:outline-none">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalNovoCliente()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl text-sm">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl text-sm">Salvar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAÇÃO PERSONALIZADO -->
+    <div id="modal-confirmacao" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[1000] hidden flex items-center justify-center p-4">
+        <div id="modal-confirmacao-box" class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl scale-95 opacity-0 transition-all duration-200">
+            <div id="modal-confirmacao-icone" class="w-16 h-16 bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg shadow-rose-950/30">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-white" id="modal-confirmacao-titulo">Confirmar Ação</h3>
+                <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed" id="modal-confirmacao-mensagem">Deseja realmente prosseguir?</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button id="btn-confirmar-cancelar" class="w-1/2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-2.5 rounded-xl text-xs transition-all border border-zinc-700">
+                    Cancelar
+                </button>
+                <button id="btn-confirmar-ok" class="w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-rose-950/50">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-zinc-900 text-white border border-emerald-400 px-5 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-[1001]">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="font-medium text-sm">Ação realizada!</span>
+    </div>
+<!-- SCRIPT PRINCIPAL DO MERCADINHO MARQUES -->
+    <script>
+        // ================= DADOS E ESTADO DO SISTEMA =================
+        let usuarioAtual = "admin";
+
+        let appData = {
+            dataAtual: new Date().toISOString().split('T')[0],
+            produtos: [],
+            lotes: [],
+            vendas: [],
+            perdas: [],
+            clientes: [],
+            carrinhoPDV: [],
+            filtroFarol: 'todos'
+        };
+
+        let validadeChart = null;
+        let comparativoChart = null;
+
+        // --- CARREGAR DADOS DO LOCALSTORAGE OU INICIALIZAR DEMO ---
+        function carregarDados() {
+            const salvas = localStorage.getItem('mercadinho_marques_data');
+            if (salvas) {
+                try {
+                    appData = JSON.parse(salvas);
+                    appData.carrinhoPDV = []; // Limpa carrinho ao reabrir
+                } catch(e) {
+                    console.error("Erro ao carregar do LocalStorage:", e);
+                    carregarDadosDemo();
+                }
+            } else {
+                carregarDadosDemo();
+            }
+
+            appData.dataAtual = new Date().toISOString().split('T')[0];
+            atualizarInterfaceCompleta();
+        }
+
+        function salvarDados() {
+            localStorage.setItem('mercadinho_marques_data', JSON.stringify({
+                produtos: appData.produtos,
+                lotes: appData.lotes,
+                vendas: appData.vendas,
+                perdas: appData.perdas,
+                clientes: appData.clientes
+            }));
+            atualizarInterfaceCompleta();
+        }
+
+        function carregarDadosDemo() {
+            const hoje = new Date();
+            
+            const addDias = (dias) => {
+                const d = new Date(hoje);
+                d.setDate(d.getDate() + dias);
+                return d.toISOString().split('T')[0];
+            };
+
+            appData.produtos = [
+                { id: 1, ean: '7891000100103', nome: 'Leite Integral Parmalat 1L', categoria: 'Laticínios', unidade: 'Un', precoCusto: 3.50, precoVenda: 5.49, estoqueMinimo: 10, localizacao: 'Gôndola A1' },
+                { id: 2, ean: '7891000200202', nome: 'Iogurte Morango Nestlé 170g', categoria: 'Laticínios', unidade: 'Un', precoCusto: 1.80, precoVenda: 3.20, estoqueMinimo: 15, localizacao: 'Geladeira 1' },
+                { id: 3, ean: '7891000300301', nome: 'Feijão Preto Camil 1Kg', categoria: 'Mercearia', unidade: 'Un', precoCusto: 4.20, precoVenda: 7.90, estoqueMinimo: 20, localizacao: 'Gôndola C2' },
+                { id: 4, ean: '7891000400400', nome: 'Pão de Forma Wickbold 500g', categoria: 'Padaria', unidade: 'Un', precoCusto: 4.00, precoVenda: 8.50, estoqueMinimo: 8, localizacao: 'Gôndola B1' }
+            ];
+
+            appData.lotes = [
+                { id: 101, produtoId: 1, numeroLote: 'LT-PARM-01', validade: addDias(4), qtd: 12, localizacao: 'Gôndola A1' },
+                { id: 102, produtoId: 1, numeroLote: 'LT-PARM-02', validade: addDias(40), qtd: 30, localizacao: 'Depósito' },
+                { id: 103, produtoId: 2, numeroLote: 'LT-NEST-01', validade: addDias(2), qtd: 8, localizacao: 'Geladeira 1' },
+                { id: 104, produtoId: 3, numeroLote: 'LT-CAM-01', validade: addDias(90), qtd: 50, localizacao: 'Gôndola C2' },
+                { id: 105, produtoId: 4, numeroLote: 'LT-WICK-01', validade: addDias(12), qtd: 10, localizacao: 'Gôndola B1' }
+            ];
+
+            appData.clientes = [
+                { id: 1, nome: 'Dona Maria da Silva', telefone: '(21) 98888-1111', endereco: 'Rua Principal, 102', limiteFiado: 300, debito: 45.00 },
+                { id: 2, nome: 'Seu José dos Santos', telefone: '(21) 97777-2222', endereco: 'Rua das Flores, 45', limiteFiado: 200, debito: 0.00 }
+            ];
+
+            appData.vendas = [];
+            appData.perdas = [];
+            salvarDados();
+        }
+
+        // ================= AUTENTICAÇÃO E NAVEGAÇÃO =================
+        function fazerLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-usuario').value.trim();
+            const s = document.getElementById('login-senha').value;
+
+            if (u && s) {
+                usuarioAtual = u;
+                document.getElementById('tela-login').classList.add('hidden');
+                carregarDados();
+                mostrarToast(`Bem-vindo ao Mercadinho Marques, ${usuarioAtual}!`);
+            } else {
+                document.getElementById('login-erro').classList.remove('hidden');
+            }
+        }
+
+        function fazerLogout() {
+            document.getElementById('tela-login').classList.remove('hidden');
+        }
+
+        function navegar(secao) {
+            document.querySelectorAll('.secao-conteudo').forEach(el => el.classList.add('hidden'));
+            const alvo = document.getElementById(`secao-${secao}`);
+            if (alvo) alvo.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-emerald-400', 'bg-emerald-500/10', 'border-l-4', 'border-emerald-400', 'font-bold');
+                btn.classList.add('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800', 'font-semibold');
+            });
+
+            const btnAtivo = document.getElementById(`btn-${secao}`);
+            if (btnAtivo) {
+                btnAtivo.classList.remove('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800', 'font-semibold');
+                btnAtivo.classList.add('active', 'text-emerald-400', 'bg-emerald-500/10', 'border-l-4', 'border-emerald-400', 'font-bold');
+            }
+
+            if (secao === 'dashboard') atualizarGraficos();
+        }
+
+        // ================= ATUALIZAÇÃO GERAL DA INTERFACE =================
+        function atualizarInterfaceCompleta() {
+            const hojeStr = appData.dataAtual;
+            
+            const pData = appData.dataAtual.split('-');
+            if (pData.length === 3) {
+                document.getElementById('dataAtualExtenso').innerText = `${pData[2]}/${pData[1]}/${pData[0]}`;
+            }
+
+            // Cálculo Vendas Hoje
+            let vendasHoje = 0;
+            appData.vendas.forEach(v => {
+                if (v.data === hojeStr) vendasHoje += parseFloat(v.total || 0);
+            });
+
+            // Cálculo Perdas Mês
+            let perdasMes = 0;
+            appData.perdas.forEach(p => {
+                perdasMes += parseFloat(p.prejuizio || 0);
+            });
+
+            // Contagem Farol de Validade
+            let countCritico = 0;
+            let countAtencao = 0;
+
+            const hojeDate = new Date(hojeStr);
+
+            appData.lotes.forEach(l => {
+                if (l.qtd <= 0) return;
+                const valDate = new Date(l.validade);
+                const diffDias = Math.ceil((valDate - hojeDate) / (1000 * 60 * 60 * 24));
+
+                if (diffDias <= 7) countCritico++;
+                else if (diffDias <= 30) countAtencao++;
+            });
+
+            // Badges & KPIs
+            document.getElementById('dash-vendas-dia').innerText = `R$ ${vendasHoje.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-critico-count').innerText = `${countCritico} Lotes`;
+            document.getElementById('dash-atencao-count').innerText = `${countAtencao} Lotes`;
+            document.getElementById('dash-perdas-mes').innerText = `R$ ${perdasMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            const badgeFarol = document.getElementById('badge-farol-risco');
+            if (badgeFarol) {
+                if (countCritico > 0) {
+                    badgeFarol.innerText = countCritico;
+                    badgeFarol.classList.remove('hidden');
+                } else {
+                    badgeFarol.classList.add('hidden');
+                }
+            }
+
+            renderizarFarolValidade();
+            renderizarEstoque();
+            popularDatalistPDV();
+            renderizarLiquidacao();
+            renderizarPerdas();
+            renderizarClientes();
+            atualizarGraficos();
+        }
+
+        // ================= FAROL DE VALIDADE (FEFO) =================
+        function renderizarFarolValidade() {
+            const tbody = document.getElementById('tabela-farol-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const busca = (document.getElementById('input-pesquisar-farol')?.value || '').toLowerCase();
+            const hojeDate = new Date(appData.dataAtual);
+
+            let lotesAtivos = appData.lotes.filter(l => l.qtd > 0);
+            
+            // Ordenação FEFO (Quem vence primeiro fica no topo)
+            lotesAtivos.sort((a, b) => new Date(a.validade) - new Date(b.validade));
+
+            document.getElementById('farol-kpi-total-lotes').innerText = lotesAtivos.length;
+
+            if (lotesAtivos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-zinc-500 text-xs">Nenhum lote cadastrado. Clique em <strong>"+ Entrada de Lote"</strong> para adicionar!</td></tr>`;
+                return;
+            }
+
+            lotesAtivos.forEach(lote => {
+                const prod = appData.produtos.find(p => p.id == lote.produtoId);
+                const nomeProd = prod ? prod.nome : 'Produto Não Encontrado';
+                const eanProd = prod ? (prod.ean || '-') : '-';
+
+                const valDate = new Date(lote.validade);
+                const diffDias = Math.ceil((valDate - hojeDate) / (1000 * 60 * 60 * 24));
+
+                let statusChave = 'ok';
+                let statusBadge = '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase"><i class="fa-solid fa-check"></i> 🟢 OK</span>';
+
+                if (diffDias <= 0) {
+                    statusChave = 'vencido';
+                    statusBadge = '<span class="bg-purple-950 text-purple-300 border border-purple-500/40 px-2.5 py-1 rounded-full text-[10px] font-black uppercase"><i class="fa-solid fa-skull"></i> ⬛ VENCIDO</span>';
+                } else if (diffDias <= 7) {
+                    statusChave = 'critico';
+                    statusBadge = '<span class="bg-rose-500/20 text-rose-400 border border-rose-500/40 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider animate-pulse"><i class="fa-solid fa-triangle-exclamation"></i> 🔴 CRÍTICO</span>';
+                } else if (diffDias <= 30) {
+                    statusChave = 'atencao';
+                    statusBadge = '<span class="bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase"><i class="fa-solid fa-clock"></i> 🟡 ATENÇÃO</span>';
+                }
+
+                if (appData.filtroFarol !== 'todos' && statusChave !== appData.filtroFarol) return;
+
+                const buscaTexto = `${nomeProd} ${eanProd} ${lote.numeroLote} ${lote.localizacao}`.toLowerCase();
+                if (busca && !buscaTexto.includes(busca)) return;
+
+                const pVal = lote.validade.split('-');
+                const valFormatada = pVal.length === 3 ? `${pVal[2]}/${pVal[1]}/${pVal[0]}` : lote.validade;
+
+                const tr = document.createElement('tr');
+                tr.className = statusChave === 'critico' ? "bg-rose-950/20 hover:bg-rose-950/40 transition-all" : "hover:bg-zinc-800/40 transition-all";
+                tr.innerHTML = `
+                    <td class="p-3">${statusBadge}</td>
+                    <td class="p-3">
+                        <strong class="text-white text-sm block">${escapeAttr(nomeProd)}</strong>
+                        <span class="text-[10px] font-mono text-zinc-500"><i class="fa-solid fa-barcode"></i> ${escapeAttr(eanProd)}</span>
+                    </td>
+                    <td class="p-3 font-mono text-xs text-zinc-300">${escapeAttr(lote.numeroLote || 'N/A')}</td>
+                    <td class="p-3 text-center font-bold text-white text-xs">${valFormatada}</td>
+                    <td class="p-3 text-center font-black ${diffDias <= 7 ? 'text-rose-400' : (diffDias <= 30 ? 'text-amber-400' : 'text-emerald-400')}">
+                        ${diffDias <= 0 ? 'Expirado' : `${diffDias} dias`}
+                    </td>
+                    <td class="p-3 text-center font-bold text-white">${lote.qtd} <span class="text-[10px] text-zinc-500">${prod ? prod.unidade : 'Un'}</span></td>
+                    <td class="p-3 text-xs text-zinc-400">${escapeAttr(lote.localizacao || 'Balcão')}</td>
+                    <td class="p-3 text-right space-x-1">
+                        <button onclick="adicionarLoteAoPDVRapido(${lote.id})" class="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 p-2 rounded-lg text-xs font-bold transition-all" title="Vender Lote no PDV">
+                            <i class="fa-solid fa-cart-plus"></i> Vender
+                        </button>
+                        <button onclick="abrirModalBaixaPerdaComLote(${lote.id})" class="bg-rose-950/50 hover:bg-rose-900 text-rose-400 p-2 rounded-lg text-xs" title="Descartar por Perda">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filtrarFarol(tipo) {
+            appData.filtroFarol = tipo;
+            document.querySelectorAll('#secao-farol button[id^="btn-farol-"]').forEach(b => {
+                b.className = "px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-300 hover:bg-zinc-700";
+            });
+            const btnAtivo = document.getElementById(`btn-farol-${tipo}`);
+            if (btnAtivo) btnAtivo.className = "px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-zinc-950";
+            renderizarFarolValidade();
+        }
+
+        // ================= ESTOQUE E PRODUTOS =================
+        function renderizarEstoque() {
+            const tbody = document.getElementById('tabela-estoque-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const busca = (document.getElementById('input-pesquisar-estoque')?.value || '').toLowerCase();
+            let totalProds = appData.produtos.length;
+            let totalLotesCount = appData.lotes.filter(l => l.qtd > 0).length;
+            let valorTotalGeral = 0;
+
+            document.getElementById('est-kpi-total-prods').innerText = totalProds;
+            document.getElementById('est-kpi-total-lotes').innerText = totalLotesCount;
+
+            if (totalProds === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-zinc-500 text-xs">Nenhum produto cadastrado no catálogo.</td></tr>`;
+                return;
+            }
+
+            appData.produtos.forEach(p => {
+                const lotesProd = appData.lotes.filter(l => l.produtoId == p.id && l.qtd > 0);
+                const qtdTotalProd = lotesProd.reduce((acc, l) => acc + parseFloat(l.qtd || 0), 0);
+                const valorProd = qtdTotalProd * parseFloat(p.precoVenda || 0);
+                valorTotalGeral += valorProd;
+
+                const buscaTexto = `${p.nome} ${p.ean} ${p.categoria}`.toLowerCase();
+                if (busca && !buscaTexto.includes(busca)) return;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-zinc-800/40 transition-all";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-xs text-emerald-400"><i class="fa-solid fa-barcode"></i> ${escapeAttr(p.ean || 'N/A')}</td>
+                    <td class="p-3 font-bold text-white">${escapeAttr(p.nome)}</td>
+                    <td class="p-3 text-xs text-zinc-400">${escapeAttr(p.categoria)}</td>
+                    <td class="p-3 text-center font-black text-white">${qtdTotalProd} <span class="text-[10px] font-normal text-zinc-500">${escapeAttr(p.unidade)}</span></td>
+                    <td class="p-3 text-xs text-rose-300">R$ ${parseFloat(p.precoCusto||0).toFixed(2)}</td>
+                    <td class="p-3 font-bold text-emerald-400">R$ ${parseFloat(p.precoVenda||0).toFixed(2)}</td>
+                    <td class="p-3 text-center"><span class="px-2 py-1 bg-zinc-800 rounded-lg text-xs font-bold text-amber-400">${lotesProd.length} Lote(s)</span></td>
+                    <td class="p-3 text-right space-x-1">
+                        <button onclick="editarProduto(${p.id})" class="bg-zinc-800 hover:bg-zinc-700 text-emerald-400 p-2 rounded-lg text-xs" title="Editar Produto">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="excluirProduto(${p.id})" class="bg-rose-950/50 hover:bg-rose-900 text-rose-400 p-2 rounded-lg text-xs" title="Excluir Produto">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('est-kpi-valor-total').innerText = `R$ ${valorTotalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+
+        function abrirModalNovoProduto() {
+            document.getElementById('modal-produto-titulo').innerHTML = `<i class="fa-solid fa-basket-shopping"></i> Cadastrar Produto no Catálogo`;
+            document.getElementById('form-produto').reset();
+            document.getElementById('prod-id').value = '';
+            document.getElementById('modal-novo-produto').classList.remove('hidden');
+        }
+
+        function fecharModalNovoProduto() { document.getElementById('modal-novo-produto').classList.add('hidden'); }
+
+        function editarProduto(id) {
+            const p = appData.produtos.find(x => x.id == id);
+            if (!p) return;
+
+            document.getElementById('modal-produto-titulo').innerHTML = `<i class="fa-solid fa-pen"></i> Editar Produto`;
+            document.getElementById('prod-id').value = p.id;
+            document.getElementById('prod-ean').value = p.ean || '';
+            document.getElementById('prod-nome').value = p.nome || '';
+            document.getElementById('prod-categoria').value = p.categoria || 'Laticínios';
+            document.getElementById('prod-unidade').value = p.unidade || 'Un';
+            document.getElementById('prod-preco-custo').value = p.precoCusto || 0;
+            document.getElementById('prod-preco-venda').value = p.precoVenda || 0;
+            document.getElementById('prod-estoque-minimo').value = p.estoqueMinimo || 5;
+            document.getElementById('prod-localizacao').value = p.localizacao || '';
+
+            document.getElementById('modal-novo-produto').classList.remove('hidden');
+        }
+
+        function salvarProdutoCat(e) {
+            e.preventDefault();
+            const idInput = document.getElementById('prod-id').value;
+            const nome = document.getElementById('prod-nome').value.trim();
+
+            if (!nome) return;
+
+            const pData = {
+                id: idInput ? parseInt(idInput) : Date.now(),
+                ean: document.getElementById('prod-ean').value.trim(),
+                nome: nome,
+                categoria: document.getElementById('prod-categoria').value,
+                unidade: document.getElementById('prod-unidade').value,
+                precoCusto: parseFloat(document.getElementById('prod-preco-custo').value || 0),
+                precoVenda: parseFloat(document.getElementById('prod-preco-venda').value || 0),
+                estoqueMinimo: parseInt(document.getElementById('prod-estoque-minimo').value || 5),
+                localizacao: document.getElementById('prod-localizacao').value.trim()
+            };
+
+            if (idInput) {
+                const idx = appData.produtos.findIndex(x => x.id == idInput);
+                if (idx !== -1) appData.produtos[idx] = pData;
+            } else {
+                appData.produtos.push(pData);
+            }
+
+            salvarDados();
+            fecharModalNovoProduto();
+            mostrarToast("Produto salvo no catálogo!");
+        }
+
+        async function excluirProduto(id) {
+            const confirmou = await confirmarAcao("Excluir Produto", "Deseja realmente excluir este produto e seus lotes?", "Sim, Excluir");
+            if (confirmou) {
+                appData.produtos = appData.produtos.filter(p => p.id != id);
+                appData.lotes = appData.lotes.filter(l => l.produtoId != id);
+                salvarDados();
+                mostrarToast("Produto removido.");
+            }
+        }
+
+        // --- ENTRADA DE LOTES E VALIDADE ---
+        function abrirModalNovoLote() {
+            document.getElementById('form-lote').reset();
+            document.getElementById('lote-id').value = '';
+            document.getElementById('lote-produto-input').value = '';
+            document.getElementById('lote-produto-id').value = '';
+            popularDatalistLoteProdutos();
+            document.getElementById('modal-novo-lote').classList.remove('hidden');
+        }
+
+        function fecharModalNovoLote() { document.getElementById('modal-novo-lote').classList.add('hidden'); }
+
+        function popularDatalistLoteProdutos() {
+            const dl = document.getElementById('dl-lote-produtos');
+            if (!dl) return;
+            dl.innerHTML = '';
+            appData.produtos.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = `${p.nome} ${p.ean ? `[EAN:${p.ean}]` : ''} [ID:${p.id}]`;
+                dl.appendChild(opt);
+            });
+        }
+
+        function selecionarProdutoParaLote(val) {
+            if (!val) return;
+            const matchId = val.match(/\[ID:(\d+)\]/);
+            if (matchId && matchId[1]) {
+                document.getElementById('lote-produto-id').value = matchId[1];
+            } else {
+                const prod = appData.produtos.find(p => p.nome.toLowerCase() === val.toLowerCase() || p.ean === val);
+                if (prod) document.getElementById('lote-produto-id').value = prod.id;
+            }
+        }
+
+        function salvarEntradaLote(e) {
+            e.preventDefault();
+            let prodId = document.getElementById('lote-produto-id').value;
+            const prodInputVal = document.getElementById('lote-produto-input').value;
+
+            if (!prodId && prodInputVal) {
+                selecionarProdutoParaLote(prodInputVal);
+                prodId = document.getElementById('lote-produto-id').value;
+            }
+
+            if (!prodId) {
+                mostrarToast("Selecione um produto do catálogo antes de criar o lote!", "erro");
+                return;
+            }
+
+            const loteData = {
+                id: Date.now(),
+                produtoId: parseInt(prodId),
+                numeroLote: document.getElementById('lote-numero').value.trim() || `LT-${Math.floor(100+Math.random()*900)}`,
+                validade: document.getElementById('lote-validade').value,
+                qtd: parseFloat(document.getElementById('lote-qtd').value || 1),
+                localizacao: document.getElementById('lote-localizacao').value.trim() || 'Gôndola'
+            };
+
+            appData.lotes.push(loteData);
+            salvarDados();
+            fecharModalNovoLote();
+            mostrarToast("Novo lote com validade registrado com sucesso!");
+        }
+
+        // ================= PDV / FRENTE DE CAIXA INTELIGENTE (FEFO) =================
+        function popularDatalistPDV() {
+            const dl = document.getElementById('dl-pdv-produtos');
+            if (!dl) return;
+            dl.innerHTML = '';
+            appData.produtos.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = `${p.nome} ${p.ean ? `(${p.ean})` : ''}`;
+                dl.appendChild(opt);
+            });
+
+            // Popular select de clientes para Caderneta
+            const selCli = document.getElementById('pdv-cliente-select');
+            if (selCli) {
+                selCli.innerHTML = `<option value="">Venda Balcão (Cliente Não Identificado)</option>`;
+                appData.clientes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.innerText = `${c.nome} (Débito: R$ ${parseFloat(c.debito||0).toFixed(2)})`;
+                    selCli.appendChild(opt);
+                });
+            }
+        }
+
+        function verificarEnterPDV(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                adicionarItemPDVPorInput();
+            }
+        }
+
+        function adicionarItemPDVPorInput() {
+            const input = document.getElementById('pdv-busca-input');
+            const termo = input.value.trim().toLowerCase();
+            if (!termo) return;
+
+            // Busca por EAN exato ou por Nome
+            const prod = appData.produtos.find(p => (p.ean && p.ean.toLowerCase() === termo) || p.nome.toLowerCase().includes(termo));
+
+            if (!prod) {
+                mostrarToast("Produto não encontrado no catálogo!", "erro");
+                return;
+            }
+
+            // APLICAR REGRA FEFO: Busca os lotes ativos desse produto ordenados da menor validade para a maior
+            const lotesDisponiveis = appData.lotes
+                .filter(l => l.produtoId == prod.id && l.qtd > 0)
+                .sort((a, b) => new Date(a.validade) - new Date(b.validade));
+
+            if (lotesDisponiveis.length === 0) {
+                mostrarToast(`Produto "${prod.nome}" sem estoque nos lotes!`, "erro");
+                return;
+            }
+
+            const loteMaisAntigo = lotesDisponiveis[0];
+
+            // Verifica se já está no carrinho
+            const itemExistente = appData.carrinhoPDV.find(i => i.loteId == loteMaisAntigo.id);
+
+            if (itemExistente) {
+                if (itemExistente.qtd + 1 > loteMaisAntigo.qtd) {
+                    mostrarToast(`Quantidade máxima do lote (${loteMaisAntigo.qtd}) atingida!`, "alerta");
+                    return;
+                }
+                itemExistente.qtd += 1;
+                itemExistente.subtotal = itemExistente.qtd * itemExistente.precoVenda;
+            } else {
+                appData.carrinhoPDV.push({
+                    loteId: loteMaisAntigo.id,
+                    produtoId: prod.id,
+                    nome: prod.nome,
+                    ean: prod.ean || '-',
+                    qtd: 1,
+                    precoVenda: parseFloat(prod.precoVenda || 0),
+                    subtotal: parseFloat(prod.precoVenda || 0),
+                    validade: loteMaisAntigo.validade
+                });
+            }
+
+            input.value = '';
+            renderizarCarrinhoPDV();
+            mostrarToast(`"${prod.nome}" adicionado (Lote FEFO: ${loteMaisAntigo.validade})`);
+        }
+
+        function adicionarLoteAoPDVRapido(loteId) {
+            const lote = appData.lotes.find(l => l.id == loteId);
+            if (!lote || lote.qtd <= 0) return;
+
+            const prod = appData.produtos.find(p => p.id == lote.produtoId);
+            if (!prod) return;
+
+            const itemExistente = appData.carrinhoPDV.find(i => i.loteId == lote.id);
+
+            if (itemExistente) {
+                if (itemExistente.qtd + 1 > lote.qtd) {
+                    mostrarToast("Estoque do lote esgotado!", "alerta");
+                    return;
+                }
+                itemExistente.qtd += 1;
+                itemExistente.subtotal = itemExistente.qtd * itemExistente.precoVenda;
+            } else {
+                appData.carrinhoPDV.push({
+                    loteId: lote.id,
+                    produtoId: prod.id,
+                    nome: prod.nome,
+                    ean: prod.ean || '-',
+                    qtd: 1,
+                    precoVenda: parseFloat(prod.precoVenda || 0),
+                    subtotal: parseFloat(prod.precoVenda || 0),
+                    validade: lote.validade
+                });
+            }
+
+            navegar('pdv');
+            renderizarCarrinhoPDV();
+        }
+
+        function renderizarCarrinhoPDV() {
+            const tbody = document.getElementById('pdv-carrinho-body');
+            tbody.innerHTML = '';
+            let totalVenda = 0;
+
+            if (appData.carrinhoPDV.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-zinc-500 text-xs italic">Nenhum item no carrinho. Bipe um código de barras acima!</td></tr>`;
+                document.getElementById('pdv-total-txt').innerText = `R$ 0,00`;
+                return;
+            }
+
+            appData.carrinhoPDV.forEach((item, index) => {
+                totalVenda += item.subtotal;
+                const pVal = item.validade.split('-');
+                const valFormatada = pVal.length === 3 ? `${pVal[2]}/${pVal[1]}` : item.validade;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-white">${escapeAttr(item.nome)}</td>
+                    <td class="p-3 text-center"><span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 font-bold rounded text-[11px]">Vence: ${valFormatada}</span></td>
+                    <td class="p-3 text-center">
+                        <input type="number" min="1" value="${item.qtd}" onchange="alterarQtdPDV(${index}, this.value)" class="w-14 bg-zinc-800 border border-zinc-700 rounded text-center text-white font-bold p-1">
+                    </td>
+                    <td class="p-3 font-semibold text-zinc-300">R$ ${item.precoVenda.toFixed(2)}</td>
+                    <td class="p-3 font-black text-emerald-400">R$ ${item.subtotal.toFixed(2)}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="removerItemPDV(${index})" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('pdv-total-txt').innerText = `R$ ${totalVenda.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+
+        function alterarQtdPDV(index, novaQtd) {
+            const qtd = parseInt(novaQtd) || 1;
+            const item = appData.carrinhoPDV[index];
+            const lote = appData.lotes.find(l => l.id == item.loteId);
+
+            if (lote && qtd > lote.qtd) {
+                mostrarToast(`Apenas ${lote.qtd} unidades disponíveis neste lote!`, "alerta");
+                item.qtd = lote.qtd;
+            } else {
+                item.qtd = qtd;
+            }
+            item.subtotal = item.qtd * item.precoVenda;
+            renderizarCarrinhoPDV();
+        }
+
+        function removerItemPDV(index) {
+            appData.carrinhoPDV.splice(index, 1);
+            renderizarCarrinhoPDV();
+        }
+
+        function limparCarrinhoPDV() {
+            appData.carrinhoPDV = [];
+            renderizarCarrinhoPDV();
+        }
+
+        function finalizarVendaPDV() {
+            if (appData.carrinhoPDV.length === 0) {
+                mostrarToast("Adicione itens ao carrinho antes de finalizar!", "erro");
+                return;
+            }
+
+            const formaPag = document.getElementById('pdv-forma-pagamento').value;
+            const clienteId = document.getElementById('pdv-cliente-select').value;
+            const totalVenda = appData.carrinhoPDV.reduce((acc, i) => acc + i.subtotal, 0);
+
+            // Se for Caderneta/Fiado, exige cliente selecionado
+            if (formaPag === 'Caderneta/Fiado' && !clienteId) {
+                mostrarToast("Para vender Fiado/Caderneta, selecione um cliente!", "erro");
+                return;
+            }
+
+            // 1. DÁ BAIXA AUTOMÁTICA NOS LOTES UTILIZADOS
+            appData.carrinhoPDV.forEach(item => {
+                const lote = appData.lotes.find(l => l.id == item.loteId);
+                if (lote) {
+                    lote.qtd = Math.max(0, lote.qtd - item.qtd);
+                }
+            });
+
+            // 2. REGISTRA A VENDA
+            const novaVenda = {
+                id: Date.now(),
+                data: appData.dataAtual,
+                itens: [...appData.carrinhoPDV],
+                total: totalVenda,
+                formaPagamento: formaPag,
+                clienteId: clienteId || null,
+                vendedor: usuarioAtual
+            };
+
+            appData.vendas.push(novaVenda);
+
+            // 3. SE FOR FIADO, ADICIONA DÉBITO AO CLIENTE
+            if (formaPag === 'Caderneta/Fiado' && clienteId) {
+                const cli = appData.clientes.find(c => c.id == clienteId);
+                if (cli) {
+                    cli.debito = (parseFloat(cli.debito || 0) + totalVenda);
+                }
+            }
+
+            salvarDados();
+            limparCarrinhoPDV();
+            mostrarToast(`Venda de R$ ${totalVenda.toFixed(2)} finalizada com sucesso! 🛒`);
+        }
+
+        // ================= LIQUIDAÇÃO & OFERTAS =================
+        function renderizarLiquidacao() {
+            const container = document.getElementById('lista-liquidacao-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const hojeDate = new Date(appData.dataAtual);
+
+            // Produtos vencendo em menos de 30 dias
+            const lotesAtençao = appData.lotes.filter(l => {
+                if (l.qtd <= 0) return false;
+                const diffDias = Math.ceil((new Date(l.validade) - hojeDate) / (1000 * 60 * 60 * 24));
+                return diffDias > 0 && diffDias <= 30;
+            }).sort((a, b) => new Date(a.validade) - new Date(b.validade));
+
+            if (lotesAtençao.length === 0) {
+                container.innerHTML = `<div class="col-span-3 p-8 text-center bg-zinc-900 border border-zinc-800 rounded-2xl text-zinc-500 text-xs italic"><i class="fa-solid fa-circle-check text-emerald-400 text-3xl mb-2 block"></i>Nenhum produto em risco de vencimento próximo no momento. Estoque saudável!</div>`;
+                return;
+            }
+
+            lotesAtençao.forEach(lote => {
+                const prod = appData.produtos.find(p => p.id == lote.produtoId);
+                if (!prod) return;
+
+                const diffDias = Math.ceil((new Date(lote.validade) - hojeDate) / (1000 * 60 * 60 * 24));
+                const precoOriginal = parseFloat(prod.precoVenda || 0);
+                const precoPromocao = precoOriginal * 0.70; // 30% de desconto sugerido
+
+                const card = document.createElement('div');
+                card.className = "bg-zinc-900 border border-amber-500/30 p-5 rounded-2xl space-y-3 relative overflow-hidden";
+                card.innerHTML = `
+                    <div class="absolute -right-8 -top-8 bg-amber-500 text-zinc-950 text-[10px] font-black uppercase py-1 px-8 rotate-45">
+                        OFERTA
+                    </div>
+                    <div>
+                        <strong class="text-white text-base block">${escapeAttr(prod.nome)}</strong>
+                        <span class="text-xs text-amber-400 font-bold">Vence em ${diffDias} dias (${lote.validade})</span>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-zinc-950 p-3 rounded-xl border border-zinc-800">
+                        <div>
+                            <span class="text-[10px] text-zinc-500 line-through block">De R$ ${precoOriginal.toFixed(2)}</span>
+                            <span class="text-xl font-black text-emerald-400">Por R$ ${precoPromocao.toFixed(2)}</span>
+                        </div>
+                        <span class="bg-amber-500/20 text-amber-400 text-xs font-black px-2.5 py-1 rounded-lg">30% OFF</span>
+                    </div>
+
+                    <div class="flex justify-between items-center text-xs text-zinc-400 pt-1">
+                        <span>Estoque Lote: <strong class="text-white">${lote.qtd} ${prod.unidade}</strong></span>
+                        <span>Local: <strong class="text-white">${escapeAttr(lote.localizacao || 'Balcão')}</strong></span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function divulgarOfertasWhatsApp() {
+            const hojeDate = new Date(appData.dataAtual);
+            const lotesAtençao = appData.lotes.filter(l => {
+                if (l.qtd <= 0) return false;
+                const diffDias = Math.ceil((new Date(l.validade) - hojeDate) / (1000 * 60 * 60 * 24));
+                return diffDias > 0 && diffDias <= 30;
+            });
+
+            if (lotesAtençao.length === 0) {
+                mostrarToast("Nenhuma oferta ativa no momento para divulgar.", "alerta");
+                return;
+            }
+
+            let msg = `🛒 *OFERTAS DE LIQUIDAÇÃO - MERCADINHO MARQUES* 🏷️✨\n\n` +
+                        `Aproveite nossos descontos especiais de liquidação antes que acabe:\n\n`;
+
+            lotesAtençao.forEach(lote => {
+                const prod = appData.produtos.find(p => p.id == lote.produtoId);
+                if (prod) {
+                    const precoOriginal = parseFloat(prod.precoVenda || 0);
+                    const precoPromo = precoOriginal * 0.70;
+                    msg += `• *${prod.nome}*: de ~R$ ${precoOriginal.toFixed(2)}~ por *R$ ${precoPromo.toFixed(2)}* 🔥\n`;
+                }
+            });
+
+            msg += `\n📍 *Mercadinho Marques* - Venha garantir o seu!`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // ================= PERDAS & DESCARTES =================
+        function renderizarPerdas() {
+            const tbody = document.getElementById('tabela-perdas-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            let totalPrejuizo = 0;
+
+            if (appData.perdas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-zinc-500 text-xs">Nenhum registro de perda ou descarte este mês.</td></tr>`;
+                document.getElementById('perdas-kpi-total').innerText = `R$ 0,00`;
+                return;
+            }
+
+            appData.perdas.forEach(p => {
+                totalPrejuizo += parseFloat(p.prejuizio || 0);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 text-zinc-400">${escapeAttr(p.data)}</td>
+                    <td class="p-3 font-bold text-white">${escapeAttr(p.produtoNome)}</td>
+                    <td class="p-3 text-center font-bold text-rose-400">${p.qtd}</td>
+                    <td class="p-3 text-xs text-zinc-300"><span class="px-2 py-0.5 bg-rose-950/60 text-rose-300 rounded">${escapeAttr(p.motivo)}</span></td>
+                    <td class="p-3 font-black text-rose-400">R$ ${parseFloat(p.prejuizio||0).toFixed(2)}</td>
+                    <td class="p-3 text-xs text-zinc-400">${escapeAttr(p.registradoPor || 'admin')}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('perdas-kpi-total').innerText = `R$ ${totalPrejuizo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+
+        function abrirModalBaixaPerda() {
+            document.getElementById('form-perda').reset();
+            document.getElementById('perda-lote-id').value = '';
+            popularDatalistPerdaLotes();
+            document.getElementById('modal-baixa-perda').classList.remove('hidden');
+        }
+
+        function abrirModalBaixaPerdaComLote(loteId) {
+            abrirModalBaixaPerda();
+            const lote = appData.lotes.find(l => l.id == loteId);
+            if (lote) {
+                const prod = appData.produtos.find(p => p.id == lote.produtoId);
+                document.getElementById('perda-lote-id').value = lote.id;
+                document.getElementById('perda-lote-input').value = `${prod ? prod.nome : 'Produto'} [Lote: ${lote.numeroLote}] [Val: ${lote.validade}] [ID:${lote.id}]`;
+            }
+        }
+
+        function fecharModalBaixaPerda() { document.getElementById('modal-baixa-perda').classList.add('hidden'); }
+
+        function popularDatalistPerdaLotes() {
+            const dl = document.getElementById('dl-perda-lotes');
+            if (!dl) return;
+            dl.innerHTML = '';
+            appData.lotes.filter(l => l.qtd > 0).forEach(l => {
+                const prod = appData.produtos.find(p => p.id == l.produtoId);
+                const opt = document.createElement('option');
+                opt.value = `${prod ? prod.nome : 'Prod'} [Lote:${l.numeroLote}] [Val:${l.validade}] [ID:${l.id}]`;
+                dl.appendChild(opt);
+            });
+        }
+
+        function selecionarLoteParaPerda(val) {
+            if (!val) return;
+            const matchId = val.match(/\[ID:(\d+)\]/);
+            if (matchId && matchId[1]) {
+                document.getElementById('perda-lote-id').value = matchId[1];
+            }
+        }
+
+        function salvarBaixaPerda(e) {
+            e.preventDefault();
+            const loteId = document.getElementById('perda-lote-id').value;
+            const qtdDescarte = parseFloat(document.getElementById('perda-qtd').value || 1);
+            const motivo = document.getElementById('perda-motivo').value;
+
+            const lote = appData.lotes.find(l => l.id == loteId);
+            if (!lote) {
+                mostrarToast("Selecione um lote válido para descartar!", "erro");
+                return;
+            }
+
+            const prod = appData.produtos.find(p => p.id == lote.produtoId);
+            const precoCustoUnit = prod ? parseFloat(prod.precoCusto || 0) : 0;
+            const prejuizoTotal = qtdDescarte * precoCustoUnit;
+
+            // Abate do lote
+            lote.qtd = Math.max(0, lote.qtd - qtdDescarte);
+
+            // Registra perda
+            appData.perdas.push({
+                id: Date.now(),
+                data: appData.dataAtual,
+                loteId: lote.id,
+                produtoNome: prod ? prod.nome : 'Produto',
+                qtd: qtdDescarte,
+                motivo: motivo,
+                prejuizio: prejuizoTotal,
+                registradoPor: usuarioAtual
+            });
+
+            salvarDados();
+            fecharModalBaixaPerda();
+            mostrarToast(`Descarte de ${qtdDescarte} un. registrado. Prejuízo: R$ ${prejuizoTotal.toFixed(2)}`);
+        }
+
+        // ================= CLIENTES & CADERNETA (FIADO) =================
+        function renderizarClientes() {
+            const tbody = document.getElementById('tabela-clientes-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (appData.clientes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-zinc-500 text-xs">Nenhum cliente cadastrado.</td></tr>`;
+                return;
+            }
+
+            appData.clientes.forEach(c => {
+                const debito = parseFloat(c.debito || 0);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-white">${escapeAttr(c.nome)}</td>
+                    <td class="p-3 text-xs text-zinc-300">${escapeAttr(c.telefone || '-')}</td>
+                    <td class="p-3 text-xs text-zinc-400">${escapeAttr(c.endereco || '-')}</td>
+                    <td class="p-3 text-center font-black ${debito > 0 ? 'text-rose-400' : 'text-emerald-400'}">
+                        R$ ${debito.toFixed(2)}
+                    </td>
+                    <td class="p-3 text-right space-x-1">
+                        ${debito > 0 ? `
+                            <button onclick="quitarDebitoCliente(${c.id})" class="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-500/30" title="Quitar Caderneta">
+                                💵 Quitar
+                            </button>
+                        ` : ''}
+                        <button onclick="excluirCliente(${c.id})" class="bg-rose-950/50 hover:bg-rose-900 text-rose-400 p-2 rounded-lg text-xs" title="Excluir">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function abrirModalNovoCliente() {
+            document.getElementById('form-cliente').reset();
+            document.getElementById('cli-id').value = '';
+            document.getElementById('modal-novo-cliente').classList.remove('hidden');
+        }
+
+        function fecharModalNovoCliente() { document.getElementById('modal-novo-cliente').classList.add('hidden'); }
+
+        function salvarCliente(e) {
+            e.preventDefault();
+            const nome = document.getElementById('cli-nome').value.trim();
+            if (!nome) return;
+
+            appData.clientes.push({
+                id: Date.now(),
+                nome: nome,
+                telefone: document.getElementById('cli-telefone').value.trim(),
+                endereco: document.getElementById('cli-endereco').value.trim(),
+                limiteFiado: parseFloat(document.getElementById('cli-limite-fiado').value || 200),
+                debito: 0.00
+            });
+
+            salvarDados();
+            fecharModalNovoCliente();
+            mostrarToast("Cliente cadastrado com sucesso!");
+        }
+
+        async function quitarDebitoCliente(clienteId) {
+            const cli = appData.clientes.find(c => c.id == clienteId);
+            if (!cli) return;
+
+            const confirmou = await confirmarAcao(
+                "Quitar Debito",
+                `Confirma o recebimento do pagamento no valor de R$ ${cli.debito.toFixed(2)} de "${cli.nome}"?`,
+                "Sim, Quitar Debito",
+                "fa-dollar-sign",
+                "emerald"
+            );
+
+            if (confirmou) {
+                cli.debito = 0.00;
+                salvarDados();
+                mostrarToast(`Débito de ${cli.nome} quitado!`);
+            }
+        }
+
+        async function excluirCliente(id) {
+            const confirmou = await confirmarAcao("Excluir Cliente", "Deseja realmente remover este cliente?", "Sim, Excluir");
+            if (confirmou) {
+                appData.clientes = appData.clientes.filter(c => c.id != id);
+                salvarDados();
+                mostrarToast("Cliente removido.");
+            }
+        }
+
+        // ================= GRÁFICOS DINÂMICOS =================
+        function atualizarGraficos() {
+            const secaoDash = document.getElementById('secao-dashboard');
+            if (secaoDash && secaoDash.classList.contains('hidden')) return;
+
+            const hojeDate = new Date(appData.dataAtual);
+
+            let countOK = 0;
+            let countAtencao = 0;
+            let countCritico = 0;
+            let countVencido = 0;
+
+            appData.lotes.filter(l => l.qtd > 0).forEach(l => {
+                const diffDias = Math.ceil((new Date(l.validade) - hojeDate) / (1000 * 60 * 60 * 24));
+                if (diffDias <= 0) countVencido++;
+                else if (diffDias <= 7) countCritico++;
+                else if (diffDias <= 30) countAtencao++;
+                else countOK++;
+            });
+
+            // Gráfico 1: Saúde das Validades
+            if (!validadeChart) {
+                const ctx1 = document.getElementById('validadeChart').getContext('2d');
+                validadeChart = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['🟢 OK (>30d)', '🟡 Atenção (<=30d)', '🔴 Crítico (<=7d)', '⬛ Vencidos'],
+                        datasets: [{
+                            data: [countOK, countAtencao, countCritico, countVencido],
+                            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#a855f7'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { grid: { color: '#27272a' } }, x: { grid: { display: false } } }
+                    }
+                });
+            } else {
+                validadeChart.data.datasets[0].data = [countOK, countAtencao, countCritico, countVencido];
+                validadeChart.update();
+            }
+
+            // Gráfico 2: Vendas vs Perdas
+            let totalVendasSum = appData.vendas.reduce((acc, v) => acc + parseFloat(v.total||0), 0);
+            let totalPerdasSum = appData.perdas.reduce((acc, p) => acc + parseFloat(p.prejuizio||0), 0);
+
+            if (!comparativoChart) {
+                const ctx2 = document.getElementById('comparativoChart').getContext('2d');
+                comparativoChart = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Vendas (Receita)', 'Perdas (Prejuízo)'],
+                        datasets: [{
+                            data: [totalVendasSum || 1, totalPerdasSum],
+                            backgroundColor: ['#10b981', '#f43f5e'],
+                            borderColor: '#18181b',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: '#d4d4d8' } } },
+                        cutout: '70%'
+                    }
+                });
+            } else {
+                comparativoChart.data.datasets[0].data = [totalVendasSum || 1, totalPerdasSum];
+                comparativoChart.update();
+            }
+        }
+
+        // ================= UTILITÁRIOS & TOASTS =================
+        function confirmarAcao(titulo, mensagem, textoBotao = "Confirmar", icone = "fa-trash-can", cor = "rose") {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-confirmacao');
+                const box = document.getElementById('modal-confirmacao-box');
+                document.getElementById('modal-confirmacao-titulo').innerText = titulo;
+                document.getElementById('modal-confirmacao-mensagem').innerText = mensagem;
+                const btnOk = document.getElementById('btn-confirmar-ok');
+                btnOk.innerText = textoBotao;
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    box.classList.remove('scale-95', 'opacity-0');
+                    box.classList.add('scale-100', 'opacity-100');
+                }, 10);
+
+                const fechar = (resp) => {
+                    box.classList.remove('scale-100', 'opacity-100');
+                    box.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        resolve(resp);
+                    }, 150);
+                };
+
+                btnOk.onclick = () => fechar(true);
+                document.getElementById('btn-confirmar-cancelar').onclick = () => fechar(false);
+            });
+        }
+
+        function mostrarToast(msg, tipo = 'sucesso') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-message').innerText = msg;
+
+            if (tipo === 'erro' || tipo === 'alerta') {
+                toast.className = "fixed bottom-5 right-5 bg-zinc-900 text-white border border-rose-500 px-5 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-[1001]";
+                icon.className = "fa-solid fa-triangle-exclamation text-rose-500 text-lg";
+            } else {
+                toast.className = "fixed bottom-5 right-5 bg-zinc-900 text-white border border-emerald-400 px-5 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-[1001]";
+                icon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
+        }
+
+        function escapeAttr(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        window.onload = carregarDados;
+    </script>
+</body>
+</html>
