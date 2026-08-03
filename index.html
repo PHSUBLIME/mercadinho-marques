@@ -13,6 +13,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- BIBLIOTECA DE LEITURA DE CÂMERA (Html5Qrcode) -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #09090b; }
         @media print {
@@ -22,6 +25,8 @@
             aside { display: none !important; }
             main { padding: 0 !important; }
         }
+        /* Ajuste do leitor de vídeo da câmera */
+        #reader video { width: 100% !important; border-radius: 1rem; object-fit: cover; }
     </style>
 </head>
 <body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col md:flex-row">
@@ -349,9 +354,14 @@
                         <label class="block text-xs font-bold uppercase tracking-wider text-emerald-400">
                             <i class="fa-solid fa-barcode"></i> Escanear Código EAN ou Digitar Nome do Produto
                         </label>
-                        <div class="flex gap-2">
-                            <input type="text" id="pdv-busca-input" list="dl-pdv-produtos" onkeypress="verificarEnterPDV(event)" placeholder="Bipe o código de barras ou digite o nome do produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-400 font-mono">
-                            <datalist id="dl-pdv-produtos"></datalist>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="relative flex-1">
+                                <input type="text" id="pdv-busca-input" list="dl-pdv-produtos" onkeypress="verificarEnterPDV(event)" placeholder="Bipe o código ou digite o nome..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-400 font-mono">
+                                <datalist id="dl-pdv-produtos"></datalist>
+                            </div>
+                            <button onclick="abrirLeitorCameraPDV()" class="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold px-4 py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shrink-0">
+                                <i class="fa-solid fa-camera"></i> 📷 Câmera
+                            </button>
                             <button onclick="adicionarItemPDVPorInput()" class="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-6 py-3 rounded-xl text-sm transition-all shrink-0">
                                 Adicionar
                             </button>
@@ -513,6 +523,27 @@
 
     <!-- ================= MODAIS ================= -->
 
+    <!-- MODAL LEITOR DE CÂMERA DE CÓDIGO DE BARRAS -->
+    <div id="modal-camera-scanner" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] hidden flex flex-col items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-6 space-y-4 text-center shadow-2xl relative overflow-hidden">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-lg font-black text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-camera"></i> Leitor de Câmera
+                </h3>
+                <button onclick="fecharLeitorCamera()" class="text-zinc-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <p class="text-xs text-zinc-400">Aponte a câmera do celular para o código de barras da embalagem:</p>
+
+            <!-- ÁREA DO VÍDEO DA CÂMERA -->
+            <div id="reader" class="w-full bg-black rounded-2xl overflow-hidden border-2 border-amber-500/50 min-h-[250px]"></div>
+
+            <button onclick="fecharLeitorCamera()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-3 rounded-xl text-xs border border-zinc-700 transition-all">
+                Fechar Câmera
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL NOVO PRODUTO (CATÁLOGO) -->
     <div id="modal-novo-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
@@ -528,7 +559,12 @@
 
                 <div>
                     <label class="block text-zinc-400 text-xs font-semibold mb-1">Código de Barras (EAN-13)</label>
-                    <input type="text" id="prod-ean" placeholder="Ex: 7891000100103 (Bipe ou Digite)" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-400">
+                    <div class="flex gap-2">
+                        <input type="text" id="prod-ean" placeholder="Ex: 7891000100103" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-400">
+                        <button type="button" onclick="abrirLeitorCameraProduto()" class="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold px-3.5 py-2 rounded-xl text-xs transition-all shrink-0 flex items-center gap-1">
+                            <i class="fa-solid fa-camera"></i> 📷 Câmera
+                        </button>
+                    </div>
                 </div>
 
                 <div>
@@ -606,8 +642,13 @@
 
                 <div>
                     <label class="block text-amber-400 text-xs font-bold uppercase mb-1">Produto (Digite Nome ou EAN)</label>
-                    <input type="text" id="lote-produto-input" list="dl-lote-produtos" onchange="selecionarProdutoParaLote(this.value)" placeholder="Busque pelo produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-xs">
-                    <datalist id="dl-lote-produtos"></datalist>
+                    <div class="flex gap-2">
+                        <input type="text" id="lote-produto-input" list="dl-lote-produtos" onchange="selecionarProdutoParaLote(this.value)" placeholder="Busque pelo produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 text-xs">
+                        <datalist id="dl-lote-produtos"></datalist>
+                        <button type="button" onclick="abrirLeitorCameraLote()" class="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold px-3.5 py-2 rounded-xl text-xs transition-all shrink-0 flex items-center gap-1">
+                            <i class="fa-solid fa-camera"></i> 📷 Câmera
+                        </button>
+                    </div>
                     <input type="hidden" id="lote-produto-id">
                 </div>
 
@@ -764,6 +805,8 @@
 
         let validadeChart = null;
         let comparativoChart = null;
+        let html5QrCode = null;
+        let acaoAposLeituraCamera = null;
 
         // --- CARREGAR DADOS DO LOCALSTORAGE OU INICIALIZAR DEMO ---
         function carregarDados() {
@@ -1710,6 +1753,84 @@
                 salvarDados();
                 mostrarToast("Cliente removido.");
             }
+        }
+
+        // ================= LÓGICA DO LEITOR DE CÂMERA (Html5Qrcode) =================
+        function tocarSomBipe() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = "sine";
+                osc.frequency.value = 1200;
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.12);
+            } catch(e) {}
+        }
+
+        function abrirLeitorCamera(callbackAcao) {
+            acaoAposLeituraCamera = callbackAcao;
+            document.getElementById('modal-camera-scanner').classList.remove('hidden');
+
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+
+            const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText, decodedResult) => {
+                    tocarSomBipe();
+                    fecharLeitorCamera();
+                    if (acaoAposLeituraCamera) {
+                        acaoAposLeituraCamera(decodedText);
+                    }
+                },
+                (errorMessage) => {}
+            ).catch(err => {
+                console.error("Erro ao abrir câmera:", err);
+                mostrarToast("Não foi possível acessar a câmera. Verifique as permissões!", "erro");
+                fecharLeitorCamera();
+            });
+        }
+
+        function fecharLeitorCamera() {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('modal-camera-scanner').classList.add('hidden');
+                }).catch(err => {
+                    document.getElementById('modal-camera-scanner').classList.add('hidden');
+                });
+            } else {
+                document.getElementById('modal-camera-scanner').classList.add('hidden');
+            }
+        }
+
+        function abrirLeitorCameraPDV() {
+            abrirLeitorCamera((codigoLido) => {
+                document.getElementById('pdv-busca-input').value = codigoLido;
+                adicionarItemPDVPorInput();
+            });
+        }
+
+        function abrirLeitorCameraProduto() {
+            abrirLeitorCamera((codigoLido) => {
+                document.getElementById('prod-ean').value = codigoLido;
+                mostrarToast(`Código EAN ${codigoLido} capturado!`);
+            });
+        }
+
+        function abrirLeitorCameraLote() {
+            abrirLeitorCamera((codigoLido) => {
+                document.getElementById('lote-produto-input').value = codigoLido;
+                selecionarProdutoParaLote(codigoLido);
+                mostrarToast(`Código lido: ${codigoLido}`);
+            });
         }
 
         // ================= GRÁFICOS DINÂMICOS =================
