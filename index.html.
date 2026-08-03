@@ -263,7 +263,8 @@
                 </table>
             </div>
         </section>
-<!-- ================= SEÇÃO: ESTOQUE E LOTES ================= -->
+
+        <!-- ================= SEÇÃO: ESTOQUE E LOTES ================= -->
         <section id="secao-estoque" class="secao-conteudo hidden space-y-6">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-2xl">
                 <div>
@@ -493,8 +494,24 @@
             </div>
 
             <div class="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 overflow-x-auto">
-                <
-<!-- ================= MODAIS ================= -->
+                <table class="w-full text-left text-sm text-zinc-300">
+                    <thead class="text-xs uppercase bg-zinc-800 text-emerald-400 border-b border-zinc-700">
+                        <tr>
+                            <th class="p-3">Nome Cliente</th>
+                            <th class="p-3">Telefone / Whats</th>
+                            <th class="p-3">Endereço</th>
+                            <th class="p-3 text-center">Débito Fiado (R$)</th>
+                            <th class="p-3 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-800" id="tabela-clientes-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODAIS ================= -->
 
     <!-- MODAL NOVO PRODUTO (CATÁLOGO) -->
     <div id="modal-novo-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -574,7 +591,7 @@
         </div>
     </div>
 
-    <!-- MODAL ENTRADA DE LOTE COM VALIDADE (O MAIS IMPORTANTE) -->
+    <!-- MODAL ENTRADA DE LOTE COM VALIDADE -->
     <div id="modal-novo-lote" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -728,7 +745,8 @@
         <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
         <span id="toast-message" class="font-medium text-sm">Ação realizada!</span>
     </div>
-<!-- SCRIPT PRINCIPAL DO MERCADINHO MARQUES -->
+
+    <!-- SCRIPT PRINCIPAL DO MERCADINHO MARQUES -->
     <script>
         // ================= DADOS E ESTADO DO SISTEMA =================
         let usuarioAtual = "admin";
