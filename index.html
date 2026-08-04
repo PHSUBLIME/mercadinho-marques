@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mercearia Marques - Controle de Validades</title>
+    <title>Mercearia Marques - Gestão Profissional</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,7 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Supabase JS v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Leitor de Câmera -->
+    <!-- Chart.js para Gráficos Profissionais -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leitor de Câmera (Barcode) -->
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
@@ -25,30 +27,39 @@
 </head>
 <body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col justify-between" onclick="desbloquearAudioNoClique()" ontouchstart="desbloquearAudioNoClique()">
 
-    <!-- CABEÇALHO DUAL (EXPANDIDO PARA 100% DA TELA) -->
+    <!-- CABEÇALHO PRINCIPAL -->
     <header class="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-40 shadow-lg w-full">
         <div class="w-full px-2 md:px-6 flex justify-between items-center">
             <!-- LOGO -->
-            <div class="flex items-center gap-3 cursor-pointer" onclick="navegar('farol')">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="navegar('dashboard')">
                 <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-xl shrink-0">
-                    <i class="fa-solid fa-basket-shopping"></i>
+                    <i class="fa-solid fa-store"></i>
                 </div>
                 <div>
                     <h1 class="text-base md:text-lg font-black text-emerald-400 leading-tight tracking-wide">MERCEARIA MARQUES</h1>
-                    <span class="text-[10px] md:text-xs text-zinc-400 font-semibold block">Controle Anti-Vencimento & Estoque</span>
+                    <span class="text-[10px] md:text-xs text-zinc-400 font-semibold block">Sistema de Gestão & Controle Financeiro</span>
                 </div>
             </div>
 
-            <!-- NAVEGAÇÃO DE DESKTOP (SÓ APARECE NO PC) -->
-            <nav class="hidden md:flex items-center gap-2 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
-                <button onclick="navegar('farol')" id="pc-nav-farol" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-traffic-light"></i> Farol de Validade
+            <!-- NAVEGAÇÃO DESKTOP -->
+            <nav class="hidden md:flex items-center gap-1.5 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
+                <button onclick="navegar('dashboard')" id="pc-nav-dashboard" class="pc-nav-btn px-3.5 py-2 rounded-xl text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-chart-pie"></i> Painel & Gráficos
                 </button>
-                <button onclick="navegar('bipar')" id="pc-nav-bipar" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-plus-circle text-amber-400"></i> Entrada Rápida (Produto + Lote)
+                <button onclick="navegar('fechamento')" id="pc-nav-fechamento" class="pc-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-cash-register text-amber-400"></i> Caixa & Fechamento Diário
                 </button>
-                <button onclick="navegar('produtos')" id="pc-nav-produtos" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-boxes-stacked text-emerald-400"></i> Catálogo Produtos
+                <button onclick="navegar('perdas')" id="pc-nav-perdas" class="pc-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-dumpster text-rose-400"></i> Registro de Perdas
+                </button>
+                <button onclick="navegar('bipar')" id="pc-nav-bipar" class="pc-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-plus-circle text-amber-300"></i> Entrada Rápida
+                </button>
+                <button onclick="navegar('farol')" id="pc-nav-farol" class="pc-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-traffic-light text-amber-300"></i> Farol de Validade
+                </button>
+                <button onclick="navegar('produtos')" id="pc-nav-produtos" class="pc-nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-boxes-stacked text-blue-400"></i> Produtos & Estoque
                 </button>
             </nav>
 
@@ -62,70 +73,242 @@
         </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL (100% LARGURA TOTAL NO PC) -->
+    <!-- CONTEÚDO PRINCIPAL -->
     <main class="flex-1 p-4 md:p-6 pb-28 w-full px-3 md:px-8 space-y-6">
 
-        <!-- ================= SEÇÃO 1: FAROL DE VALIDADES ================= -->
-        <section id="secao-farol" class="secao-conteudo space-y-6">
+        <!-- ================= SEÇÃO 1: DASHBOARD & ANALYTICS (GRÁFICOS) ================= -->
+        <section id="secao-dashboard" class="secao-conteudo space-y-6">
             
-            <!-- CARDS DE RESUMO KPI (2 NO CELULAR, 4 NO PC) -->
+            <!-- CARDS DE METRICAS PRINCIPAIS (KPIs) -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                <div class="bg-emerald-950/30 border border-emerald-800/60 p-4 rounded-2xl shadow-lg">
+                    <span class="text-[10px] md:text-xs font-black uppercase text-emerald-400 tracking-wider block">Faturamento (Mês)</span>
+                    <strong class="text-xl md:text-2xl font-black text-emerald-400 mt-1 block" id="dash-faturamento-mes">R$ 0,00</strong>
+                    <span class="text-[10px] md:text-xs text-emerald-300 font-medium" id="dash-entradas-dias">0 fechamentos</span>
+                </div>
+
+                <div class="bg-blue-950/30 border border-blue-800/60 p-4 rounded-2xl shadow-lg">
+                    <span class="text-[10px] md:text-xs font-black uppercase text-blue-400 tracking-wider block">Lucro Estimado</span>
+                    <strong class="text-xl md:text-2xl font-black text-blue-400 mt-1 block" id="dash-lucro-mes">R$ 0,00</strong>
+                    <span class="text-[10px] md:text-xs text-blue-300 font-medium">Faturamento - Despesas - Perdas</span>
+                </div>
+
                 <div class="bg-rose-950/30 border border-rose-800/60 p-4 rounded-2xl shadow-lg">
-                    <span class="text-[10px] md:text-xs font-black uppercase text-rose-400 tracking-wider block">Crítico (&le; 7 Dias)</span>
-                    <strong class="text-2xl md:text-3xl font-black text-rose-400 mt-1 block" id="kpi-critico">0</strong>
-                    <span class="text-[10px] md:text-xs text-rose-300 font-medium">Urgente em risco</span>
+                    <span class="text-[10px] md:text-xs font-black uppercase text-rose-400 tracking-wider block">Prejuízo por Perdas</span>
+                    <strong class="text-xl md:text-2xl font-black text-rose-400 mt-1 block" id="dash-perdas-mes">R$ 0,00</strong>
+                    <span class="text-[10px] md:text-xs text-rose-300 font-medium" id="dash-perdas-qtd">0 itens descartados</span>
                 </div>
 
                 <div class="bg-amber-950/30 border border-amber-800/60 p-4 rounded-2xl shadow-lg">
-                    <span class="text-[10px] md:text-xs font-black uppercase text-amber-400 tracking-wider block">Atenção (&le; 30 Dias)</span>
-                    <strong class="text-2xl md:text-3xl font-black text-amber-400 mt-1 block" id="kpi-atencao">0</strong>
-                    <span class="text-[10px] md:text-xs text-amber-300 font-medium">Atentar validade</span>
-                </div>
-
-                <div class="bg-emerald-950/30 border border-emerald-800/60 p-4 rounded-2xl shadow-lg">
-                    <span class="text-[10px] md:text-xs font-black uppercase text-emerald-400 tracking-wider block">Validade OK (&gt; 30d)</span>
-                    <strong class="text-2xl md:text-3xl font-black text-emerald-400 mt-1 block" id="kpi-ok">0</strong>
-                    <span class="text-[10px] md:text-xs text-emerald-300 font-medium">Estoque saudável</span>
-                </div>
-
-                <div class="bg-purple-950/30 border border-purple-800/60 p-4 rounded-2xl shadow-lg">
-                    <span class="text-[10px] md:text-xs font-black uppercase text-purple-300 tracking-wider block">Lotes Vencidos</span>
-                    <strong class="text-2xl md:text-3xl font-black text-purple-400 mt-1 block" id="kpi-vencidos">0</strong>
-                    <span class="text-[10px] md:text-xs text-purple-300 font-medium">Necessita atenção</span>
+                    <span class="text-[10px] md:text-xs font-black uppercase text-amber-400 tracking-wider block">Alerta Encalhados</span>
+                    <strong class="text-xl md:text-2xl font-black text-amber-400 mt-1 block" id="dash-encalhados-qtd">0 produtos</strong>
+                    <span class="text-[10px] md:text-xs text-amber-300 font-medium">Sem saída há +30d</span>
                 </div>
             </div>
 
-            <!-- CONTROLES BARRA DE AÇÃO (FILTROS + BOTÃO BIPAR + BUSCA) -->
-            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 space-y-4">
-                <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
-                    
-                    <!-- FILTROS DE RISCO (PILLS TÁTEIS) -->
-                    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 text-xs no-scrollbar">
-                        <button onclick="filtrarFarol('todos')" id="btn-f-todos" class="px-3.5 py-2 rounded-xl font-bold bg-emerald-500 text-zinc-950 shrink-0">Todos</button>
-                        <button onclick="filtrarFarol('critico')" id="btn-f-critico" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-rose-400 border border-zinc-800 shrink-0 hover:bg-rose-950/40">🔴 Crítico (&le;7d)</button>
-                        <button onclick="filtrarFarol('atencao')" id="btn-f-atencao" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-amber-400 border border-zinc-800 shrink-0 hover:bg-amber-950/40">🟡 Atenção (&le;30d)</button>
-                        <button onclick="filtrarFarol('ok')" id="btn-f-ok" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-emerald-400 border border-zinc-800 shrink-0 hover:bg-emerald-950/40">🟢 OK (&gt;30d)</button>
-                        <button onclick="filtrarFarol('vencido')" id="btn-f-vencido" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-purple-400 border border-zinc-800 shrink-0 hover:bg-purple-950/40">⬛ Vencidos</button>
+            <!-- ÁREA DE GRÁFICOS (CHART.JS) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- GRÁFICO FINANCEIRO -->
+                <div class="lg:col-span-2 bg-zinc-900 p-5 md:p-6 rounded-2xl border border-zinc-800 space-y-4">
+                    <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                        <div>
+                            <h3 class="text-sm md:text-base font-black text-emerald-400 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line"></i> Fluxo Financeiro Diário
+                            </h3>
+                            <span class="text-xs text-zinc-400">Faturamento vs Despesas vs Perdas Alimentares</span>
+                        </div>
                     </div>
-
-                    <!-- NOVO BOTÃO SUBST. WHATSAPP: BIPAR / ENTRADA DE LOTE -->
-                    <button onclick="navegar('bipar')" class="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-300 text-zinc-950 font-black py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 shrink-0 transition-all">
-                        <i class="fa-solid fa-plus-circle text-base"></i> ➕ Bipar / Entrada de Lote
-                    </button>
+                    <div class="relative h-64 md:h-80 w-full">
+                        <canvas id="chartFinanceiro"></canvas>
+                    </div>
                 </div>
 
-                <!-- CAMPO DE BUSCA -->
-                <div class="bg-zinc-950 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
-                    <i class="fa-solid fa-magnifying-glass text-emerald-400 text-base"></i>
-                    <input type="text" id="busca-farol" onkeyup="renderizarFarol()" placeholder="Pesquisar por nome do produto, lote, código EAN..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
+                <!-- RANKING DE PRODUTOS (MAIS VENDIDOS VS ENCALHADOS) -->
+                <div class="bg-zinc-900 p-5 md:p-6 rounded-2xl border border-zinc-800 space-y-4 flex flex-col justify-between">
+                    <div class="border-b border-zinc-800 pb-3">
+                        <h3 class="text-sm md:text-base font-black text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-fire"></i> Desempenho de Produtos
+                        </h3>
+                        <span class="text-xs text-zinc-400">Distribuição dos mais e menos vendidos</span>
+                    </div>
+                    <div class="relative h-64 w-full flex items-center justify-center">
+                        <canvas id="chartProdutosRanking"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- LISTA DE CARDS DE LOTES (1 COLUNA NO CELULAR, ATÉ 5 COLUNAS NO PC) -->
-            <div id="lista-farol-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
+            <!-- LISTAS DE PRODUTOS: MAIS VENDIDOS x ENCALHADOS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- TOP VENDIDOS -->
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 space-y-3">
+                    <h4 class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-800 pb-2">
+                        <i class="fa-solid fa-trophy"></i> Top Produtos Mais Vendidos
+                    </h4>
+                    <div id="lista-top-vendidos" class="space-y-2 text-xs"></div>
+                </div>
+
+                <!-- ENCALHADOS -->
+                <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 space-y-3">
+                    <h4 class="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-800 pb-2">
+                        <i class="fa-solid fa-snowflake"></i> Produtos Encalhados (&gt;30 Dias Sem Saída)
+                    </h4>
+                    <div id="lista-encalhados" class="space-y-2 text-xs"></div>
+                </div>
+            </div>
+
         </section>
 
-        <!-- ================= SEÇÃO 2: ENTRADA UNIFICADA (PRODUTO + LOTE EM 1 PASSO) ================= -->
+        <!-- ================= SEÇÃO 2: FECHAMENTO DIÁRIO DE CAIXA ================= -->
+        <section id="secao-fechamento" class="secao-conteudo hidden space-y-6">
+            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
+                <div class="border-b border-zinc-800 pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base md:text-lg font-black text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-cash-register"></i> Lançamento do Fechamento Diário
+                        </h2>
+                        <p class="text-xs text-zinc-400 mt-1">Registre o resumo total de vendas e compras do dia de forma prática.</p>
+                    </div>
+                </div>
+
+                <form onsubmit="salvarFechamentoDiario(event)" class="space-y-4 text-xs md:text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-zinc-400 font-bold mb-1">Data do Fechamento *</label>
+                            <input type="date" id="fech-data" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-amber-400">
+                        </div>
+
+                        <div>
+                            <label class="block text-emerald-400 font-black mb-1">Faturamento Bruto (R$ Entradas) *</label>
+                            <input type="text" id="fech-entradas" required placeholder="0.00" class="w-full bg-zinc-800 border border-emerald-500/60 rounded-xl p-3 text-emerald-400 font-bold text-base focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-rose-400 font-black mb-1">Despesas / Compras (R$ Saídas)</label>
+                            <input type="text" id="fech-saidas" placeholder="0.00" class="w-full bg-zinc-800 border border-rose-500/60 rounded-xl p-3 text-rose-300 font-bold text-base focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- VINCULO DE SAÍDA DE PRODUTOS CHAVE NO DIA -->
+                    <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800 space-y-3">
+                        <span class="text-xs font-bold text-zinc-300 block uppercase tracking-wider">
+                            <i class="fa-solid fa-list-check text-amber-400"></i> Lançar Vendas Diárias por Produto (Para estatísticas)
+                        </span>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="md:col-span-2">
+                                <label class="block text-zinc-400 font-semibold mb-1">Selecione o Produto Vendido</label>
+                                <input type="text" id="venda-prod-input" list="dl-produtos-venda" placeholder="Digite para buscar produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white focus:outline-none">
+                                <datalist id="dl-produtos-venda"></datalist>
+                            </div>
+                            <div>
+                                <label class="block text-zinc-400 font-semibold mb-1">Qtd Vendida</label>
+                                <div class="flex gap-2">
+                                    <input type="number" id="venda-prod-qtd" min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-bold text-center focus:outline-none">
+                                    <button type="button" onclick="adicionarVendaItemTemp()" class="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-4 rounded-xl shrink-0">
+                                        + Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TABELA DE ITENS VENDIDOS TEMP NO DIA -->
+                        <div class="border border-zinc-800 rounded-xl overflow-hidden max-h-40 overflow-y-auto">
+                            <table class="w-full text-left text-xs text-zinc-300">
+                                <thead class="bg-zinc-800/80 text-zinc-400 uppercase text-[10px]">
+                                    <tr>
+                                        <th class="p-2">Produto</th>
+                                        <th class="p-2 text-center">Qtd Vendida</th>
+                                        <th class="p-2 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-vendas-temp" class="divide-y divide-zinc-800">
+                                    <tr><td colspan="3" class="p-3 text-center text-zinc-500 italic">Nenhum item adicionado à lista do dia.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Observações do Fechamento</label>
+                        <textarea id="fech-obs" rows="2" placeholder="Ex: Baixo movimento devido à chuva. Compra de hortifrúti na feira." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-amber-400 hover:bg-amber-300 active:bg-amber-200 text-zinc-950 font-black py-4 rounded-xl text-sm transition-all shadow-lg shadow-amber-950/40 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-lock"></i> SALVAR FECHAMENTO DO DIA
+                    </button>
+                </form>
+
+                <!-- HISTÓRICO RECENTE DE FECHAMENTOS -->
+                <div class="pt-4 border-t border-zinc-800 space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Histórico de Fechamentos Recentes</h3>
+                    <div id="lista-fechamentos-historico" class="space-y-2 text-xs"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO 3: REGISTRO DE PERDAS DE ALIMENTOS ================= -->
+        <section id="secao-perdas" class="secao-conteudo hidden space-y-6">
+            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
+                <div class="border-b border-zinc-800 pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base md:text-lg font-black text-rose-400 flex items-center gap-2">
+                            <i class="fa-solid fa-dumpster"></i> Registro de Perdas, Avarias & Vencidos
+                        </h2>
+                        <p class="text-xs text-zinc-400 mt-1">Lance itens descartados para dar baixa no estoque e calcular o prejuízo real.</p>
+                    </div>
+                </div>
+
+                <form onsubmit="salvarRegistroPerda(event)" class="space-y-4 text-xs md:text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="md:col-span-2">
+                            <label class="block text-zinc-400 font-bold mb-1">Selecione o Produto Descartado *</label>
+                            <input type="text" id="perda-prod-input" required list="dl-produtos-perda" onchange="selecionarProdutoPerda(this.value)" placeholder="Digite o nome ou EAN do produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                            <datalist id="dl-produtos-perda"></datalist>
+                            <input type="hidden" id="perda-prod-id">
+                        </div>
+
+                        <div>
+                            <label class="block text-zinc-400 font-bold mb-1">Motivo da Perda *</label>
+                            <select id="perda-motivo" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                                <option value="Vencimento">Vencimento Expired</option>
+                                <option value="Avaria/Estragado">Avaria / Embalagem Rasgada</option>
+                                <option value="Deterioração">Deterioração (Hortifrúti/Frios)</option>
+                                <option value="Furto/Abono">Furto ou Extravio</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-zinc-400 font-semibold mb-1">Quantidade Descartada *</label>
+                            <input type="number" id="perda-qtd" required min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-rose-400 font-bold mb-1">Prejuízo Estimado (R$ Custo)</label>
+                            <input type="text" id="perda-valor" placeholder="0.00" class="w-full bg-zinc-800 border border-rose-500/60 rounded-xl p-3 text-rose-400 font-bold focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-zinc-400 font-semibold mb-1">Data da Ocorrência *</label>
+                            <input type="date" id="perda-data" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-black py-3.5 rounded-xl text-xs md:text-sm transition-all shadow-lg shadow-rose-950/40 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> REGISTRAR PERDA E DAR BAIXA NO ESTOQUE
+                    </button>
+                </form>
+
+                <!-- LISTAGEM DE PERDAS REGISTRADAS -->
+                <div class="pt-4 border-t border-zinc-800 space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Histórico de Perdas Registradas</h3>
+                    <div id="lista-perdas-historico" class="space-y-2 text-xs max-h-60 overflow-y-auto"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO 4: ENTRADA UNIFICADA (BIPAR) ================= -->
         <section id="secao-bipar" class="secao-conteudo hidden space-y-4">
             <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-5 shadow-2xl">
                 <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -237,42 +420,78 @@
             </div>
         </section>
 
-        <!-- ================= SEÇÃO 3: CATÁLOGO DE PRODUTOS ================= -->
+        <!-- ================= SEÇÃO 5: FAROL DE VALIDADES ================= -->
+        <section id="secao-farol" class="secao-conteudo hidden space-y-6">
+            <!-- BARRA DE FILTROS & PESQUISA -->
+            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+                    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 text-xs no-scrollbar">
+                        <button onclick="filtrarFarol('todos')" id="btn-f-todos" class="px-3.5 py-2 rounded-xl font-bold bg-emerald-500 text-zinc-950 shrink-0">Todos</button>
+                        <button onclick="filtrarFarol('critico')" id="btn-f-critico" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-rose-400 border border-zinc-800 shrink-0 hover:bg-rose-950/40">🔴 Crítico (&le;7d)</button>
+                        <button onclick="filtrarFarol('atencao')" id="btn-f-atencao" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-amber-400 border border-zinc-800 shrink-0 hover:bg-amber-950/40">🟡 Atenção (&le;30d)</button>
+                        <button onclick="filtrarFarol('ok')" id="btn-f-ok" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-emerald-400 border border-zinc-800 shrink-0 hover:bg-emerald-950/40">🟢 OK (&gt;30d)</button>
+                        <button onclick="filtrarFarol('vencido')" id="btn-f-vencido" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-purple-400 border border-zinc-800 shrink-0 hover:bg-purple-950/40">⬛ Vencidos</button>
+                    </div>
+
+                    <button onclick="navegar('bipar')" class="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 shrink-0 transition-all">
+                        <i class="fa-solid fa-plus-circle text-base"></i> ➕ Entrada de Novo Lote
+                    </button>
+                </div>
+
+                <div class="bg-zinc-950 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
+                    <i class="fa-solid fa-magnifying-glass text-emerald-400 text-base"></i>
+                    <input type="text" id="busca-farol" onkeyup="renderizarFarol()" placeholder="Pesquisar lote por produto, EAN, nº lote..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
+                </div>
+            </div>
+
+            <!-- CARDS DE LOTES -->
+            <div id="lista-farol-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
+        </section>
+
+        <!-- ================= SEÇÃO 6: CATÁLOGO DE PRODUTOS ================= -->
         <section id="secao-produtos" class="secao-conteudo hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
                 <div>
                     <h2 class="text-base md:text-lg font-black text-emerald-400">Catálogo de Produtos</h2>
-                    <span class="text-xs text-zinc-400">Produtos cadastrados na mercearia</span>
+                    <span class="text-xs text-zinc-400">Cadastro de itens e preços da mercearia</span>
                 </div>
-                <button onclick="abrirModalProduto()" class="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-300 text-zinc-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/30">
-                    <i class="fa-solid fa-plus"></i> + Novo Produto Avulso
+                <button onclick="abrirModalProduto()" class="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/30">
+                    <i class="fa-solid fa-plus"></i> + Novo Produto
                 </button>
             </div>
 
-            <!-- CAMPO DE BUSCA PRODUTOS -->
             <div class="bg-zinc-900 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
                 <i class="fa-solid fa-magnifying-glass text-emerald-400 text-base"></i>
-                <input type="text" id="busca-produtos" onkeyup="renderizarProdutos()" placeholder="Buscar produto por nome, categoria ou código EAN..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
+                <input type="text" id="busca-produtos" onkeyup="renderizarProdutos()" placeholder="Buscar por nome, categoria ou código EAN..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
             </div>
 
-            <!-- CARDS DE PRODUTOS (5 COLUNAS NO PC WIDESCREEN) -->
             <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
         </section>
 
     </main>
 
-    <!-- BARRA DE NAVEGAÇÃO INFERIOR FIXA (Apenas para telas de CELULAR) -->
+    <!-- NAVEGAÇÃO MOBILE FIXA (BOTTOM BAR) -->
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 flex justify-around items-center py-2.5 z-50 px-2">
-        <button onclick="navegar('farol')" id="nav-farol" class="nav-item active flex flex-col items-center gap-1 text-emerald-400 font-bold transition-all">
-            <i class="fa-solid fa-traffic-light text-lg"></i>
-            <span class="text-[10px]">Farol</span>
+        <button onclick="navegar('dashboard')" id="nav-dashboard" class="nav-item active flex flex-col items-center gap-1 text-emerald-400 font-bold transition-all">
+            <i class="fa-solid fa-chart-pie text-lg"></i>
+            <span class="text-[10px]">Painel</span>
         </button>
 
-        <button onclick="navegar('bipar')" id="nav-bipar" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium transition-all">
+        <button onclick="navegar('fechamento')" id="nav-fechamento" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium transition-all">
             <div class="w-10 h-10 bg-amber-500 text-zinc-950 rounded-full flex items-center justify-center text-lg font-black shadow-lg shadow-amber-950/50 -mt-5 border-2 border-zinc-950">
-                <i class="fa-solid fa-plus"></i>
+                <i class="fa-solid fa-cash-register"></i>
             </div>
-            <span class="text-[10px]">Bipar Lote</span>
+            <span class="text-[10px]">Caixa</span>
+        </button>
+
+        <button onclick="navegar('perdas')" id="nav-perdas" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium transition-all">
+            <i class="fa-solid fa-dumpster text-lg"></i>
+            <span class="text-[10px]">Perdas</span>
+        </button>
+
+        <button onclick="navegar('farol')" id="nav-farol" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium transition-all">
+            <i class="fa-solid fa-traffic-light text-lg"></i>
+            <span class="text-[10px]">Validades</span>
         </button>
 
         <button onclick="navegar('produtos')" id="nav-produtos" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium transition-all">
@@ -338,7 +557,7 @@
         </div>
     </div>
 
-    <!-- MODAL CADASTRO / EDIÇÃO DE PRODUTO -->
+    <!-- MODAL CADASTRO PRODUTO AVULSO -->
     <div id="modal-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -404,9 +623,9 @@
         <span id="toast-msg" class="font-medium text-xs">Ação realizada!</span>
     </div>
 
-    <!-- SCRIPT JS LÓGICA E SUPABASE -->
+    <!-- SCRIPT JS LÓGICA & SUPABASE & CHART.JS -->
     <script>
-        // CONFIGURAÇÃO SUPABASE PREENCHIDA
+        // CONFIGURAÇÃO SUPABASE
         const SUPABASE_URL = 'https://ssgbhzsjbvioyeuwvhez.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_e_hKXIyJfFTDzFaD-MEDYg_ez8ec68N';
 
@@ -416,13 +635,20 @@
             produtos: [],
             lotes: [],
             perdas: [],
+            fechamentos: [],
+            vendasDiarias: [],
             filtroFarol: 'todos'
         };
 
+        let vendasTempDia = [];
         let html5QrCode = null;
         let destinoScanner = null;
 
-        // BIPE DE SOM REAL - MOTOR DE ÁUDIO
+        // INSTÂNCIAS DOS GRÁFICOS (CHART.JS)
+        let chartFinanceiroInstance = null;
+        let chartProdutosInstance = null;
+
+        // MOTOR DE ÁUDIO BIPE
         let audioCtx = null;
 
         function desbloquearAudioNoClique() {
@@ -443,7 +669,7 @@
                 const gain = audioCtx.createGain();
 
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(1400, audioCtx.currentTime); // Som agudo 1400Hz
+                osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
                 gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
 
@@ -457,7 +683,6 @@
             }
         }
 
-        // CONVERSOR SEGURO DE NÚMEROS (ACEITA VÍRGULA E PONTO)
         function parseNum(val) {
             if (!val) return 0;
             const clean = String(val).replace(',', '.').trim();
@@ -465,35 +690,50 @@
             return isNaN(num) ? 0 : num;
         }
 
-        // CARREGAR DADOS DO SUPABASE
+        // CARREGAR DADOS BLINDADO (NÃO TRAVA A TELA MESMO SE UMA TABELA FALHAR)
         async function carregarDados() {
             const iconSync = document.getElementById('icon-sync');
             if (iconSync) iconSync.classList.add('fa-spin');
 
             try {
-                const [resProd, resLote, resPerd] = await Promise.all([
-                    supabaseClient.from('mercearia_produtos').select('*').order('nome'),
-                    supabaseClient.from('mercearia_lotes').select('*').order('validade'),
-                    supabaseClient.from('mercearia_perdas').select('*').order('id', { ascending: false })
-                ]);
-
+                const resProd = await supabaseClient.from('mercearia_produtos').select('*').order('nome');
                 if (resProd.data) appData.produtos = resProd.data;
+
+                const resLote = await supabaseClient.from('mercearia_lotes').select('*').order('validade');
                 if (resLote.data) appData.lotes = resLote.data;
+
+                const resPerd = await supabaseClient.from('mercearia_perdas').select('*').order('data_perda', { ascending: false });
                 if (resPerd.data) appData.perdas = resPerd.data;
 
-                atualizarInterface();
+                const resFech = await supabaseClient.from('mercearia_fechamentos').select('*').order('data', { ascending: false });
+                if (resFech.data) appData.fechamentos = resFech.data;
+
+                const resVend = await supabaseClient.from('mercearia_vendas_diarias').select('*');
+                if (resVend.data) appData.vendasDiarias = resVend.data;
+
             } catch (e) {
                 console.error("Erro ao carregar dados do Supabase:", e);
-                mostrarToast("Erro ao conectar com o banco!", "erro");
             } finally {
+                atualizarInterface();
                 if (iconSync) iconSync.classList.remove('fa-spin');
             }
         }
 
         function atualizarInterface() {
+            renderizarDashboard();
             renderizarFarol();
             renderizarProdutos();
+            renderizarHistoricoFechamentos();
+            renderizarHistoricoPerdas();
             popularDatalists();
+            
+            const hoje = new Date().toISOString().split('T')[0];
+            if (document.getElementById('fech-data') && !document.getElementById('fech-data').value) {
+                document.getElementById('fech-data').value = hoje;
+            }
+            if (document.getElementById('perda-data') && !document.getElementById('perda-data').value) {
+                document.getElementById('perda-data').value = hoje;
+            }
         }
 
         function navegar(secao) {
@@ -501,7 +741,6 @@
             const alvo = document.getElementById(`secao-${secao}`);
             if (alvo) alvo.classList.remove('hidden');
 
-            // Atualizar navegadores de mobile
             document.querySelectorAll('.nav-item').forEach(b => {
                 b.classList.remove('text-emerald-400', 'font-bold');
                 b.classList.add('text-zinc-400', 'font-medium');
@@ -513,7 +752,6 @@
                 btnMobile.classList.add('text-emerald-400', 'font-bold');
             }
 
-            // Atualizar navegadores do PC
             document.querySelectorAll('.pc-nav-btn').forEach(b => {
                 b.classList.remove('text-emerald-400', 'bg-emerald-500/10', 'border', 'border-emerald-500/30', 'font-bold');
                 b.classList.add('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800', 'font-semibold');
@@ -524,16 +762,518 @@
                 btnPC.classList.remove('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800', 'font-semibold');
                 btnPC.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border', 'border-emerald-500/30', 'font-bold');
             }
+
+            if (secao === 'dashboard') {
+                renderizarDashboard();
+            }
         }
 
-        // ================= FAROL DE VALIDADE (RESPONSIVO E EXPANDIDO NO PC) =================
+        // ================= DASHBOARD, ANALYTICS & GRÁFICOS (CHART.JS) =================
+        function renderizarDashboard() {
+            const hoje = new Date();
+            const mesAtual = hoje.getMonth();
+            const anoAtual = hoje.getFullYear();
+
+            let totalFatMes = 0;
+            let totalDespesasMes = 0;
+            let totalPerdasMes = 0;
+            let qtdItensPerdidosMes = 0;
+            let numFechamentos = 0;
+
+            appData.fechamentos.forEach(f => {
+                if (f.data) {
+                    const parts = f.data.split('-');
+                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                    if (d.getMonth() === mesAtual && d.getFullYear() === anoAtual) {
+                        totalFatMes += parseFloat(f.faturamento_bruto || 0);
+                        totalDespesasMes += parseFloat(f.despesas || 0);
+                        numFechamentos++;
+                    }
+                }
+            });
+
+            appData.perdas.forEach(p => {
+                if (p.data_perda) {
+                    const parts = p.data_perda.split('-');
+                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                    if (d.getMonth() === mesAtual && d.getFullYear() === anoAtual) {
+                        totalPerdasMes += parseFloat(p.valor_total || 0);
+                        qtdItensPerdidosMes += parseFloat(p.quantidade || 0);
+                    }
+                }
+            });
+
+            const lucroMes = totalFatMes - totalDespesasMes - totalPerdasMes;
+
+            document.getElementById('dash-faturamento-mes').innerText = `R$ ${totalFatMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-entradas-dias').innerText = `${numFechamentos} fechamento(s) no mês`;
+
+            document.getElementById('dash-lucro-mes').innerText = `R$ ${lucroMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-perdas-mes').innerText = `R$ ${totalPerdasMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-perdas-qtd').innerText = `${qtdItensPerdidosMes} item(ns) descartado(s)`;
+
+            let vendasAcumuladas = {};
+            let ultimaDataVenda = {};
+
+            appData.vendasDiarias.forEach(v => {
+                const pid = v.produto_id;
+                const qtd = parseFloat(v.qtd_vendida || 0);
+                vendasAcumuladas[pid] = (vendasAcumuladas[pid] || 0) + qtd;
+
+                if (v.data) {
+                    const vDate = new Date(v.data);
+                    if (!ultimaDataVenda[pid] || vDate > ultimaDataVenda[pid]) {
+                        ultimaDataVenda[pid] = vDate;
+                    }
+                }
+            });
+
+            let arrayMaisVendidos = appData.produtos.map(p => ({
+                ...p,
+                qtdVendida: vendasAcumuladas[p.id] || 0
+            })).sort((a, b) => b.qtdVendida - a.qtdVendida);
+
+            const containerTop = document.getElementById('lista-top-vendidos');
+            containerTop.innerHTML = '';
+
+            const top5 = arrayMaisVendidos.slice(0, 5);
+            if (top5.filter(x => x.qtdVendida > 0).length === 0) {
+                containerTop.innerHTML = `<p class="text-zinc-500 italic p-2">Nenhuma venda de produto gravada nos fechamentos.</p>`;
+            } else {
+                top5.forEach((p, idx) => {
+                    if (p.qtdVendida > 0) {
+                        const item = document.createElement('div');
+                        item.className = "flex justify-between items-center bg-zinc-950 p-2.5 rounded-xl border border-zinc-800/80";
+                        item.innerHTML = `
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 bg-emerald-500/20 text-emerald-400 font-bold rounded-full flex items-center justify-center text-[10px]">${idx + 1}º</span>
+                                <strong class="text-white">${escapeAttr(p.nome)}</strong>
+                            </div>
+                            <span class="text-emerald-400 font-bold">${p.qtdVendida} ${escapeAttr(p.unidade || 'Un')} vendidas</span>
+                        `;
+                        containerTop.appendChild(item);
+                    }
+                });
+            }
+
+            const limite30Dias = new Date();
+            limite30Dias.setDate(limite30Dias.getDate() - 30);
+
+            let arrayEncalhados = appData.produtos.filter(p => {
+                const ultima = ultimaDataVenda[p.id];
+                return !ultima || ultima < limite30Dias;
+            });
+
+            document.getElementById('dash-encalhados-qtd').innerText = `${arrayEncalhados.length} produto(s)`;
+
+            const containerEncalhados = document.getElementById('lista-encalhados');
+            containerEncalhados.innerHTML = '';
+
+            if (arrayEncalhados.length === 0) {
+                containerEncalhados.innerHTML = `<p class="text-emerald-400 font-medium italic p-2">Excelente! Nenhum produto parado há mais de 30 dias.</p>`;
+            } else {
+                arrayEncalhados.slice(0, 5).forEach(p => {
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center bg-amber-950/20 border border-amber-800/40 p-2.5 rounded-xl";
+                    item.innerHTML = `
+                        <div>
+                            <strong class="text-amber-200 block">${escapeAttr(p.nome)}</strong>
+                            <span class="text-[10px] text-amber-400/80">${escapeAttr(p.categoria || 'Mercearia')}</span>
+                        </div>
+                        <span class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded text-[10px] font-bold">🧊 Parado</span>
+                    `;
+                    containerEncalhados.appendChild(item);
+                });
+            }
+
+            desenharGraficoFinanceiro();
+            desenharGraficoRankingProdutos(top5);
+        }
+
+        function desenharGraficoFinanceiro() {
+            try {
+                const ctx = document.getElementById('chartFinanceiro');
+                if (!ctx) return;
+
+                const ultimosFech = [...appData.fechamentos].reverse().slice(-7);
+
+                const labels = ultimosFech.map(f => {
+                    const p = f.data ? f.data.split('-') : ['00','00','00'];
+                    return `${p[2]}/${p[1]}`;
+                });
+
+                const dataEntradas = ultimosFech.map(f => parseFloat(f.faturamento_bruto || 0));
+                const dataSaidas = ultimosFech.map(f => parseFloat(f.despesas || 0));
+
+                if (chartFinanceiroInstance) {
+                    chartFinanceiroInstance.destroy();
+                }
+
+                chartFinanceiroInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels.length > 0 ? labels : ['Sem dados'],
+                        datasets: [
+                            {
+                                label: 'Faturamento (Entradas)',
+                                data: dataEntradas.length > 0 ? dataEntradas : [0],
+                                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                                borderColor: '#10b981',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Despesas (Saídas)',
+                                data: dataSaidas.length > 0 ? dataSaidas : [0],
+                                backgroundColor: 'rgba(244, 63, 94, 0.8)',
+                                borderColor: '#f43f5e',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#a1a1aa', font: { family: 'Inter', size: 11 } } }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#71717a' }, grid: { display: false } },
+                            y: { ticks: { color: '#71717a' }, grid: { color: '#27272a' } }
+                        }
+                    }
+                });
+            } catch (errChart) {
+                console.warn("Erro ao desenhar gráfico financeiro:", errChart);
+            }
+        }
+
+        function desenharGraficoRankingProdutos(top5) {
+            try {
+                const ctx = document.getElementById('chartProdutosRanking');
+                if (!ctx) return;
+
+                const validos = top5 ? top5.filter(x => x && x.qtdVendida > 0) : [];
+                const labels = validos.map(x => (x.nome || 'Item').substring(0, 12) + '...');
+                const data = validos.map(x => x.qtdVendida);
+
+                if (chartProdutosInstance) {
+                    chartProdutosInstance.destroy();
+                }
+
+                chartProdutosInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels.length > 0 ? labels : ['Sem vendas'],
+                        datasets: [{
+                            data: data.length > 0 ? data : [1],
+                            backgroundColor: [
+                                '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#09090b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#a1a1aa', font: { family: 'Inter', size: 10 } } }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            } catch (errChart2) {
+                console.warn("Erro ao desenhar gráfico de ranking:", errChart2);
+            }
+        }
+
+        // ================= SEÇÃO: FECHAMENTO DIÁRIO DE CAIXA =================
+        function adicionarVendaItemTemp() {
+            const inputProd = document.getElementById('venda-prod-input');
+            const qtdInput = document.getElementById('venda-prod-qtd');
+
+            const val = inputProd.value.trim();
+            const qtd = parseInt(qtdInput.value) || 1;
+
+            if (!val) return;
+
+            const matchId = val.match(/\[id:(\d+)\]/i);
+            let prod = null;
+            if (matchId && matchId[1]) {
+                prod = appData.produtos.find(p => p.id == matchId[1]);
+            } else {
+                prod = appData.produtos.find(p => p.nome.toLowerCase() === val.toLowerCase() || p.ean === val);
+            }
+
+            if (!prod) {
+                mostrarToast("Selecione um produto válido da lista!", "erro");
+                return;
+            }
+
+            const idx = vendasTempDia.findIndex(v => v.produto_id == prod.id);
+            if (idx >= 0) {
+                vendasTempDia[idx].qtd += qtd;
+            } else {
+                vendasTempDia.push({
+                    produto_id: prod.id,
+                    nome: prod.nome,
+                    qtd: qtd
+                });
+            }
+
+            tocarSomBipe();
+            inputProd.value = '';
+            qtdInput.value = '1';
+            renderizarTabelaVendasTemp();
+        }
+
+        function removerVendaItemTemp(idx) {
+            vendasTempDia.splice(idx, 1);
+            renderizarTabelaVendasTemp();
+        }
+
+        function renderizarTabelaVendasTemp() {
+            const tbody = document.getElementById('tbody-vendas-temp');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (vendasTempDia.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-zinc-500 italic">Nenhum item adicionado à lista do dia.</td></tr>`;
+                return;
+            }
+
+            vendasTempDia.forEach((v, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2 font-bold text-white">${escapeAttr(v.nome)}</td>
+                    <td class="p-2 text-center font-bold text-emerald-400">${v.qtd} un</td>
+                    <td class="p-2 text-right">
+                        <button type="button" onclick="removerVendaItemTemp(${idx})" class="text-rose-400 hover:text-rose-300 p-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function salvarFechamentoDiario(e) {
+            e.preventDefault();
+
+            const data = document.getElementById('fech-data').value;
+            const entradas = parseNum(document.getElementById('fech-entradas').value);
+            const saidas = parseNum(document.getElementById('fech-saidas').value);
+            const obs = document.getElementById('fech-obs').value.trim();
+
+            if (!data) {
+                mostrarToast("Selecione a data do fechamento!", "erro");
+                return;
+            }
+
+            try {
+                const fechData = {
+                    data: data,
+                    faturamento_bruto: entradas,
+                    despesas: saidas,
+                    observacoes: obs
+                };
+
+                const { error: errF } = await supabaseClient.from('mercearia_fechamentos').insert([fechData]);
+
+                if (errF) {
+                    alert(`Erro ao salvar fechamento:\n\n${errF.message}`);
+                    return;
+                }
+
+                if (vendasTempDia.length > 0) {
+                    const vendasParaInserir = vendasTempDia.map(v => ({
+                        data: data,
+                        produto_id: v.produto_id,
+                        qtd_vendida: v.qtd
+                    }));
+
+                    await supabaseClient.from('mercearia_vendas_diarias').insert(vendasParaInserir);
+                }
+
+                tocarSomBipe();
+                mostrarToast("Fechamento diário registrado com sucesso!");
+                
+                vendasTempDia = [];
+                document.getElementById('fech-entradas').value = '';
+                document.getElementById('fech-saidas').value = '';
+                document.getElementById('fech-obs').value = '';
+                renderizarTabelaVendasTemp();
+
+                await carregarDados();
+                navegar('dashboard');
+
+            } catch (err) {
+                console.error("Erro geral no fechamento:", err);
+                alert(`Erro ao processar fechamento:\n\n${err.message || err}`);
+            }
+        }
+
+        function renderizarHistoricoFechamentos() {
+            const container = document.getElementById('lista-fechamentos-historico');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (appData.fechamentos.length === 0) {
+                container.innerHTML = `<p class="text-zinc-500 italic p-2">Nenhum fechamento registrado.</p>`;
+                return;
+            }
+
+            appData.fechamentos.slice(0, 5).forEach(f => {
+                const parts = f.data ? f.data.split('-') : ['--', '--', '----'];
+                const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                const ent = parseFloat(f.faturamento_bruto || 0);
+                const sai = parseFloat(f.despesas || 0);
+                const saldo = ent - sai;
+
+                const card = document.createElement('div');
+                card.className = "bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center";
+                card.innerHTML = `
+                    <div>
+                        <strong class="text-white block font-bold">${dataFmt}</strong>
+                        <span class="text-[10px] text-zinc-400">Entradas: <strong class="text-emerald-400">R$ ${ent.toFixed(2)}</strong> | Saídas: <strong class="text-rose-400">R$ ${sai.toFixed(2)}</strong></span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-zinc-500 uppercase block font-bold">Saldo Dia</span>
+                        <strong class="text-sm font-black ${saldo >= 0 ? 'text-emerald-400' : 'text-rose-400'}">R$ ${saldo.toFixed(2)}</strong>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ================= SEÇÃO: REGISTRO DE PERDAS =================
+        function selecionarProdutoPerda(val) {
+            if (!val) return;
+
+            const matchId = val.match(/\[id:(\d+)\]/i);
+            let prod = null;
+            if (matchId && matchId[1]) {
+                prod = appData.produtos.find(p => p.id == matchId[1]);
+            } else {
+                prod = appData.produtos.find(p => p.nome.toLowerCase() === val.toLowerCase() || p.ean === val);
+            }
+
+            if (prod) {
+                document.getElementById('perda-prod-id').value = prod.id;
+                document.getElementById('perda-prod-input').value = prod.nome;
+                
+                const qtd = parseNum(document.getElementById('perda-qtd').value) || 1;
+                const custo = parseFloat(prod.preco_custo || 0);
+                if (custo > 0) {
+                    document.getElementById('perda-valor').value = (custo * qtd).toFixed(2);
+                }
+            }
+        }
+
+        async function salvarRegistroPerda(e) {
+            e.preventDefault();
+
+            const prodId = document.getElementById('perda-prod-id').value;
+            const motivo = document.getElementById('perda-motivo').value;
+            const qtd = parseNum(document.getElementById('perda-qtd').value);
+            const valorTotal = parseNum(document.getElementById('perda-valor').value);
+            const dataPerda = document.getElementById('perda-data').value;
+
+            if (!prodId) {
+                mostrarToast("Selecione um produto válido para a perda!", "erro");
+                return;
+            }
+
+            try {
+                const perdaData = {
+                    produto_id: parseInt(prodId),
+                    motivo: motivo,
+                    quantidade: qtd,
+                    valor_total: valorTotal,
+                    data_perda: dataPerda
+                };
+
+                const { error: errP } = await supabaseClient.from('mercearia_perdas').insert([perdaData]);
+
+                if (errP) {
+                    alert(`Erro ao salvar perda:\n\n${errP.message}`);
+                    return;
+                }
+
+                const lotesProd = appData.lotes.filter(l => l.produto_id == prodId && parseFloat(l.quantidade || 0) > 0)
+                                              .sort((a, b) => new Date(a.validade) - new Date(b.validade));
+
+                let restanteAbater = qtd;
+                for (let lote of lotesProd) {
+                    if (restanteAbater <= 0) break;
+                    const qtdLote = parseFloat(lote.quantidade || 0);
+                    if (qtdLote <= restanteAbater) {
+                        restanteAbater -= qtdLote;
+                        await supabaseClient.from('mercearia_lotes').update({ quantidade: 0 }).eq('id', lote.id);
+                    } else {
+                        const novaQtd = qtdLote - restanteAbater;
+                        restanteAbater = 0;
+                        await supabaseClient.from('mercearia_lotes').update({ quantidade: novaQtd }).eq('id', lote.id);
+                    }
+                }
+
+                tocarSomBipe();
+                mostrarToast("Perda registrada e estoque abatido com sucesso!");
+
+                document.getElementById('perda-prod-id').value = '';
+                document.getElementById('perda-prod-input').value = '';
+                document.getElementById('perda-qtd').value = '1';
+                document.getElementById('perda-valor').value = '';
+
+                await carregarDados();
+
+            } catch (err) {
+                console.error("Erro no registro de perda:", err);
+                alert(`Erro ao registrar perda:\n\n${err.message || err}`);
+            }
+        }
+
+        function renderizarHistoricoPerdas() {
+            const container = document.getElementById('lista-perdas-historico');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (appData.perdas.length === 0) {
+                container.innerHTML = `<p class="text-zinc-500 italic p-2">Nenhuma perda registrada.</p>`;
+                return;
+            }
+
+            appData.perdas.slice(0, 10).forEach(p => {
+                const prod = appData.produtos.find(x => x.id == p.produto_id);
+                const nomeP = prod ? prod.nome : 'Produto Desconhecido';
+                const parts = p.data_perda ? p.data_perda.split('-') : ['--', '--', '----'];
+                const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+                const card = document.createElement('div');
+                card.className = "bg-zinc-950 p-3 rounded-xl border border-rose-950/60 flex justify-between items-center";
+                card.innerHTML = `
+                    <div>
+                        <strong class="text-white block font-bold">${escapeAttr(nomeP)}</strong>
+                        <span class="text-[10px] text-zinc-400">${dataFmt} • Motivo: <strong class="text-rose-400">${escapeAttr(p.motivo)}</strong></span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-rose-400 font-bold block">-${p.quantidade} un</span>
+                        <strong class="text-xs text-zinc-400">R$ ${parseFloat(p.valor_total || 0).toFixed(2)}</strong>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ================= FAROL DE VALIDADES =================
         function renderizarFarol() {
             const container = document.getElementById('lista-farol-cards');
             if (!container) return;
             container.innerHTML = '';
 
             const busca = (document.getElementById('busca-farol')?.value || '').toLowerCase();
-            
             const hojeDate = new Date();
             hojeDate.setHours(0,0,0,0);
 
@@ -652,12 +1392,33 @@
         // ================= BUSCA E ENTRADA UNIFICADA INTELIGENTE =================
         function popularDatalists() {
             const dlUnificado = document.getElementById('dl-produtos-unificado');
+            const dlVenda = document.getElementById('dl-produtos-venda');
+            const dlPerda = document.getElementById('dl-produtos-perda');
+
             if (dlUnificado) {
                 dlUnificado.innerHTML = '';
                 appData.produtos.forEach(p => {
                     const opt = document.createElement('option');
-                    opt.value = `${p.nome} ${p.ean ? `[EAN:${p.ean}]` : ''} [ID:${p.id}]`;
+                    opt.value = `${p.nome} ${p.ean ? `[EAN:${p.ean}]` : ''} [id:${p.id}]`;
                     dlUnificado.appendChild(opt);
+                });
+            }
+
+            if (dlVenda) {
+                dlVenda.innerHTML = '';
+                appData.produtos.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = `${p.nome} [id:${p.id}]`;
+                    dlVenda.appendChild(opt);
+                });
+            }
+
+            if (dlPerda) {
+                dlPerda.innerHTML = '';
+                appData.produtos.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = `${p.nome} [id:${p.id}]`;
+                    dlPerda.appendChild(opt);
                 });
             }
         }
@@ -673,7 +1434,7 @@
             termo = termo.trim().toLowerCase();
 
             let prod = null;
-            const matchId = termo.match(/\[id:(\d+)\]/);
+            const matchId = termo.match(/\[id:(\d+)\]/i);
             if (matchId && matchId[1]) {
                 prod = appData.produtos.find(p => p.id == matchId[1]);
             }
@@ -736,14 +1497,12 @@
             }
 
             try {
-                // 1. Se não tem ID, verifica na memória local se já existe antes de inserir
                 if (!prodId) {
                     let prodExistente = appData.produtos.find(p => (ean && p.ean === ean) || p.nome.toLowerCase() === nome.toLowerCase());
 
                     if (prodExistente) {
                         prodId = prodExistente.id;
                     } else {
-                        // Insere produto novo em mercearia_produtos
                         const pData = {
                             ean: ean || null,
                             nome: nome,
@@ -756,8 +1515,7 @@
                         const { data: newProd, error: errP } = await supabaseClient.from('mercearia_produtos').insert([pData]).select();
 
                         if (errP) {
-                            console.error("Erro Supabase Produtos:", errP);
-                            alert(`Erro ao cadastrar produto no Supabase:\n\n${errP.message}\n${errP.details || ''}`);
+                            alert(`Erro ao cadastrar produto no Supabase:\n\n${errP.message}`);
                             mostrarToast(`Erro produto: ${errP.message}`, "erro");
                             return;
                         }
@@ -767,7 +1525,6 @@
                         }
                     }
                 } else {
-                    // Atualiza preços se foram modificados
                     await supabaseClient.from('mercearia_produtos').update({
                         preco_custo: parseNum(document.getElementById('u-prod-custo').value),
                         preco_venda: parseNum(document.getElementById('u-prod-venda').value)
@@ -779,7 +1536,6 @@
                     return;
                 }
 
-                // 2. Insere lote em mercearia_lotes
                 const loteData = {
                     produto_id: parseInt(prodId),
                     numero_lote: document.getElementById('u-lote-num').value.trim() || 'LT-01',
@@ -791,8 +1547,7 @@
                 const { error: errL } = await supabaseClient.from('mercearia_lotes').insert([loteData]);
 
                 if (errL) {
-                    console.error("Erro Supabase Lotes:", errL);
-                    alert(`Erro ao cadastrar lote no Supabase:\n\n${errL.message}\n${errL.details || ''}`);
+                    alert(`Erro ao cadastrar lote no Supabase:\n\n${errL.message}`);
                     mostrarToast(`Erro lote: ${errL.message}`, "erro");
                     return;
                 }
@@ -878,7 +1633,7 @@
             const busca = (document.getElementById('busca-produtos')?.value || '').toLowerCase();
 
             if (appData.produtos.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum produto cadastrado. Clique em "+ Novo Produto Avulso".</div>`;
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum produto cadastrado. Clique em "+ Novo Produto".</div>`;
                 return;
             }
 
@@ -902,7 +1657,7 @@
 
                     <div class="flex justify-between items-center text-xs bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80">
                         <div>
-                            <span class="text-[10px] text-zinc-500 block font-bold uppercase">Estoque Total</span>
+                            <span class="text-[10px] text-zinc-500 block font-bold uppercase">Estoque Lotes</span>
                             <strong class="text-white font-bold text-sm">${totalQtd} ${escapeAttr(p.unidade || 'Un')}</strong>
                         </div>
                         <div class="text-right">
@@ -913,7 +1668,7 @@
 
                     <div class="flex justify-end gap-2 pt-2 border-t border-zinc-800">
                         <button onclick="abrirModalEditarProduto(${p.id})" class="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-500/30 transition-all">
-                            <i class="fa-solid fa-pen"></i> Editar Produto
+                            <i class="fa-solid fa-pen"></i> Editar
                         </button>
                         <button onclick="excluirProduto(${p.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-800/50 transition-all">
                             <i class="fa-solid fa-trash"></i> Apagar
