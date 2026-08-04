@@ -50,9 +50,6 @@
                 <button onclick="navegar('produtos')" id="pc-nav-produtos" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
                     <i class="fa-solid fa-boxes-stacked text-emerald-400"></i> Catálogo Produtos
                 </button>
-                <button onclick="navegar('perdas')" id="pc-nav-perdas" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-dumpster text-rose-400"></i> Relatório de Perdas
-                </button>
             </nav>
 
             <!-- BOTAO ATUALIZAR -->
@@ -82,7 +79,7 @@
                 <div class="bg-amber-950/30 border border-amber-800/60 p-4 rounded-2xl shadow-lg">
                     <span class="text-[10px] md:text-xs font-black uppercase text-amber-400 tracking-wider block">Atenção (&le; 30 Dias)</span>
                     <strong class="text-2xl md:text-3xl font-black text-amber-400 mt-1 block" id="kpi-atencao">0</strong>
-                    <span class="text-[10px] md:text-xs text-amber-300 font-medium">Oferecer desconto</span>
+                    <span class="text-[10px] md:text-xs text-amber-300 font-medium">Atentar validade</span>
                 </div>
 
                 <div class="bg-emerald-950/30 border border-emerald-800/60 p-4 rounded-2xl shadow-lg">
@@ -94,11 +91,11 @@
                 <div class="bg-purple-950/30 border border-purple-800/60 p-4 rounded-2xl shadow-lg">
                     <span class="text-[10px] md:text-xs font-black uppercase text-purple-300 tracking-wider block">Lotes Vencidos</span>
                     <strong class="text-2xl md:text-3xl font-black text-purple-400 mt-1 block" id="kpi-vencidos">0</strong>
-                    <span class="text-[10px] md:text-xs text-purple-300 font-medium">Aguardando descarte</span>
+                    <span class="text-[10px] md:text-xs text-purple-300 font-medium">Necessita atenção</span>
                 </div>
             </div>
 
-            <!-- CONTROLES BARRA DE AÇÃO (FILTROS + BUSCA + OFERTA WHATS) -->
+            <!-- CONTROLES BARRA DE AÇÃO (FILTROS + BOTÃO BIPAR + BUSCA) -->
             <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 space-y-4">
                 <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
                     
@@ -111,9 +108,9 @@
                         <button onclick="filtrarFarol('vencido')" id="btn-f-vencido" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-purple-400 border border-zinc-800 shrink-0 hover:bg-purple-950/40">⬛ Vencidos</button>
                     </div>
 
-                    <!-- BOTÃO DIVULGAR OFERTAS WHATSAPP -->
-                    <button onclick="divulgarOfertasWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-400 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 border border-emerald-500/30 shrink-0 transition-all">
-                        <i class="fa-brands fa-whatsapp text-base"></i> Gerar Ofertas no Whats
+                    <!-- NOVO BOTÃO SUBST. WHATSAPP: BIPAR / ENTRADA DE LOTE -->
+                    <button onclick="navegar('bipar')" class="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-300 text-zinc-950 font-black py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 shrink-0 transition-all">
+                        <i class="fa-solid fa-plus-circle text-base"></i> ➕ Bipar / Entrada de Lote
                     </button>
                 </div>
 
@@ -258,24 +255,8 @@
                 <input type="text" id="busca-produtos" onkeyup="renderizarProdutos()" placeholder="Buscar produto por nome, categoria ou código EAN..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
             </div>
 
-            <!-- CARDS DE PRODUTOS -->
+            <!-- CARDS DE PRODUTOS (5 COLUNAS NO PC WIDESCREEN) -->
             <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
-        </section>
-
-        <!-- ================= SEÇÃO 4: REGISTRO DE PERDAS ================= -->
-        <section id="secao-perdas" class="secao-conteudo hidden space-y-4">
-            <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <span class="text-xs font-bold text-zinc-400 uppercase block">Prejuízo Acumulado por Vencimentos</span>
-                    <strong class="text-3xl font-black text-rose-400 mt-1 block" id="perdas-total-txt">R$ 0,00</strong>
-                </div>
-                <button onclick="abrirModalPerda()" class="bg-rose-600 hover:bg-rose-500 active:bg-rose-400 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-rose-950/40">
-                    <i class="fa-solid fa-dumpster"></i> Registar Descarte por Perda
-                </button>
-            </div>
-
-            <!-- CARDS DE PERDAS -->
-            <div id="lista-perdas-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
         </section>
 
     </main>
@@ -298,14 +279,52 @@
             <i class="fa-solid fa-boxes-stacked text-lg"></i>
             <span class="text-[10px]">Produtos</span>
         </button>
-
-        <button onclick="navegar('perdas')" id="nav-perdas" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium transition-all">
-            <i class="fa-solid fa-dumpster text-lg"></i>
-            <span class="text-[10px]">Perdas</span>
-        </button>
     </nav>
 
     <!-- ================= MODAIS ================= -->
+
+    <!-- MODAL EDITAR LOTE -->
+    <div id="modal-editar-lote" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-sm md:text-base font-black text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar Lote & Validade
+                </h3>
+                <button onclick="fecharModalEditarLote()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="salvarLoteEdicao(event)" class="space-y-3 text-xs md:text-sm">
+                <input type="hidden" id="edit-lote-id">
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">Produto</label>
+                    <input type="text" id="edit-lote-prod-nome" disabled class="w-full bg-zinc-800/60 border border-zinc-700/60 rounded-xl p-3 text-zinc-300 font-bold focus:outline-none cursor-not-allowed">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Nº Lote</label>
+                        <input type="text" id="edit-lote-num" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-amber-400 font-black uppercase mb-1">Validade *</label>
+                        <input type="date" id="edit-lote-val" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-3 text-white font-bold focus:outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Quantidade *</label>
+                        <input type="number" id="edit-lote-qtd" required min="0" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Localização</label>
+                        <input type="text" id="edit-lote-local" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalEditarLote()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-amber-400 text-zinc-950 font-bold rounded-xl">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- MODAL LEITOR CÂMERA -->
     <div id="modal-camera" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] hidden flex flex-col items-center justify-center p-4">
@@ -319,7 +338,7 @@
         </div>
     </div>
 
-    <!-- MODAL CADASTRO PRODUTO AVULSO -->
+    <!-- MODAL CADASTRO / EDIÇÃO DE PRODUTO -->
     <div id="modal-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -374,40 +393,6 @@
                 <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
                     <button type="button" onclick="fecharModalProduto()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
                     <button type="submit" class="px-5 py-2.5 bg-emerald-500 text-zinc-950 font-bold rounded-xl">Salvar Produto</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL BAIXA DE PERDA -->
-    <div id="modal-perda" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h3 class="text-sm md:text-base font-black text-rose-400 flex items-center gap-2"><i class="fa-solid fa-dumpster"></i> Registrar Descarte</h3>
-                <button onclick="fecharModalPerda()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form onsubmit="salvarPerdaForm(event)" class="space-y-3 text-xs md:text-sm">
-                <div>
-                    <label class="block text-rose-400 font-bold mb-1">Lote Avariado / Vencido *</label>
-                    <input type="text" id="f-perda-lote-busca" list="dl-perdas-lotes" onchange="selecionarLotePerdaForm(this.value)" placeholder="Buscar lote..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                    <datalist id="dl-perdas-lotes"></datalist>
-                    <input type="hidden" id="f-perda-lote-id">
-                </div>
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Quantidade Descartada *</label>
-                    <input type="number" id="f-perda-qtd" required min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Motivo</label>
-                    <select id="f-perda-motivo" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                        <option value="Vencimento">Vencimento Expirado</option>
-                        <option value="Avaria / Estragado">Embalagem Avariada</option>
-                        <option value="Consumo Interno">Consumo Interno</option>
-                    </select>
-                </div>
-                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
-                    <button type="button" onclick="fecharModalPerda()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl">Confirmar Perda</button>
                 </div>
             </form>
         </div>
@@ -508,7 +493,6 @@
         function atualizarInterface() {
             renderizarFarol();
             renderizarProdutos();
-            renderizarPerdas();
             popularDatalists();
         }
 
@@ -553,7 +537,7 @@
             const hojeDate = new Date();
             hojeDate.setHours(0,0,0,0);
 
-            let lotesValidos = appData.lotes.filter(l => parseFloat(l.quantidade || 0) > 0);
+            let lotesValidos = appData.lotes.filter(l => parseFloat(l.quantidade || 0) >= 0);
 
             let cCritico = 0;
             let cAtencao = 0;
@@ -561,7 +545,7 @@
             let cVencidos = 0;
 
             if (lotesValidos.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum lote com quantidade disponível no estoque.</div>`;
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum lote cadastrado no estoque.</div>`;
                 document.getElementById('kpi-critico').innerText = '0';
                 document.getElementById('kpi-atencao').innerText = '0';
                 document.getElementById('kpi-ok').innerText = '0';
@@ -636,9 +620,14 @@
 
                     <div class="flex justify-between items-center text-xs pt-2 border-t border-zinc-800/80">
                         <span class="text-zinc-400 text-xs">Qtd: <strong class="text-white font-bold text-sm">${lote.quantidade} ${prod ? prod.unidade : 'Un'}</strong></span>
-                        <button onclick="abrirModalPerdaComLote(${lote.id})" class="bg-rose-950/60 hover:bg-rose-900 active:bg-rose-800 text-rose-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-800/50 transition-all">
-                            <i class="fa-solid fa-trash"></i> Descartar
-                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="abrirModalEditarLote(${lote.id})" class="bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-zinc-950 px-2.5 py-1.5 rounded-xl text-xs font-bold border border-amber-500/30 transition-all" title="Editar Lote">
+                                <i class="fa-solid fa-pen"></i> Editar
+                            </button>
+                            <button onclick="excluirLote(${lote.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 px-2.5 py-1.5 rounded-xl text-xs font-bold border border-rose-800/50 transition-all" title="Excluir Lote">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -660,39 +649,6 @@
             renderizarFarol();
         }
 
-        function divulgarOfertasWhatsApp() {
-            const hojeDate = new Date();
-            hojeDate.setHours(0,0,0,0);
-
-            const lotesAtençao = appData.lotes.filter(l => {
-                if (parseFloat(l.quantidade || 0) <= 0) return false;
-                const valParts = l.validade.split('-');
-                const valDate = new Date(valParts[0], valParts[1] - 1, valParts[2]);
-                const diffDias = Math.ceil((valDate - hojeDate) / (1000 * 60 * 60 * 24));
-                return diffDias > 0 && diffDias <= 30;
-            });
-
-            if (lotesAtençao.length === 0) {
-                mostrarToast("Nenhum item vencendo nos próximos 30 dias!", "alerta");
-                return;
-            }
-
-            let msg = `🛒 *OFERTAS DE LIQUIDAÇÃO - MERCADINHO MARQUES* 🏷️✨\n\n` +
-                      `Aproveite nossos descontos especiais de liquidação:\n\n`;
-
-            lotesAtençao.forEach(l => {
-                const prod = appData.produtos.find(p => p.id == l.produto_id);
-                if (prod) {
-                    const precoOrig = parseFloat(prod.preco_venda || 0);
-                    const precoPromo = precoOrig * 0.70; // 30% OFF
-                    msg += `• *${prod.nome}*: De ~R$ ${precoOrig.toFixed(2)}~ por *R$ ${precoPromo.toFixed(2)}* 🔥\n`;
-                }
-            });
-
-            msg += `\n📍 *Mercadinho Marques* - Venha garantir o seu antes que acabe!`;
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
         // ================= BUSCA E ENTRADA UNIFICADA INTELIGENTE =================
         function popularDatalists() {
             const dlUnificado = document.getElementById('dl-produtos-unificado');
@@ -702,17 +658,6 @@
                     const opt = document.createElement('option');
                     opt.value = `${p.nome} ${p.ean ? `[EAN:${p.ean}]` : ''} [ID:${p.id}]`;
                     dlUnificado.appendChild(opt);
-                });
-            }
-
-            const dlPerda = document.getElementById('dl-perdas-lotes');
-            if (dlPerda) {
-                dlPerda.innerHTML = '';
-                appData.lotes.filter(l => parseFloat(l.quantidade || 0) > 0).forEach(l => {
-                    const prod = appData.produtos.find(p => p.id == l.produto_id);
-                    const opt = document.createElement('option');
-                    opt.value = `${prod ? prod.nome : 'Produto'} [Val:${l.validade}] [Qtd:${l.quantidade}] [ID:${l.id}]`;
-                    dlPerda.appendChild(opt);
                 });
             }
         }
@@ -864,6 +809,66 @@
             }
         }
 
+        // ================= EDIÇÃO E EXCLUSÃO DE LOTE =================
+        function abrirModalEditarLote(loteId) {
+            const lote = appData.lotes.find(l => l.id == loteId);
+            if (!lote) return;
+
+            const prod = appData.produtos.find(p => p.id == lote.produto_id);
+
+            document.getElementById('edit-lote-id').value = lote.id;
+            document.getElementById('edit-lote-prod-nome').value = prod ? prod.nome : 'Produto Desconhecido';
+            document.getElementById('edit-lote-num').value = lote.numero_lote || '';
+            document.getElementById('edit-lote-val').value = lote.validade || '';
+            document.getElementById('edit-lote-qtd').value = lote.quantidade || 0;
+            document.getElementById('edit-lote-local').value = lote.localizacao || '';
+
+            document.getElementById('modal-editar-lote').classList.remove('hidden');
+        }
+
+        function fecharModalEditarLote() {
+            document.getElementById('modal-editar-lote').classList.add('hidden');
+        }
+
+        async function salvarLoteEdicao(e) {
+            e.preventDefault();
+            const loteId = document.getElementById('edit-lote-id').value;
+            const validade = document.getElementById('edit-lote-val').value;
+            const qtd = parseNum(document.getElementById('edit-lote-qtd').value);
+
+            if (!loteId) return;
+
+            const loteData = {
+                numero_lote: document.getElementById('edit-lote-num').value.trim() || 'LT-01',
+                validade: validade,
+                quantidade: qtd,
+                localizacao: document.getElementById('edit-lote-local').value.trim() || 'Gôndola'
+            };
+
+            const { error } = await supabaseClient.from('mercearia_lotes').update(loteData).eq('id', loteId);
+
+            if (!error) {
+                mostrarToast("Lote alterado com sucesso!");
+                fecharModalEditarLote();
+                await carregarDados();
+            } else {
+                alert(`Erro ao alterar lote:\n\n${error.message}`);
+                mostrarToast(`Erro: ${error.message}`, "erro");
+            }
+        }
+
+        async function excluirLote(loteId) {
+            if (confirm("Tem certeza que deseja apagar este lote do sistema?")) {
+                const { error } = await supabaseClient.from('mercearia_lotes').delete().eq('id', loteId);
+                if (!error) {
+                    mostrarToast("Lote apagado com sucesso!");
+                    await carregarDados();
+                } else {
+                    alert(`Erro ao apagar lote:\n\n${error.message}`);
+                }
+            }
+        }
+
         // ================= CATÁLOGO DE PRODUTOS =================
         function renderizarProdutos() {
             const container = document.getElementById('lista-produtos-cards');
@@ -897,13 +902,22 @@
 
                     <div class="flex justify-between items-center text-xs bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80">
                         <div>
-                            <span class="text-[10px] text-zinc-500 block font-bold uppercase">Estoque Disponível</span>
+                            <span class="text-[10px] text-zinc-500 block font-bold uppercase">Estoque Total</span>
                             <strong class="text-white font-bold text-sm">${totalQtd} ${escapeAttr(p.unidade || 'Un')}</strong>
                         </div>
                         <div class="text-right">
                             <span class="text-[10px] text-zinc-500 block font-bold uppercase">Preço Venda</span>
                             <strong class="text-emerald-400 font-bold text-sm">R$ ${parseFloat(p.preco_venda || 0).toFixed(2)}</strong>
                         </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2 border-t border-zinc-800">
+                        <button onclick="abrirModalEditarProduto(${p.id})" class="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 px-3 py-1.5 rounded-xl text-xs font-bold border border-emerald-500/30 transition-all">
+                            <i class="fa-solid fa-pen"></i> Editar Produto
+                        </button>
+                        <button onclick="excluirProduto(${p.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-800/50 transition-all">
+                            <i class="fa-solid fa-trash"></i> Apagar
+                        </button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -916,6 +930,23 @@
             document.getElementById('f-prod-nome').value = '';
             document.getElementById('f-prod-custo').value = '';
             document.getElementById('f-prod-venda').value = '';
+            document.getElementById('prod-modal-titulo').innerText = "Novo Produto Avulso";
+            document.getElementById('modal-produto').classList.remove('hidden');
+        }
+
+        function abrirModalEditarProduto(prodId) {
+            const p = appData.produtos.find(x => x.id == prodId);
+            if (!p) return;
+
+            document.getElementById('f-prod-id').value = p.id;
+            document.getElementById('f-prod-ean').value = p.ean || '';
+            document.getElementById('f-prod-nome').value = p.nome || '';
+            document.getElementById('f-prod-cat').value = p.categoria || 'Mercearia';
+            document.getElementById('f-prod-uni').value = p.unidade || 'Un';
+            document.getElementById('f-prod-custo').value = p.preco_custo || 0;
+            document.getElementById('f-prod-venda').value = p.preco_venda || 0;
+
+            document.getElementById('prod-modal-titulo').innerText = "Editar Produto";
             document.getElementById('modal-produto').classList.remove('hidden');
         }
 
@@ -923,6 +954,7 @@
 
         async function salvarProdutoForm(e) {
             e.preventDefault();
+            const prodId = document.getElementById('f-prod-id').value;
             const nome = document.getElementById('f-prod-nome').value.trim();
             if (!nome) return;
 
@@ -935,118 +967,32 @@
                 preco_venda: parseNum(document.getElementById('f-prod-venda').value)
             };
 
-            const { error } = await supabaseClient.from('mercearia_produtos').insert([pData]);
+            let res;
+            if (prodId) {
+                res = await supabaseClient.from('mercearia_produtos').update(pData).eq('id', prodId);
+            } else {
+                res = await supabaseClient.from('mercearia_produtos').insert([pData]);
+            }
 
-            if (!error) {
-                mostrarToast("Produto cadastrado com sucesso!");
+            if (!res.error) {
+                mostrarToast(prodId ? "Produto alterado!" : "Produto cadastrado!");
                 fecharModalProduto();
                 await carregarDados();
             } else {
-                alert(`Erro ao cadastrar produto:\n\n${error.message}`);
-                mostrarToast(`Erro: ${error.message}`, "erro");
+                alert(`Erro ao salvar produto:\n\n${res.error.message}`);
+                mostrarToast(`Erro: ${res.error.message}`, "erro");
             }
         }
 
-        // ================= REGISTRO DE PERDAS =================
-        function renderizarPerdas() {
-            const container = document.getElementById('lista-perdas-cards');
-            if (!container) return;
-            container.innerHTML = '';
-
-            let totalPrejuizio = 0;
-
-            if (appData.perdas.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum registro de descarte efetuado.</div>`;
-                document.getElementById('perdas-total-txt').innerText = 'R$ 0,00';
-                return;
-            }
-
-            appData.perdas.forEach(p => {
-                totalPrejuizio += parseFloat(p.prejuizo_total || 0);
-
-                const card = document.createElement('div');
-                card.className = "bg-zinc-900 border border-rose-950/60 p-4 rounded-2xl space-y-2 hover:border-rose-900/80 transition-all";
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <strong class="text-white text-xs md:text-sm font-bold leading-snug">${escapeAttr(p.produto_nome)}</strong>
-                        <span class="text-rose-400 font-black text-sm shrink-0">R$ ${parseFloat(p.prejuizo_total||0).toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs text-zinc-400 bg-zinc-950/60 p-2 rounded-xl border border-zinc-800">
-                        <span>Qtd Descartada: <strong class="text-white font-bold">${p.quantidade} un</strong> (${escapeAttr(p.motivo)})</span>
-                        <span class="text-zinc-500 text-[10px] font-mono">${p.data_descarte}</span>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-
-            document.getElementById('perdas-total-txt').innerText = `R$ ${totalPrejuizio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-        }
-
-        function abrirModalPerda() {
-            document.getElementById('f-perda-lote-id').value = '';
-            document.getElementById('f-perda-lote-busca').value = '';
-            document.getElementById('modal-perda').classList.remove('hidden');
-        }
-
-        function abrirModalPerdaComLote(loteId) {
-            abrirModalPerda();
-            const lote = appData.lotes.find(l => l.id == loteId);
-            if (lote) {
-                const prod = appData.produtos.find(p => p.id == lote.produto_id);
-                document.getElementById('f-perda-lote-id').value = lote.id;
-                document.getElementById('f-perda-lote-busca').value = `${prod ? prod.nome : 'Prod'} [Val:${lote.validade}] [Qtd:${lote.quantidade}] [ID:${lote.id}]`;
-            }
-        }
-
-        function fecharModalPerda() { document.getElementById('modal-perda').classList.add('hidden'); }
-
-        function selecionarLotePerdaForm(val) {
-            if (!val) return;
-            const matchId = val.match(/\[ID:(\d+)\]/);
-            if (matchId && matchId[1]) {
-                document.getElementById('f-perda-lote-id').value = matchId[1];
-            }
-        }
-
-        async function salvarPerdaForm(e) {
-            e.preventDefault();
-            const loteId = document.getElementById('f-perda-lote-id').value;
-            const qtdDescarte = parseNum(document.getElementById('f-perda-qtd').value) || 1;
-            const motivo = document.getElementById('f-perda-motivo').value;
-
-            const lote = appData.lotes.find(l => l.id == loteId);
-            if (!lote) {
-                mostrarToast("Selecione um lote válido!", "erro");
-                return;
-            }
-
-            const prod = appData.produtos.find(p => p.id == lote.produto_id);
-            const custoUnit = prod ? parseFloat(prod.preco_custo || 0) : 0;
-            const prejuizio = qtdDescarte * custoUnit;
-
-            // 1. Abate a quantidade no Lote
-            const novaQtd = Math.max(0, parseFloat(lote.quantidade || 0) - qtdDescarte);
-            await supabaseClient.from('mercearia_lotes').update({ quantidade: novaQtd }).eq('id', lote.id);
-
-            // 2. Insere registro de Perda
-            const perdaData = {
-                lote_id: lote.id,
-                produto_nome: prod ? prod.nome : 'Produto',
-                quantidade: qtdDescarte,
-                prejuizo_total: prejuizio,
-                motivo: motivo,
-                data_descarte: new Date().toISOString().split('T')[0]
-            };
-
-            const { error } = await supabaseClient.from('mercearia_perdas').insert([perdaData]);
-
-            if (!error) {
-                fecharModalPerda();
-                mostrarToast(`Descarte registrado! Prejuízo: R$ ${prejuizio.toFixed(2)}`);
-                await carregarDados();
-            } else {
-                alert(`Erro ao registrar perda:\n\n${error.message}`);
-                mostrarToast(`Erro: ${error.message}`, "erro");
+        async function excluirProduto(prodId) {
+            if (confirm("Tem certeza que deseja apagar este produto e TODOS os seus lotes?")) {
+                const { error } = await supabaseClient.from('mercearia_produtos').delete().eq('id', prodId);
+                if (!error) {
+                    mostrarToast("Produto apagado com sucesso!");
+                    await carregarDados();
+                } else {
+                    alert(`Erro ao apagar produto:\n\n${error.message}`);
+                }
             }
         }
 
