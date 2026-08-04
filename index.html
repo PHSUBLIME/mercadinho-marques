@@ -23,7 +23,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col justify-between">
+<body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col justify-between" onclick="desbloquearAudioNoClique()" ontouchstart="desbloquearAudioNoClique()">
 
     <!-- CABEÇALHO DUAL (EXPANDIDO PARA 100% DA TELA) -->
     <header class="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-40 shadow-lg w-full">
@@ -138,7 +138,9 @@
                         </h2>
                         <p class="text-xs text-zinc-400 mt-0.5">Bipe o produto. Se já existir, o sistema reconhece. Se for novo, cadastra tudo junto!</p>
                     </div>
-                    <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-xl font-bold">1 Clique</span>
+                    <button type="button" onclick="tocarSomBipe()" class="text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/40 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-volume-high"></i> Testar Som
+                    </button>
                 </div>
 
                 <!-- CAIXA DE STATUS DO RECONHECIMENTO DO PRODUTO -->
@@ -168,7 +170,7 @@
                         </div>
                     </div>
 
-                    <!-- PASSO 2: DADOS COMPLEMENTARES DO PRODUTO (PREENCHE SOZINHO SE JÁ EXISTIR) -->
+                    <!-- PASSO 2: DADOS COMPLEMENTARES DO PRODUTO -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div>
                             <label class="block text-zinc-400 font-semibold mb-1">Categoria</label>
@@ -192,15 +194,15 @@
                         </div>
                         <div>
                             <label class="block text-zinc-400 font-semibold mb-1">Preço Custo (R$)</label>
-                            <input type="number" step="0.01" id="u-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
+                            <input type="text" id="u-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-emerald-400 font-semibold mb-1">Preço Venda (R$)</label>
-                            <input type="number" step="0.01" id="u-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-emerald-400 font-bold focus:outline-none">
+                            <input type="text" id="u-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-emerald-400 font-bold focus:outline-none">
                         </div>
                     </div>
 
-                    <!-- PASSO 3: DADOS DO LOTE E DA VALIDADE (A PARTE MAIS IMPORTANTE) -->
+                    <!-- PASSO 3: DADOS DO LOTE E DA VALIDADE -->
                     <div class="p-4 bg-zinc-950/80 border border-zinc-800 rounded-xl space-y-3">
                         <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block border-b border-zinc-800 pb-2">
                             <i class="fa-solid fa-calendar-day"></i> Informações da Validade & Quantidade do Lote
@@ -256,7 +258,7 @@
                 <input type="text" id="busca-produtos" onkeyup="renderizarProdutos()" placeholder="Buscar produto por nome, categoria ou código EAN..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
             </div>
 
-            <!-- CARDS DE PRODUTOS (5 COLUNAS NO PC WIDESCREEN) -->
+            <!-- CARDS DE PRODUTOS -->
             <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
         </section>
 
@@ -272,7 +274,7 @@
                 </button>
             </div>
 
-            <!-- CARDS DE PERDAS (5 COLUNAS NO PC WIDESCREEN) -->
+            <!-- CARDS DE PERDAS -->
             <div id="lista-perdas-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
         </section>
 
@@ -362,11 +364,11 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-zinc-400 font-semibold mb-1">Preço Custo (R$)</label>
-                        <input type="number" step="0.01" id="f-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
+                        <input type="text" id="f-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-emerald-400 font-semibold mb-1">Preço Venda (R$)</label>
-                        <input type="number" step="0.01" id="f-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-emerald-400 font-bold focus:outline-none">
+                        <input type="text" id="f-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-emerald-400 font-bold focus:outline-none">
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
@@ -405,7 +407,7 @@
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
                     <button type="button" onclick="fecharModalPerda()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2.5 bg-rose-600 text-white font-bold rounded-xl">Confirmar Perda</button>
+                    <button type="submit" class="px-4 py-2.5 bg-rose-600 text-white font-bold rounded-xl">Confirmar Perda</button>
                 </div>
             </form>
         </div>
@@ -435,20 +437,47 @@
         let html5QrCode = null;
         let destinoScanner = null;
 
-        // BIPE DE SOM REAL
+        // BIPE DE SOM REAL - MOTOR DE ÁUDIO
+        let audioCtx = null;
+
+        function desbloquearAudioNoClique() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
         function tocarSomBipe() {
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                desbloquearAudioNoClique();
+                if (!audioCtx) return;
+
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
+
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(1200, audioCtx.currentTime); // Som agudo 1200Hz
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(1400, audioCtx.currentTime); // Som agudo 1400Hz
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
+
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.12); // Duração de 120ms
-            } catch(e) {}
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch(e) {
+                console.error("Erro no áudio:", e);
+            }
+        }
+
+        // CONVERSOR SEGURO DE NÚMEROS (ACEITA VÍRGULA E PONTO)
+        function parseNum(val) {
+            if (!val) return 0;
+            const clean = String(val).replace(',', '.').trim();
+            const num = parseFloat(clean);
+            return isNaN(num) ? 0 : num;
         }
 
         // CARREGAR DADOS DO SUPABASE
@@ -741,71 +770,97 @@
         }
 
         async function salvarEntradaUnificada(e) {
-            e.preventDefault();
+            if (e && e.preventDefault) e.preventDefault();
+
             let prodId = document.getElementById('u-prod-id').value;
             const ean = document.getElementById('u-prod-ean').value.trim();
             const nome = document.getElementById('u-prod-nome').value.trim();
             const validade = document.getElementById('u-lote-val').value;
-            const qtd = parseFloat(document.getElementById('u-lote-qtd').value || 1);
+            const qtd = parseNum(document.getElementById('u-lote-qtd').value) || 1;
 
             if (!nome) {
                 mostrarToast("Digite o nome do produto!", "erro");
+                document.getElementById('u-prod-nome').focus();
                 return;
             }
 
             if (!validade) {
                 mostrarToast("Selecione a data de validade!", "erro");
+                document.getElementById('u-lote-val').focus();
                 return;
             }
 
-            // 1. Se o produto for NOVO (não tem ID ainda), cadastra em mercearia_produtos
-            if (!prodId) {
-                const pData = {
-                    ean: ean,
-                    nome: nome,
-                    categoria: document.getElementById('u-prod-cat').value,
-                    unidade: document.getElementById('u-prod-uni').value,
-                    preco_custo: parseFloat(document.getElementById('u-prod-custo').value || 0),
-                    preco_venda: parseFloat(document.getElementById('u-prod-venda').value || 0)
-                };
+            try {
+                // 1. Se não tem ID, verifica na memória local se já existe antes de inserir
+                if (!prodId) {
+                    let prodExistente = appData.produtos.find(p => (ean && p.ean === ean) || p.nome.toLowerCase() === nome.toLowerCase());
 
-                const { data: newProd, error: errP } = await supabaseClient.from('mercearia_produtos').insert([pData]).select();
+                    if (prodExistente) {
+                        prodId = prodExistente.id;
+                    } else {
+                        // Insere produto novo em mercearia_produtos
+                        const pData = {
+                            ean: ean || null,
+                            nome: nome,
+                            categoria: document.getElementById('u-prod-cat').value || 'Mercearia',
+                            unidade: document.getElementById('u-prod-uni').value || 'Un',
+                            preco_custo: parseNum(document.getElementById('u-prod-custo').value),
+                            preco_venda: parseNum(document.getElementById('u-prod-venda').value)
+                        };
 
-                if (errP) {
-                    mostrarToast(`Erro ao cadastrar produto: ${errP.message}`, "erro");
+                        const { data: newProd, error: errP } = await supabaseClient.from('mercearia_produtos').insert([pData]).select();
+
+                        if (errP) {
+                            console.error("Erro Supabase Produtos:", errP);
+                            alert(`Erro ao cadastrar produto no Supabase:\n\n${errP.message}\n${errP.details || ''}`);
+                            mostrarToast(`Erro produto: ${errP.message}`, "erro");
+                            return;
+                        }
+
+                        if (newProd && newProd.length > 0) {
+                            prodId = newProd[0].id;
+                        }
+                    }
+                } else {
+                    // Atualiza preços se foram modificados
+                    await supabaseClient.from('mercearia_produtos').update({
+                        preco_custo: parseNum(document.getElementById('u-prod-custo').value),
+                        preco_venda: parseNum(document.getElementById('u-prod-venda').value)
+                    }).eq('id', prodId);
+                }
+
+                if (!prodId) {
+                    mostrarToast("Falha ao identificar o ID do produto.", "erro");
                     return;
                 }
 
-                if (newProd && newProd.length > 0) {
-                    prodId = newProd[0].id;
+                // 2. Insere lote em mercearia_lotes
+                const loteData = {
+                    produto_id: parseInt(prodId),
+                    numero_lote: document.getElementById('u-lote-num').value.trim() || 'LT-01',
+                    validade: validade,
+                    quantidade: qtd,
+                    localizacao: document.getElementById('u-lote-local').value.trim() || 'Gôndola'
+                };
+
+                const { error: errL } = await supabaseClient.from('mercearia_lotes').insert([loteData]);
+
+                if (errL) {
+                    console.error("Erro Supabase Lotes:", errL);
+                    alert(`Erro ao cadastrar lote no Supabase:\n\n${errL.message}\n${errL.details || ''}`);
+                    mostrarToast(`Erro lote: ${errL.message}`, "erro");
+                    return;
                 }
-            } else {
-                // Atualiza o preço se foi alterado
-                await supabaseClient.from('mercearia_produtos').update({
-                    preco_custo: parseFloat(document.getElementById('u-prod-custo').value || 0),
-                    preco_venda: parseFloat(document.getElementById('u-prod-venda').value || 0)
-                }).eq('id', prodId);
-            }
 
-            // 2. Insere o LOTE em mercearia_lotes
-            const loteData = {
-                produto_id: parseInt(prodId),
-                numero_lote: document.getElementById('u-lote-num').value.trim() || 'LT-01',
-                validade: validade,
-                quantidade: qtd,
-                localizacao: document.getElementById('u-lote-local').value.trim() || 'Gôndola'
-            };
-
-            const { error: errL } = await supabaseClient.from('mercearia_lotes').insert([loteData]);
-
-            if (!errL) {
                 tocarSomBipe();
                 mostrarToast(`Sucesso! Lote de "${nome}" registrado!`);
                 limparFormUnificado();
                 await carregarDados();
                 navegar('farol');
-            } else {
-                mostrarToast(`Erro ao salvar lote: ${errL.message}`, "erro");
+
+            } catch (errGeral) {
+                console.error("Erro geral no salvamento:", errGeral);
+                alert(`Erro inesperado ao salvar:\n\n${errGeral.message || errGeral}`);
             }
         }
 
@@ -818,7 +873,7 @@
             const busca = (document.getElementById('busca-produtos')?.value || '').toLowerCase();
 
             if (appData.produtos.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum produto cadastrado. Clique em "+ Novo Produto".</div>`;
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum produto cadastrado. Clique em "+ Novo Produto Avulso".</div>`;
                 return;
             }
 
@@ -872,12 +927,12 @@
             if (!nome) return;
 
             const pData = {
-                ean: document.getElementById('f-prod-ean').value.trim(),
+                ean: document.getElementById('f-prod-ean').value.trim() || null,
                 nome: nome,
                 categoria: document.getElementById('f-prod-cat').value,
                 unidade: document.getElementById('f-prod-uni').value,
-                preco_custo: parseFloat(document.getElementById('f-prod-custo').value || 0),
-                preco_venda: parseFloat(document.getElementById('f-prod-venda').value || 0)
+                preco_custo: parseNum(document.getElementById('f-prod-custo').value),
+                preco_venda: parseNum(document.getElementById('f-prod-venda').value)
             };
 
             const { error } = await supabaseClient.from('mercearia_produtos').insert([pData]);
@@ -887,6 +942,7 @@
                 fecharModalProduto();
                 await carregarDados();
             } else {
+                alert(`Erro ao cadastrar produto:\n\n${error.message}`);
                 mostrarToast(`Erro: ${error.message}`, "erro");
             }
         }
@@ -955,7 +1011,7 @@
         async function salvarPerdaForm(e) {
             e.preventDefault();
             const loteId = document.getElementById('f-perda-lote-id').value;
-            const qtdDescarte = parseFloat(document.getElementById('f-perda-qtd').value || 1);
+            const qtdDescarte = parseNum(document.getElementById('f-perda-qtd').value) || 1;
             const motivo = document.getElementById('f-perda-motivo').value;
 
             const lote = appData.lotes.find(l => l.id == loteId);
@@ -989,6 +1045,7 @@
                 mostrarToast(`Descarte registrado! Prejuízo: R$ ${prejuizio.toFixed(2)}`);
                 await carregarDados();
             } else {
+                alert(`Erro ao registrar perda:\n\n${error.message}`);
                 mostrarToast(`Erro: ${error.message}`, "erro");
             }
         }
@@ -1007,6 +1064,7 @@
                 { fps: 10, qrbox: { width: 220, height: 140 } },
                 (codigoLido) => {
                     fecharCameraScanner();
+                    tocarSomBipe();
                     if (destinoScanner === 'prod') {
                         document.getElementById('f-prod-ean').value = codigoLido;
                     } else if (destinoScanner === 'unificado') {
