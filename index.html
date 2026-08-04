@@ -25,9 +25,9 @@
 </head>
 <body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <!-- CABEÇALHO DUAL (PC + MOBILE) -->
-    <header class="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-40 shadow-lg">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <!-- CABEÇALHO DUAL (EXPANDIDO PARA 100% DA TELA) -->
+    <header class="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-40 shadow-lg w-full">
+        <div class="w-full px-2 md:px-6 flex justify-between items-center">
             <!-- LOGO -->
             <div class="flex items-center gap-3 cursor-pointer" onclick="navegar('farol')">
                 <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-xl shrink-0">
@@ -45,7 +45,7 @@
                     <i class="fa-solid fa-traffic-light"></i> Farol de Validade
                 </button>
                 <button onclick="navegar('bipar')" id="pc-nav-bipar" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-plus-circle text-amber-400"></i> Bipar / Entrar Lote
+                    <i class="fa-solid fa-plus-circle text-amber-400"></i> Entrada Rápida (Produto + Lote)
                 </button>
                 <button onclick="navegar('produtos')" id="pc-nav-produtos" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
                     <i class="fa-solid fa-boxes-stacked text-emerald-400"></i> Catálogo Produtos
@@ -65,8 +65,8 @@
         </div>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL (EXPANDE NO PC, EXPANDE NO CELULAR) -->
-    <main class="flex-1 p-4 md:p-6 pb-28 max-w-7xl mx-auto w-full space-y-6">
+    <!-- CONTEÚDO PRINCIPAL (100% LARGURA TOTAL NO PC) -->
+    <main class="flex-1 p-4 md:p-6 pb-28 w-full px-3 md:px-8 space-y-6">
 
         <!-- ================= SEÇÃO 1: FAROL DE VALIDADES ================= -->
         <section id="secao-farol" class="secao-conteudo space-y-6">
@@ -124,61 +124,116 @@
                 </div>
             </div>
 
-            <!-- LISTA DE CARDS DE LOTES (1 COLUNA NO CELULAR, 3 COLUNAS NO PC) -->
-            <div id="lista-farol-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
+            <!-- LISTA DE CARDS DE LOTES (1 COLUNA NO CELULAR, ATÉ 5 COLUNAS NO PC) -->
+            <div id="lista-farol-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
         </section>
 
-        <!-- ================= SEÇÃO 2: BIPAR / ENTRADA DE LOTE ================= -->
+        <!-- ================= SEÇÃO 2: ENTRADA UNIFICADA (PRODUTO + LOTE EM 1 PASSO) ================= -->
         <section id="secao-bipar" class="secao-conteudo hidden space-y-4">
-            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-2xl mx-auto space-y-5 shadow-2xl">
+            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-5 shadow-2xl">
                 <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
                     <div>
                         <h2 class="text-base md:text-lg font-black text-amber-400 flex items-center gap-2">
-                            <i class="fa-solid fa-box-archive"></i> Nova Entrada de Lote
+                            <i class="fa-solid fa-barcode"></i> Entrada Unificada Inteligente
                         </h2>
-                        <p class="text-xs text-zinc-400 mt-0.5">Cadastre o lote e a validade para alimentar o Farol</p>
+                        <p class="text-xs text-zinc-400 mt-0.5">Bipe o produto. Se já existir, o sistema reconhece. Se for novo, cadastra tudo junto!</p>
                     </div>
-                    <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-xl font-bold">Validade</span>
+                    <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-xl font-bold">1 Clique</span>
                 </div>
 
-                <form onsubmit="salvarLoteForm(event)" class="space-y-4 text-xs md:text-sm">
-                    <div>
-                        <label class="block text-zinc-400 font-bold mb-1">Buscar ou Bipar Produto *</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="lote-prod-busca" list="dl-produtos-lote" onchange="selecionarProdutoFormLote(this.value)" placeholder="Digite nome ou EAN do produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none focus:border-amber-400">
-                            <datalist id="dl-produtos-lote"></datalist>
-                            <button type="button" onclick="abrirCameraScanner('lote')" class="bg-amber-500 hover:bg-amber-400 active:bg-amber-300 text-zinc-950 font-black px-4 py-3 rounded-xl transition-all shrink-0 flex items-center gap-1.5">
-                                <i class="fa-solid fa-camera"></i> 📷
-                            </button>
-                        </div>
-                        <input type="hidden" id="lote-prod-id">
-                    </div>
+                <!-- CAIXA DE STATUS DO RECONHECIMENTO DO PRODUTO -->
+                <div id="status-prod-box" class="p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs flex items-center gap-2.5">
+                    <span id="status-prod-txt" class="text-zinc-400 font-medium">Bipe o código EAN abaixo ou comece a digitar o nome do produto...</span>
+                </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                        <div>
-                            <label class="block text-zinc-400 font-semibold mb-1">Nº do Lote</label>
-                            <input type="text" id="lote-num" placeholder="Ex: LT-2026-01" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-amber-400 font-black uppercase mb-1">Data de Validade *</label>
-                            <input type="date" id="lote-val" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-amber-400">
-                        </div>
-                    </div>
+                <form onsubmit="salvarEntradaUnificada(event)" class="space-y-4 text-xs md:text-sm">
+                    <input type="hidden" id="u-prod-id">
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                        <div>
-                            <label class="block text-zinc-400 font-semibold mb-1">Quantidade Recebida *</label>
-                            <input type="number" id="lote-qtd" required min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
+                    <!-- PASSO 1: IDENTIFICAÇÃO DO PRODUTO (EAN / NOME) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="md:col-span-1">
+                            <label class="block text-amber-400 font-bold mb-1">Código EAN (Bipar) *</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="u-prod-ean" oninput="buscarProdutoUnificado(this.value)" placeholder="Bipe o código..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none focus:border-amber-400">
+                                <button type="button" onclick="abrirCameraScanner('unificado')" class="bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black px-4 py-3 rounded-xl shrink-0 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-camera"></i> 📷
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-zinc-400 font-semibold mb-1">Localização na Loja</label>
-                            <input type="text" id="lote-local" placeholder="Ex: Gôndola A3 / Depósito" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+
+                        <div class="md:col-span-2">
+                            <label class="block text-zinc-400 font-bold mb-1">Nome do Produto *</label>
+                            <input type="text" id="u-prod-nome" required list="dl-produtos-unificado" oninput="buscarProdutoUnificado(this.value)" placeholder="Ex: Leite Integral Parmalat 1L" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none focus:border-amber-400">
+                            <datalist id="dl-produtos-unificado"></datalist>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-amber-400 hover:bg-amber-300 active:bg-amber-200 text-zinc-950 font-black py-4 rounded-xl text-sm transition-all shadow-lg shadow-amber-950/30">
-                        REGISTRAR LOTE NO SISTEMA
-                    </button>
+                    <!-- PASSO 2: DADOS COMPLEMENTARES DO PRODUTO (PREENCHE SOZINHO SE JÁ EXISTIR) -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-zinc-400 font-semibold mb-1">Categoria</label>
+                            <select id="u-prod-cat" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                                <option value="Mercearia">Mercearia</option>
+                                <option value="Laticínios">Laticínios</option>
+                                <option value="Bebidas">Bebidas</option>
+                                <option value="Padaria">Padaria</option>
+                                <option value="Limpeza">Limpeza</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-zinc-400 font-semibold mb-1">Unidade</label>
+                            <select id="u-prod-uni" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                                <option value="Un">Unidade (Un)</option>
+                                <option value="Kg">Quilo (Kg)</option>
+                                <option value="L">Litro (L)</option>
+                                <option value="Cx">Caixa (Cx)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-zinc-400 font-semibold mb-1">Preço Custo (R$)</label>
+                            <input type="number" step="0.01" id="u-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-emerald-400 font-semibold mb-1">Preço Venda (R$)</label>
+                            <input type="number" step="0.01" id="u-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-emerald-400 font-bold focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- PASSO 3: DADOS DO LOTE E DA VALIDADE (A PARTE MAIS IMPORTANTE) -->
+                    <div class="p-4 bg-zinc-950/80 border border-zinc-800 rounded-xl space-y-3">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block border-b border-zinc-800 pb-2">
+                            <i class="fa-solid fa-calendar-day"></i> Informações da Validade & Quantidade do Lote
+                        </span>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-zinc-400 font-semibold mb-1">Nº Lote</label>
+                                <input type="text" id="u-lote-num" placeholder="Ex: LT-01" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-amber-400 font-black uppercase mb-1">Validade *</label>
+                                <input type="date" id="u-lote-val" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-amber-400">
+                            </div>
+                            <div>
+                                <label class="block text-zinc-400 font-semibold mb-1">Quantidade *</label>
+                                <input type="number" id="u-lote-qtd" required min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-zinc-400 font-semibold mb-1">Localização</label>
+                                <input type="text" id="u-lote-local" placeholder="Ex: Gôndola A" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="button" onclick="limparFormUnificado()" class="w-1/3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-3.5 rounded-xl text-xs">
+                            Limpar Tela
+                        </button>
+                        <button type="submit" class="w-2/3 bg-amber-400 hover:bg-amber-300 active:bg-amber-200 text-zinc-950 font-black py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-amber-950/30 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check-double"></i> SALVAR TUDO EM 1 CLIQUE
+                        </button>
+                    </div>
                 </form>
             </div>
         </section>
@@ -191,7 +246,7 @@
                     <span class="text-xs text-zinc-400">Produtos cadastrados na mercearia</span>
                 </div>
                 <button onclick="abrirModalProduto()" class="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-300 text-zinc-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/30">
-                    <i class="fa-solid fa-plus"></i> + Novo Produto
+                    <i class="fa-solid fa-plus"></i> + Novo Produto Avulso
                 </button>
             </div>
 
@@ -201,8 +256,8 @@
                 <input type="text" id="busca-produtos" onkeyup="renderizarProdutos()" placeholder="Buscar produto por nome, categoria ou código EAN..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
             </div>
 
-            <!-- CARDS DE PRODUTOS (3 COLUNAS NO PC) -->
-            <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
+            <!-- CARDS DE PRODUTOS (5 COLUNAS NO PC WIDESCREEN) -->
+            <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
         </section>
 
         <!-- ================= SEÇÃO 4: REGISTRO DE PERDAS ================= -->
@@ -217,8 +272,8 @@
                 </button>
             </div>
 
-            <!-- CARDS DE PERDAS (3 COLUNAS NO PC) -->
-            <div id="lista-perdas-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
+            <!-- CARDS DE PERDAS (5 COLUNAS NO PC WIDESCREEN) -->
+            <div id="lista-perdas-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4"></div>
         </section>
 
     </main>
@@ -262,11 +317,11 @@
         </div>
     </div>
 
-    <!-- MODAL CADASTRO PRODUTO -->
+    <!-- MODAL CADASTRO PRODUTO AVULSO -->
     <div id="modal-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h3 class="text-sm md:text-base font-black text-emerald-400" id="prod-modal-titulo">Novo Produto</h3>
+                <h3 class="text-sm md:text-base font-black text-emerald-400" id="prod-modal-titulo">Novo Produto Avulso</h3>
                 <button onclick="fecharModalProduto()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form onsubmit="salvarProdutoForm(event)" class="space-y-3 text-xs md:text-sm">
@@ -380,6 +435,22 @@
         let html5QrCode = null;
         let destinoScanner = null;
 
+        // BIPE DE SOM REAL
+        function tocarSomBipe() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime); // Som agudo 1200Hz
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12); // Duração de 120ms
+            } catch(e) {}
+        }
+
         // CARREGAR DADOS DO SUPABASE
         async function carregarDados() {
             const iconSync = document.getElementById('icon-sync');
@@ -442,7 +513,7 @@
             }
         }
 
-        // ================= FAROL DE VALIDADE (RESPONSIVO) =================
+        // ================= FAROL DE VALIDADE (RESPONSIVO E EXPANDIDO NO PC) =================
         function renderizarFarol() {
             const container = document.getElementById('lista-farol-cards');
             if (!container) return;
@@ -593,15 +664,15 @@
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        // ================= CADASTRO DE LOTE =================
+        // ================= BUSCA E ENTRADA UNIFICADA INTELIGENTE =================
         function popularDatalists() {
-            const dlLote = document.getElementById('dl-produtos-lote');
-            if (dlLote) {
-                dlLote.innerHTML = '';
+            const dlUnificado = document.getElementById('dl-produtos-unificado');
+            if (dlUnificado) {
+                dlUnificado.innerHTML = '';
                 appData.produtos.forEach(p => {
                     const opt = document.createElement('option');
                     opt.value = `${p.nome} ${p.ean ? `[EAN:${p.ean}]` : ''} [ID:${p.id}]`;
-                    dlLote.appendChild(opt);
+                    dlUnificado.appendChild(opt);
                 });
             }
 
@@ -617,52 +688,124 @@
             }
         }
 
-        function selecionarProdutoFormLote(val) {
-            if (!val) return;
-            const matchId = val.match(/\[ID:(\d+)\]/);
-            if (matchId && matchId[1]) {
-                document.getElementById('lote-prod-id').value = matchId[1];
-            } else {
-                const prod = appData.produtos.find(p => p.nome.toLowerCase() === val.toLowerCase() || p.ean === val);
-                if (prod) document.getElementById('lote-prod-id').value = prod.id;
-            }
-        }
-
-        async function salvarLoteForm(e) {
-            e.preventDefault();
-            let prodId = document.getElementById('lote-prod-id').value;
-            const prodInput = document.getElementById('lote-prod-busca').value;
-
-            if (!prodId && prodInput) {
-                selecionarProdutoFormLote(prodInput);
-                prodId = document.getElementById('lote-prod-id').value;
-            }
-
-            if (!prodId) {
-                mostrarToast("Selecione um produto do catálogo!", "erro");
+        function buscarProdutoUnificado(termo) {
+            if (!termo) {
+                document.getElementById('u-prod-id').value = '';
+                document.getElementById('status-prod-box').className = "p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs flex items-center gap-2.5";
+                document.getElementById('status-prod-txt').innerHTML = `<span class="text-zinc-400 font-medium">Bipe o código EAN abaixo ou comece a digitar o nome do produto...</span>`;
                 return;
             }
 
+            termo = termo.trim().toLowerCase();
+
+            let prod = null;
+            const matchId = termo.match(/\[id:(\d+)\]/);
+            if (matchId && matchId[1]) {
+                prod = appData.produtos.find(p => p.id == matchId[1]);
+            }
+
+            if (!prod) {
+                prod = appData.produtos.find(p => (p.ean && p.ean.toLowerCase() === termo) || p.nome.toLowerCase() === termo);
+            }
+
+            if (prod) {
+                tocarSomBipe();
+                document.getElementById('u-prod-id').value = prod.id;
+                document.getElementById('u-prod-ean').value = prod.ean || '';
+                document.getElementById('u-prod-nome').value = prod.nome;
+                document.getElementById('u-prod-cat').value = prod.categoria || 'Mercearia';
+                document.getElementById('u-prod-uni').value = prod.unidade || 'Un';
+                document.getElementById('u-prod-custo').value = prod.preco_custo || '';
+                document.getElementById('u-prod-venda').value = prod.preco_venda || '';
+
+                document.getElementById('status-prod-box').className = "p-3.5 bg-emerald-950/60 border border-emerald-500/50 rounded-xl text-xs flex items-center gap-2.5 shadow-md";
+                document.getElementById('status-prod-txt').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-base"></i> <span class="text-emerald-300 font-bold">Produto Encontrado no Catálogo! Digite apenas a validade e quantidade abaixo.</span>`;
+            } else {
+                document.getElementById('u-prod-id').value = '';
+                document.getElementById('status-prod-box').className = "p-3.5 bg-amber-950/60 border border-amber-500/50 rounded-xl text-xs flex items-center gap-2.5 shadow-md";
+                document.getElementById('status-prod-txt').innerHTML = `<i class="fa-solid fa-plus-circle text-amber-400 text-base"></i> <span class="text-amber-300 font-bold">Novo Produto Detectado! Complete o nome e o preço para cadastrá-lo JUNTO com o lote.</span>`;
+            }
+        }
+
+        function limparFormUnificado() {
+            document.getElementById('u-prod-id').value = '';
+            document.getElementById('u-prod-ean').value = '';
+            document.getElementById('u-prod-nome').value = '';
+            document.getElementById('u-prod-custo').value = '';
+            document.getElementById('u-prod-venda').value = '';
+            document.getElementById('u-lote-num').value = '';
+            document.getElementById('u-lote-val').value = '';
+            document.getElementById('u-lote-qtd').value = '1';
+            document.getElementById('u-lote-local').value = '';
+            buscarProdutoUnificado('');
+        }
+
+        async function salvarEntradaUnificada(e) {
+            e.preventDefault();
+            let prodId = document.getElementById('u-prod-id').value;
+            const ean = document.getElementById('u-prod-ean').value.trim();
+            const nome = document.getElementById('u-prod-nome').value.trim();
+            const validade = document.getElementById('u-lote-val').value;
+            const qtd = parseFloat(document.getElementById('u-lote-qtd').value || 1);
+
+            if (!nome) {
+                mostrarToast("Digite o nome do produto!", "erro");
+                return;
+            }
+
+            if (!validade) {
+                mostrarToast("Selecione a data de validade!", "erro");
+                return;
+            }
+
+            // 1. Se o produto for NOVO (não tem ID ainda), cadastra em mercearia_produtos
+            if (!prodId) {
+                const pData = {
+                    ean: ean,
+                    nome: nome,
+                    categoria: document.getElementById('u-prod-cat').value,
+                    unidade: document.getElementById('u-prod-uni').value,
+                    preco_custo: parseFloat(document.getElementById('u-prod-custo').value || 0),
+                    preco_venda: parseFloat(document.getElementById('u-prod-venda').value || 0)
+                };
+
+                const { data: newProd, error: errP } = await supabaseClient.from('mercearia_produtos').insert([pData]).select();
+
+                if (errP) {
+                    mostrarToast(`Erro ao cadastrar produto: ${errP.message}`, "erro");
+                    return;
+                }
+
+                if (newProd && newProd.length > 0) {
+                    prodId = newProd[0].id;
+                }
+            } else {
+                // Atualiza o preço se foi alterado
+                await supabaseClient.from('mercearia_produtos').update({
+                    preco_custo: parseFloat(document.getElementById('u-prod-custo').value || 0),
+                    preco_venda: parseFloat(document.getElementById('u-prod-venda').value || 0)
+                }).eq('id', prodId);
+            }
+
+            // 2. Insere o LOTE em mercearia_lotes
             const loteData = {
                 produto_id: parseInt(prodId),
-                numero_lote: document.getElementById('lote-num').value.trim() || 'LT-01',
-                validade: document.getElementById('lote-val').value,
-                quantidade: parseFloat(document.getElementById('lote-qtd').value || 1),
-                localizacao: document.getElementById('lote-local').value.trim() || 'Gôndola'
+                numero_lote: document.getElementById('u-lote-num').value.trim() || 'LT-01',
+                validade: validade,
+                quantidade: qtd,
+                localizacao: document.getElementById('u-lote-local').value.trim() || 'Gôndola'
             };
 
-            const { error } = await supabaseClient.from('mercearia_lotes').insert([loteData]);
+            const { error: errL } = await supabaseClient.from('mercearia_lotes').insert([loteData]);
 
-            if (!error) {
-                mostrarToast("Novo lote cadastrado!");
-                document.getElementById('lote-prod-busca').value = '';
-                document.getElementById('lote-prod-id').value = '';
-                document.getElementById('lote-num').value = '';
-                document.getElementById('lote-val').value = '';
+            if (!errL) {
+                tocarSomBipe();
+                mostrarToast(`Sucesso! Lote de "${nome}" registrado!`);
+                limparFormUnificado();
                 await carregarDados();
                 navegar('farol');
             } else {
-                mostrarToast(`Erro ao salvar lote: ${error.message}`, "erro");
+                mostrarToast(`Erro ao salvar lote: ${errL.message}`, "erro");
             }
         }
 
@@ -866,9 +1009,9 @@
                     fecharCameraScanner();
                     if (destinoScanner === 'prod') {
                         document.getElementById('f-prod-ean').value = codigoLido;
-                    } else if (destinoScanner === 'lote') {
-                        document.getElementById('lote-prod-busca').value = codigoLido;
-                        selecionarProdutoFormLote(codigoLido);
+                    } else if (destinoScanner === 'unificado') {
+                        document.getElementById('u-prod-ean').value = codigoLido;
+                        buscarProdutoUnificado(codigoLido);
                     }
                     mostrarToast(`EAN Lido: ${codigoLido}`);
                 },
