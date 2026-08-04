@@ -19,118 +19,164 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #09090b; -webkit-tap-highlight-color: transparent; }
         #reader video { width: 100% !important; border-radius: 1rem; object-fit: cover; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <!-- CABEÇALHO FIXO -->
-    <header class="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-40 flex justify-between items-center shadow-lg">
-        <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-lg">
-                <i class="fa-solid fa-basket-shopping"></i>
+    <!-- CABEÇALHO DUAL (PC + MOBILE) -->
+    <header class="bg-zinc-900 border-b border-zinc-800 p-4 sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <!-- LOGO -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="navegar('farol')">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-lg font-black text-emerald-400 leading-tight tracking-wide">MERCEARIA MARQUES</h1>
+                    <span class="text-[10px] md:text-xs text-zinc-400 font-semibold block">Controle Anti-Vencimento & Estoque</span>
+                </div>
             </div>
-            <div>
-                <h1 class="text-sm font-black text-emerald-400 leading-tight tracking-wide">MERCEARIA MARQUES</h1>
-                <span class="text-[10px] text-zinc-400 font-semibold block">Controle Anti-Vencimento</span>
+
+            <!-- NAVEGAÇÃO DE DESKTOP (SÓ APARECE NO PC) -->
+            <nav class="hidden md:flex items-center gap-2 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
+                <button onclick="navegar('farol')" id="pc-nav-farol" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-traffic-light"></i> Farol de Validade
+                </button>
+                <button onclick="navegar('bipar')" id="pc-nav-bipar" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-plus-circle text-amber-400"></i> Bipar / Entrar Lote
+                </button>
+                <button onclick="navegar('produtos')" id="pc-nav-produtos" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-boxes-stacked text-emerald-400"></i> Catálogo Produtos
+                </button>
+                <button onclick="navegar('perdas')" id="pc-nav-perdas" class="pc-nav-btn px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-dumpster text-rose-400"></i> Relatório de Perdas
+                </button>
+            </nav>
+
+            <!-- BOTAO ATUALIZAR -->
+            <div class="flex items-center gap-2">
+                <button onclick="carregarDados()" class="bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-zinc-200 px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-xs font-bold border border-zinc-700 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-rotate text-emerald-400" id="icon-sync"></i>
+                    <span class="hidden sm:inline">Sincronizar</span>
+                </button>
             </div>
         </div>
-
-        <button onclick="carregarDados()" class="bg-zinc-800 active:bg-zinc-700 text-zinc-300 w-9 h-9 rounded-xl flex items-center justify-center text-xs border border-zinc-700">
-            <i class="fa-solid fa-rotate text-emerald-400" id="icon-sync"></i>
-        </button>
     </header>
 
-    <!-- CONTEÚDO PRINCIPAL (COM ROLAGEM) -->
-    <main class="flex-1 p-4 pb-28 max-w-lg mx-auto w-full space-y-4">
+    <!-- CONTEÚDO PRINCIPAL (EXPANDE NO PC, EXPANDE NO CELULAR) -->
+    <main class="flex-1 p-4 md:p-6 pb-28 max-w-7xl mx-auto w-full space-y-6">
 
         <!-- ================= SEÇÃO 1: FAROL DE VALIDADES ================= -->
-        <section id="secao-farol" class="secao-conteudo space-y-4">
+        <section id="secao-farol" class="secao-conteudo space-y-6">
             
-            <!-- CARDS DE RESUMO KPI -->
-            <div class="grid grid-cols-2 gap-2.5">
-                <div class="bg-rose-950/40 border border-rose-800/60 p-3.5 rounded-2xl">
-                    <span class="text-[10px] font-black uppercase text-rose-400 tracking-wider block">Crítico (&le; 7 Dias)</span>
-                    <strong class="text-2xl font-black text-rose-400 mt-0.5 block" id="kpi-critico">0</strong>
-                    <span class="text-[10px] text-rose-300 font-medium">Urgente em risco</span>
+            <!-- CARDS DE RESUMO KPI (2 NO CELULAR, 4 NO PC) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                <div class="bg-rose-950/30 border border-rose-800/60 p-4 rounded-2xl shadow-lg">
+                    <span class="text-[10px] md:text-xs font-black uppercase text-rose-400 tracking-wider block">Crítico (&le; 7 Dias)</span>
+                    <strong class="text-2xl md:text-3xl font-black text-rose-400 mt-1 block" id="kpi-critico">0</strong>
+                    <span class="text-[10px] md:text-xs text-rose-300 font-medium">Urgente em risco</span>
                 </div>
 
-                <div class="bg-amber-950/40 border border-amber-800/60 p-3.5 rounded-2xl">
-                    <span class="text-[10px] font-black uppercase text-amber-400 tracking-wider block">Atenção (&le; 30 Dias)</span>
-                    <strong class="text-2xl font-black text-amber-400 mt-0.5 block" id="kpi-atencao">0</strong>
-                    <span class="text-[10px] text-amber-300 font-medium">Oferecer desconto</span>
+                <div class="bg-amber-950/30 border border-amber-800/60 p-4 rounded-2xl shadow-lg">
+                    <span class="text-[10px] md:text-xs font-black uppercase text-amber-400 tracking-wider block">Atenção (&le; 30 Dias)</span>
+                    <strong class="text-2xl md:text-3xl font-black text-amber-400 mt-1 block" id="kpi-atencao">0</strong>
+                    <span class="text-[10px] md:text-xs text-amber-300 font-medium">Oferecer desconto</span>
+                </div>
+
+                <div class="bg-emerald-950/30 border border-emerald-800/60 p-4 rounded-2xl shadow-lg">
+                    <span class="text-[10px] md:text-xs font-black uppercase text-emerald-400 tracking-wider block">Validade OK (&gt; 30d)</span>
+                    <strong class="text-2xl md:text-3xl font-black text-emerald-400 mt-1 block" id="kpi-ok">0</strong>
+                    <span class="text-[10px] md:text-xs text-emerald-300 font-medium">Estoque saudável</span>
+                </div>
+
+                <div class="bg-purple-950/30 border border-purple-800/60 p-4 rounded-2xl shadow-lg">
+                    <span class="text-[10px] md:text-xs font-black uppercase text-purple-300 tracking-wider block">Lotes Vencidos</span>
+                    <strong class="text-2xl md:text-3xl font-black text-purple-400 mt-1 block" id="kpi-vencidos">0</strong>
+                    <span class="text-[10px] md:text-xs text-purple-300 font-medium">Aguardando descarte</span>
                 </div>
             </div>
 
-            <!-- BOTÃO DIVULGAR OFERTAS WHATSAPP -->
-            <button onclick="divulgarOfertasWhatsApp()" class="w-full bg-emerald-600 active:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 border border-emerald-500/30">
-                <i class="fa-brands fa-whatsapp text-base"></i> Gerar Ofertas de Liquidação no Whats
-            </button>
+            <!-- CONTROLES BARRA DE AÇÃO (FILTROS + BUSCA + OFERTA WHATS) -->
+            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3">
+                    
+                    <!-- FILTROS DE RISCO (PILLS TÁTEIS) -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 text-xs no-scrollbar">
+                        <button onclick="filtrarFarol('todos')" id="btn-f-todos" class="px-3.5 py-2 rounded-xl font-bold bg-emerald-500 text-zinc-950 shrink-0">Todos</button>
+                        <button onclick="filtrarFarol('critico')" id="btn-f-critico" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-rose-400 border border-zinc-800 shrink-0 hover:bg-rose-950/40">🔴 Crítico (&le;7d)</button>
+                        <button onclick="filtrarFarol('atencao')" id="btn-f-atencao" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-amber-400 border border-zinc-800 shrink-0 hover:bg-amber-950/40">🟡 Atenção (&le;30d)</button>
+                        <button onclick="filtrarFarol('ok')" id="btn-f-ok" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-emerald-400 border border-zinc-800 shrink-0 hover:bg-emerald-950/40">🟢 OK (&gt;30d)</button>
+                        <button onclick="filtrarFarol('vencido')" id="btn-f-vencido" class="px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-purple-400 border border-zinc-800 shrink-0 hover:bg-purple-950/40">⬛ Vencidos</button>
+                    </div>
 
-            <!-- FILTROS DE RISCO (PILLS TÁTEIS) -->
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-                <button onclick="filtrarFarol('todos')" id="btn-f-todos" class="px-3 py-2 rounded-xl font-bold bg-emerald-500 text-zinc-950 shrink-0">Todos</button>
-                <button onclick="filtrarFarol('critico')" id="btn-f-critico" class="px-3 py-2 rounded-xl font-bold bg-zinc-900 text-rose-400 border border-zinc-800 shrink-0">🔴 Crítico (&le;7d)</button>
-                <button onclick="filtrarFarol('atencao')" id="btn-f-atencao" class="px-3 py-2 rounded-xl font-bold bg-zinc-900 text-amber-400 border border-zinc-800 shrink-0">🟡 Atenção (&le;30d)</button>
-                <button onclick="filtrarFarol('ok')" id="btn-f-ok" class="px-3 py-2 rounded-xl font-bold bg-zinc-900 text-emerald-400 border border-zinc-800 shrink-0">🟢 OK (&gt;30d)</button>
-                <button onclick="filtrarFarol('vencido')" id="btn-f-vencido" class="px-3 py-2 rounded-xl font-bold bg-zinc-900 text-purple-400 border border-zinc-800 shrink-0">⬛ Vencidos</button>
+                    <!-- BOTÃO DIVULGAR OFERTAS WHATSAPP -->
+                    <button onclick="divulgarOfertasWhatsApp()" class="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-400 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 border border-emerald-500/30 shrink-0 transition-all">
+                        <i class="fa-brands fa-whatsapp text-base"></i> Gerar Ofertas no Whats
+                    </button>
+                </div>
+
+                <!-- CAMPO DE BUSCA -->
+                <div class="bg-zinc-950 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
+                    <i class="fa-solid fa-magnifying-glass text-emerald-400 text-base"></i>
+                    <input type="text" id="busca-farol" onkeyup="renderizarFarol()" placeholder="Pesquisar por nome do produto, lote, código EAN..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
+                </div>
             </div>
 
-            <!-- CAMPO DE BUSCA -->
-            <div class="bg-zinc-900 px-3.5 py-2.5 rounded-xl border border-zinc-800 flex items-center gap-2">
-                <i class="fa-solid fa-magnifying-glass text-emerald-400 text-sm"></i>
-                <input type="text" id="busca-farol" onkeyup="renderizarFarol()" placeholder="Buscar produto, lote, EAN..." class="bg-transparent text-white text-xs w-full focus:outline-none">
-            </div>
-
-            <!-- LISTA DE CARDS DE LOTES (MOBILE FIRST) -->
-            <div id="lista-farol-cards" class="space-y-3"></div>
+            <!-- LISTA DE CARDS DE LOTES (1 COLUNA NO CELULAR, 3 COLUNAS NO PC) -->
+            <div id="lista-farol-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
         </section>
 
         <!-- ================= SEÇÃO 2: BIPAR / ENTRADA DE LOTE ================= -->
         <section id="secao-bipar" class="secao-conteudo hidden space-y-4">
-            <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 space-y-4 shadow-xl">
-                <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
-                    <h2 class="text-base font-black text-amber-400 flex items-center gap-2">
-                        <i class="fa-solid fa-box-archive"></i> Nova Entrada de Lote
-                    </h2>
-                    <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-bold">Validade</span>
+            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-2xl mx-auto space-y-5 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+                    <div>
+                        <h2 class="text-base md:text-lg font-black text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-box-archive"></i> Nova Entrada de Lote
+                        </h2>
+                        <p class="text-xs text-zinc-400 mt-0.5">Cadastre o lote e a validade para alimentar o Farol</p>
+                    </div>
+                    <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-xl font-bold">Validade</span>
                 </div>
 
-                <form onsubmit="salvarLoteForm(event)" class="space-y-3 text-xs">
+                <form onsubmit="salvarLoteForm(event)" class="space-y-4 text-xs md:text-sm">
                     <div>
-                        <label class="block text-zinc-400 font-bold mb-1">Buscar ou Bipar Produto</label>
+                        <label class="block text-zinc-400 font-bold mb-1">Buscar ou Bipar Produto *</label>
                         <div class="flex gap-2">
-                            <input type="text" id="lote-prod-busca" list="dl-produtos-lote" onchange="selecionarProdutoFormLote(this.value)" placeholder="Digite nome ou EAN..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none focus:border-amber-400 text-xs">
+                            <input type="text" id="lote-prod-busca" list="dl-produtos-lote" onchange="selecionarProdutoFormLote(this.value)" placeholder="Digite nome ou EAN do produto..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none focus:border-amber-400">
                             <datalist id="dl-produtos-lote"></datalist>
-                            <button type="button" onclick="abrirCameraScanner('lote')" class="bg-amber-500 active:bg-amber-400 text-zinc-950 font-black px-4 py-3 rounded-xl transition-all shrink-0 flex items-center gap-1 text-xs">
+                            <button type="button" onclick="abrirCameraScanner('lote')" class="bg-amber-500 hover:bg-amber-400 active:bg-amber-300 text-zinc-950 font-black px-4 py-3 rounded-xl transition-all shrink-0 flex items-center gap-1.5">
                                 <i class="fa-solid fa-camera"></i> 📷
                             </button>
                         </div>
                         <input type="hidden" id="lote-prod-id">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
                             <label class="block text-zinc-400 font-semibold mb-1">Nº do Lote</label>
-                            <input type="text" id="lote-num" placeholder="Ex: LT-01" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none">
+                            <input type="text" id="lote-num" placeholder="Ex: LT-2026-01" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-amber-400 font-black uppercase mb-1">Validade *</label>
+                            <label class="block text-amber-400 font-black uppercase mb-1">Data de Validade *</label>
                             <input type="date" id="lote-val" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-amber-400">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
-                            <label class="block text-zinc-400 font-semibold mb-1">Quantidade *</label>
+                            <label class="block text-zinc-400 font-semibold mb-1">Quantidade Recebida *</label>
                             <input type="number" id="lote-qtd" required min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-zinc-400 font-semibold mb-1">Localização</label>
-                            <input type="text" id="lote-local" placeholder="Ex: Gôndola A" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                            <label class="block text-zinc-400 font-semibold mb-1">Localização na Loja</label>
+                            <input type="text" id="lote-local" placeholder="Ex: Gôndola A3 / Depósito" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-amber-400 active:bg-amber-300 text-zinc-950 font-black py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-amber-950/30">
+                    <button type="submit" class="w-full bg-amber-400 hover:bg-amber-300 active:bg-amber-200 text-zinc-950 font-black py-4 rounded-xl text-sm transition-all shadow-lg shadow-amber-950/30">
                         REGISTRAR LOTE NO SISTEMA
                     </button>
                 </form>
@@ -139,44 +185,46 @@
 
         <!-- ================= SEÇÃO 3: CATÁLOGO DE PRODUTOS ================= -->
         <section id="secao-produtos" class="secao-conteudo hidden space-y-4">
-            <div class="flex justify-between items-center bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
                 <div>
-                    <h2 class="text-base font-black text-emerald-400">Catálogo de Produtos</h2>
-                    <span class="text-[10px] text-zinc-400">Itens cadastrados</span>
+                    <h2 class="text-base md:text-lg font-black text-emerald-400">Catálogo de Produtos</h2>
+                    <span class="text-xs text-zinc-400">Produtos cadastrados na mercearia</span>
                 </div>
-                <button onclick="abrirModalProduto()" class="bg-emerald-500 active:bg-emerald-400 text-zinc-950 font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Novo
+                <button onclick="abrirModalProduto()" class="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-300 text-zinc-950 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/30">
+                    <i class="fa-solid fa-plus"></i> + Novo Produto
                 </button>
             </div>
 
             <!-- CAMPO DE BUSCA PRODUTOS -->
-            <div class="bg-zinc-900 px-3.5 py-2.5 rounded-xl border border-zinc-800 flex items-center gap-2">
-                <i class="fa-solid fa-magnifying-glass text-emerald-400 text-sm"></i>
-                <input type="text" id="busca-produtos" onkeyup="renderizarProdutos()" placeholder="Buscar nome ou EAN..." class="bg-transparent text-white text-xs w-full focus:outline-none">
+            <div class="bg-zinc-900 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
+                <i class="fa-solid fa-magnifying-glass text-emerald-400 text-base"></i>
+                <input type="text" id="busca-produtos" onkeyup="renderizarProdutos()" placeholder="Buscar produto por nome, categoria ou código EAN..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
             </div>
 
-            <div id="lista-produtos-cards" class="space-y-3"></div>
+            <!-- CARDS DE PRODUTOS (3 COLUNAS NO PC) -->
+            <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
         </section>
 
         <!-- ================= SEÇÃO 4: REGISTRO DE PERDAS ================= -->
         <section id="secao-perdas" class="secao-conteudo hidden space-y-4">
-            <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex justify-between items-center">
+            <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <span class="text-[10px] font-bold text-zinc-400 uppercase block">Prejuízo por Vencimentos</span>
-                    <strong class="text-2xl font-black text-rose-400" id="perdas-total-txt">R$ 0,00</strong>
+                    <span class="text-xs font-bold text-zinc-400 uppercase block">Prejuízo Acumulado por Vencimentos</span>
+                    <strong class="text-3xl font-black text-rose-400 mt-1 block" id="perdas-total-txt">R$ 0,00</strong>
                 </div>
-                <button onclick="abrirModalPerda()" class="bg-rose-600 active:bg-rose-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg shadow-rose-950/40">
-                    <i class="fa-solid fa-dumpster"></i> Baixa Perda
+                <button onclick="abrirModalPerda()" class="bg-rose-600 hover:bg-rose-500 active:bg-rose-400 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-lg shadow-rose-950/40">
+                    <i class="fa-solid fa-dumpster"></i> Registar Descarte por Perda
                 </button>
             </div>
 
-            <div id="lista-perdas-cards" class="space-y-3"></div>
+            <!-- CARDS DE PERDAS (3 COLUNAS NO PC) -->
+            <div id="lista-perdas-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4"></div>
         </section>
 
     </main>
 
-    <!-- BARRA DE NAVEGAÇÃO INFERIOR FIXA (MOBILE BOTTOM NAV) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 flex justify-around items-center py-2.5 z-50 px-2">
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR FIXA (Apenas para telas de CELULAR) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 flex justify-around items-center py-2.5 z-50 px-2">
         <button onclick="navegar('farol')" id="nav-farol" class="nav-item active flex flex-col items-center gap-1 text-emerald-400 font-bold transition-all">
             <i class="fa-solid fa-traffic-light text-lg"></i>
             <span class="text-[10px]">Farol</span>
@@ -216,28 +264,28 @@
 
     <!-- MODAL CADASTRO PRODUTO -->
     <div id="modal-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                <h3 class="text-sm font-black text-emerald-400" id="prod-modal-titulo">Novo Produto</h3>
-                <button onclick="fecharModalProduto()" class="text-zinc-400"><i class="fa-solid fa-xmark"></i></button>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-sm md:text-base font-black text-emerald-400" id="prod-modal-titulo">Novo Produto</h3>
+                <button onclick="fecharModalProduto()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form onsubmit="salvarProdutoForm(event)" class="space-y-2.5 text-xs">
+            <form onsubmit="salvarProdutoForm(event)" class="space-y-3 text-xs md:text-sm">
                 <input type="hidden" id="f-prod-id">
                 <div>
                     <label class="block text-zinc-400 font-semibold mb-1">EAN (Código de Barras)</label>
                     <div class="flex gap-2">
-                        <input type="text" id="f-prod-ean" placeholder="789..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-mono focus:outline-none">
-                        <button type="button" onclick="abrirCameraScanner('prod')" class="bg-amber-500 text-zinc-950 font-bold px-3 py-2.5 rounded-xl">📷</button>
+                        <input type="text" id="f-prod-ean" placeholder="789..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none">
+                        <button type="button" onclick="abrirCameraScanner('prod')" class="bg-amber-500 text-zinc-950 font-bold px-3 py-3 rounded-xl">📷</button>
                     </div>
                 </div>
                 <div>
                     <label class="block text-zinc-400 font-semibold mb-1">Nome do Produto *</label>
-                    <input type="text" id="f-prod-nome" required placeholder="Ex: Leite Integral Parmalat 1L" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white focus:outline-none">
+                    <input type="text" id="f-prod-nome" required placeholder="Ex: Leite Integral Parmalat 1L" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
                 </div>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-zinc-400 font-semibold mb-1">Categoria</label>
-                        <select id="f-prod-cat" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white focus:outline-none">
+                        <select id="f-prod-cat" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
                             <option value="Mercearia">Mercearia</option>
                             <option value="Laticínios">Laticínios</option>
                             <option value="Bebidas">Bebidas</option>
@@ -248,7 +296,7 @@
                     </div>
                     <div>
                         <label class="block text-zinc-400 font-semibold mb-1">Unidade</label>
-                        <select id="f-prod-uni" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white focus:outline-none">
+                        <select id="f-prod-uni" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
                             <option value="Un">Unidade (Un)</option>
                             <option value="Kg">Quilo (Kg)</option>
                             <option value="L">Litro (L)</option>
@@ -256,19 +304,19 @@
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-zinc-400 font-semibold mb-1">Preço Custo (R$)</label>
-                        <input type="number" step="0.01" id="f-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-rose-300 font-bold focus:outline-none">
+                        <input type="number" step="0.01" id="f-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-emerald-400 font-semibold mb-1">Preço Venda (R$)</label>
-                        <input type="number" step="0.01" id="f-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-emerald-400 font-bold focus:outline-none">
+                        <input type="number" step="0.01" id="f-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-emerald-400 font-bold focus:outline-none">
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-2 border-t border-zinc-800">
-                    <button type="button" onclick="fecharModalProduto()" class="px-3 py-2 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-emerald-500 text-zinc-950 font-bold rounded-xl">Salvar Produto</button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalProduto()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-500 text-zinc-950 font-bold rounded-xl">Salvar Produto</button>
                 </div>
             </form>
         </div>
@@ -276,33 +324,33 @@
 
     <!-- MODAL BAIXA DE PERDA -->
     <div id="modal-perda" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                <h3 class="text-sm font-black text-rose-400 flex items-center gap-1.5"><i class="fa-solid fa-dumpster"></i> Registrar Descarte</h3>
-                <button onclick="fecharModalPerda()" class="text-zinc-400"><i class="fa-solid fa-xmark"></i></button>
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-sm md:text-base font-black text-rose-400 flex items-center gap-2"><i class="fa-solid fa-dumpster"></i> Registrar Descarte</h3>
+                <button onclick="fecharModalPerda()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form onsubmit="salvarPerdaForm(event)" class="space-y-2.5 text-xs">
+            <form onsubmit="salvarPerdaForm(event)" class="space-y-3 text-xs md:text-sm">
                 <div>
-                    <label class="block text-rose-400 font-bold mb-1">Lote Avariado / Vencido</label>
-                    <input type="text" id="f-perda-lote-busca" list="dl-perdas-lotes" onchange="selecionarLotePerdaForm(this.value)" placeholder="Buscar lote..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white focus:outline-none">
+                    <label class="block text-rose-400 font-bold mb-1">Lote Avariado / Vencido *</label>
+                    <input type="text" id="f-perda-lote-busca" list="dl-perdas-lotes" onchange="selecionarLotePerdaForm(this.value)" placeholder="Buscar lote..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
                     <datalist id="dl-perdas-lotes"></datalist>
                     <input type="hidden" id="f-perda-lote-id">
                 </div>
                 <div>
                     <label class="block text-zinc-400 font-semibold mb-1">Quantidade Descartada *</label>
-                    <input type="number" id="f-perda-qtd" required min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-bold focus:outline-none">
+                    <input type="number" id="f-perda-qtd" required min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-zinc-400 font-semibold mb-1">Motivo</label>
-                    <select id="f-perda-motivo" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white focus:outline-none">
+                    <select id="f-perda-motivo" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
                         <option value="Vencimento">Vencimento Expirado</option>
                         <option value="Avaria / Estragado">Embalagem Avariada</option>
                         <option value="Consumo Interno">Consumo Interno</option>
                     </select>
                 </div>
-                <div class="flex justify-end gap-2 pt-2 border-t border-zinc-800">
-                    <button type="button" onclick="fecharModalPerda()" class="px-3 py-2 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-rose-600 text-white font-bold rounded-xl">Confirmar Perda</button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalPerda()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-rose-600 text-white font-bold rounded-xl">Confirmar Perda</button>
                 </div>
             </form>
         </div>
@@ -369,19 +417,32 @@
             const alvo = document.getElementById(`secao-${secao}`);
             if (alvo) alvo.classList.remove('hidden');
 
+            // Atualizar navegadores de mobile
             document.querySelectorAll('.nav-item').forEach(b => {
                 b.classList.remove('text-emerald-400', 'font-bold');
                 b.classList.add('text-zinc-400', 'font-medium');
             });
 
-            const btn = document.getElementById(`nav-${secao}`);
-            if (btn) {
-                btn.classList.remove('text-zinc-400', 'font-medium');
-                btn.classList.add('text-emerald-400', 'font-bold');
+            const btnMobile = document.getElementById(`nav-${secao}`);
+            if (btnMobile) {
+                btnMobile.classList.remove('text-zinc-400', 'font-medium');
+                btnMobile.classList.add('text-emerald-400', 'font-bold');
+            }
+
+            // Atualizar navegadores do PC
+            document.querySelectorAll('.pc-nav-btn').forEach(b => {
+                b.classList.remove('text-emerald-400', 'bg-emerald-500/10', 'border', 'border-emerald-500/30', 'font-bold');
+                b.classList.add('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800', 'font-semibold');
+            });
+
+            const btnPC = document.getElementById(`pc-nav-${secao}`);
+            if (btnPC) {
+                btnPC.classList.remove('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800', 'font-semibold');
+                btnPC.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border', 'border-emerald-500/30', 'font-bold');
             }
         }
 
-        // ================= FAROL DE VALIDADE (CARDS MOBILE) =================
+        // ================= FAROL DE VALIDADE (RESPONSIVO) =================
         function renderizarFarol() {
             const container = document.getElementById('lista-farol-cards');
             if (!container) return;
@@ -396,11 +457,15 @@
 
             let cCritico = 0;
             let cAtencao = 0;
+            let cOk = 0;
+            let cVencidos = 0;
 
             if (lotesValidos.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum lote com quantidade disponível. Vazio!</div>`;
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum lote com quantidade disponível no estoque.</div>`;
                 document.getElementById('kpi-critico').innerText = '0';
                 document.getElementById('kpi-atencao').innerText = '0';
+                document.getElementById('kpi-ok').innerText = '0';
+                document.getElementById('kpi-vencidos').innerText = '0';
                 return;
             }
 
@@ -419,6 +484,7 @@
 
                 if (diffDias <= 0) {
                     statusChave = 'vencido';
+                    cVencidos++;
                     tagBadge = '<span class="bg-purple-950 text-purple-300 border border-purple-800 px-2 py-0.5 rounded text-[10px] font-black">⬛ VENCIDO</span>';
                     borderCor = 'border-purple-800/80 bg-purple-950/20';
                 } else if (diffDias <= 7) {
@@ -431,6 +497,8 @@
                     cAtencao++;
                     tagBadge = '<span class="bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded text-[10px] font-bold">🟡 ATENÇÃO</span>';
                     borderCor = 'border-amber-800/80 bg-amber-950/20';
+                } else {
+                    cOk++;
                 }
 
                 if (appData.filtroFarol !== 'todos' && statusChave !== appData.filtroFarol) return;
@@ -441,36 +509,36 @@
                 const valFormatada = `${valParts[2]}/${valParts[1]}/${valParts[0]}`;
 
                 const card = document.createElement('div');
-                card.className = `bg-zinc-900 border ${borderCor} p-4 rounded-2xl space-y-2.5 shadow-md`;
+                card.className = `bg-zinc-900 border ${borderCor} p-4 rounded-2xl space-y-3 shadow-md flex flex-col justify-between hover:border-zinc-700 transition-all`;
                 card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div class="pr-2">
-                            <strong class="text-white text-sm block leading-snug">${escapeAttr(nomeProd)}</strong>
-                            <span class="text-[10px] font-mono text-zinc-400"><i class="fa-solid fa-barcode"></i> ${escapeAttr(eanProd)}</span>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div class="pr-2">
+                                <strong class="text-white text-sm block leading-snug font-bold">${escapeAttr(nomeProd)}</strong>
+                                <span class="text-[10px] font-mono text-zinc-400"><i class="fa-solid fa-barcode"></i> ${escapeAttr(eanProd)}</span>
+                            </div>
+                            ${tagBadge}
                         </div>
-                        ${tagBadge}
+
+                        <div class="flex justify-between items-center text-xs bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80">
+                            <div>
+                                <span class="text-[10px] text-zinc-500 block uppercase font-bold">Validade</span>
+                                <strong class="text-white text-xs">${valFormatada}</strong>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-zinc-500 block uppercase font-bold">Prazo</span>
+                                <strong class="${diffDias <= 7 ? 'text-rose-400 font-black' : (diffDias <= 30 ? 'text-amber-400 font-bold' : 'text-emerald-400')}">
+                                    ${diffDias <= 0 ? 'EXPIRADO' : `${diffDias} dias`}
+                                </strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex justify-between items-center text-xs bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80">
-                        <div>
-                            <span class="text-[10px] text-zinc-500 block uppercase font-bold">Validade</span>
-                            <strong class="text-white text-xs">${valFormatada}</strong>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[10px] text-zinc-500 block uppercase font-bold">Prazo</span>
-                            <strong class="${diffDias <= 7 ? 'text-rose-400 font-black' : (diffDias <= 30 ? 'text-amber-400 font-bold' : 'text-emerald-400')}">
-                                ${diffDias <= 0 ? 'EXPIRADO' : `${diffDias} dias`}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center text-xs pt-0.5">
-                        <span class="text-zinc-400">Qtd: <strong class="text-white font-bold">${lote.quantidade} ${prod ? prod.unidade : 'Un'}</strong></span>
-                        <div class="flex gap-2">
-                            <button onclick="abrirModalPerdaComLote(${lote.id})" class="bg-rose-950/60 active:bg-rose-900 text-rose-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-800/50">
-                                <i class="fa-solid fa-trash"></i> Descartar
-                            </button>
-                        </div>
+                    <div class="flex justify-between items-center text-xs pt-2 border-t border-zinc-800/80">
+                        <span class="text-zinc-400 text-xs">Qtd: <strong class="text-white font-bold text-sm">${lote.quantidade} ${prod ? prod.unidade : 'Un'}</strong></span>
+                        <button onclick="abrirModalPerdaComLote(${lote.id})" class="bg-rose-950/60 hover:bg-rose-900 active:bg-rose-800 text-rose-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-800/50 transition-all">
+                            <i class="fa-solid fa-trash"></i> Descartar
+                        </button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -478,15 +546,17 @@
 
             document.getElementById('kpi-critico').innerText = cCritico;
             document.getElementById('kpi-atencao').innerText = cAtencao;
+            document.getElementById('kpi-ok').innerText = cOk;
+            document.getElementById('kpi-vencidos').innerText = cVencidos;
         }
 
         function filtrarFarol(tipo) {
             appData.filtroFarol = tipo;
             document.querySelectorAll('#secao-farol button[id^="btn-f-"]').forEach(b => {
-                b.className = "px-3 py-2 rounded-xl font-bold bg-zinc-900 text-zinc-400 border border-zinc-800 shrink-0";
+                b.className = "px-3.5 py-2 rounded-xl font-bold bg-zinc-950 text-zinc-400 border border-zinc-800 shrink-0 hover:bg-zinc-800";
             });
             const btn = document.getElementById(`btn-f-${tipo}`);
-            if (btn) btn.className = "px-3 py-2 rounded-xl font-bold bg-emerald-500 text-zinc-950 shrink-0";
+            if (btn) btn.className = "px-3.5 py-2 rounded-xl font-bold bg-emerald-500 text-zinc-950 shrink-0";
             renderizarFarol();
         }
 
@@ -605,7 +675,7 @@
             const busca = (document.getElementById('busca-produtos')?.value || '').toLowerCase();
 
             if (appData.produtos.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum produto cadastrado. Clique em "+ Novo".</div>`;
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum produto cadastrado. Clique em "+ Novo Produto".</div>`;
                 return;
             }
 
@@ -617,24 +687,24 @@
                 const totalQtd = lotesProd.reduce((acc, l) => acc + parseFloat(l.quantidade || 0), 0);
 
                 const card = document.createElement('div');
-                card.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl space-y-2";
+                card.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl space-y-3 flex flex-col justify-between hover:border-zinc-700 transition-all";
                 card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <strong class="text-white text-sm block">${escapeAttr(p.nome)}</strong>
-                            <span class="text-[10px] text-zinc-500 font-mono"><i class="fa-solid fa-barcode"></i> ${escapeAttr(p.ean || 'Sem EAN')}</span>
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-start">
+                            <strong class="text-white text-sm font-bold block leading-snug">${escapeAttr(p.nome)}</strong>
+                            <span class="bg-zinc-800 text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 rounded-lg border border-zinc-700 shrink-0">${escapeAttr(p.categoria || 'Mercearia')}</span>
                         </div>
-                        <span class="bg-zinc-800 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded border border-zinc-700">${escapeAttr(p.categoria || 'Mercearia')}</span>
+                        <span class="text-xs font-mono text-zinc-400 block"><i class="fa-solid fa-barcode"></i> ${escapeAttr(p.ean || 'Sem EAN')}</span>
                     </div>
 
-                    <div class="flex justify-between items-center text-xs pt-1">
+                    <div class="flex justify-between items-center text-xs bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80">
                         <div>
-                            <span class="text-[10px] text-zinc-500 block font-bold">Estoque Total</span>
-                            <strong class="text-white font-bold">${totalQtd} ${escapeAttr(p.unidade || 'Un')}</strong>
+                            <span class="text-[10px] text-zinc-500 block font-bold uppercase">Estoque Disponível</span>
+                            <strong class="text-white font-bold text-sm">${totalQtd} ${escapeAttr(p.unidade || 'Un')}</strong>
                         </div>
                         <div class="text-right">
-                            <span class="text-[10px] text-zinc-500 block font-bold">Preço Venda</span>
-                            <strong class="text-emerald-400 font-bold">R$ ${parseFloat(p.preco_venda || 0).toFixed(2)}</strong>
+                            <span class="text-[10px] text-zinc-500 block font-bold uppercase">Preço Venda</span>
+                            <strong class="text-emerald-400 font-bold text-sm">R$ ${parseFloat(p.preco_venda || 0).toFixed(2)}</strong>
                         </div>
                     </div>
                 `;
@@ -687,7 +757,7 @@
             let totalPrejuizio = 0;
 
             if (appData.perdas.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum registro de descarte efetuado.</div>`;
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum registro de descarte efetuado.</div>`;
                 document.getElementById('perdas-total-txt').innerText = 'R$ 0,00';
                 return;
             }
@@ -696,15 +766,15 @@
                 totalPrejuizio += parseFloat(p.prejuizo_total || 0);
 
                 const card = document.createElement('div');
-                card.className = "bg-zinc-900 border border-rose-950/60 p-3.5 rounded-2xl space-y-1.5";
+                card.className = "bg-zinc-900 border border-rose-950/60 p-4 rounded-2xl space-y-2 hover:border-rose-900/80 transition-all";
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
-                        <strong class="text-white text-xs">${escapeAttr(p.produto_nome)}</strong>
-                        <span class="text-rose-400 font-black text-xs">R$ ${parseFloat(p.prejuizo_total||0).toFixed(2)}</span>
+                        <strong class="text-white text-xs md:text-sm font-bold leading-snug">${escapeAttr(p.produto_nome)}</strong>
+                        <span class="text-rose-400 font-black text-sm shrink-0">R$ ${parseFloat(p.prejuizo_total||0).toFixed(2)}</span>
                     </div>
-                    <div class="flex justify-between items-center text-[11px] text-zinc-400">
-                        <span>Descarte: ${p.quantidade} un. (${escapeAttr(p.motivo)})</span>
-                        <span class="text-zinc-500">${p.data_descarte}</span>
+                    <div class="flex justify-between items-center text-xs text-zinc-400 bg-zinc-950/60 p-2 rounded-xl border border-zinc-800">
+                        <span>Qtd Descartada: <strong class="text-white font-bold">${p.quantidade} un</strong> (${escapeAttr(p.motivo)})</span>
+                        <span class="text-zinc-500 text-[10px] font-mono">${p.data_descarte}</span>
                     </div>
                 `;
                 container.appendChild(card);
