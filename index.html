@@ -499,6 +499,29 @@
     </nav>
 
     <!-- MODAIS DE SISTEMA -->
+
+    <!-- MODAL DE CONFIRMAÇÃO PERSONALIZADO (Substitui confirm e alert) -->
+    <div id="modal-confirmacao" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[2000] hidden flex items-center justify-center p-4">
+        <div id="modal-confirmacao-box" class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl scale-95 opacity-0 transition-all duration-200">
+            <div id="modal-confirmacao-icone" class="w-14 h-14 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-lg">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-black text-white" id="modal-confirmacao-titulo">Confirmar Ação</h3>
+                <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed" id="modal-confirmacao-mensagem">Deseja realmente prosseguir?</p>
+            </div>
+            <div class="flex gap-2.5 pt-2" id="modal-confirmacao-botoes">
+                <button id="btn-confirmar-cancelar" class="w-1/2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-2.5 rounded-xl text-xs transition-all border border-zinc-700">
+                    Cancelar
+                </button>
+                <button id="btn-confirmar-ok" class="w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-rose-950/50">
+                    Sim, Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR LOTE -->
     <div id="modal-editar-lote" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -535,6 +558,7 @@
         </div>
     </div>
 
+    <!-- MODAL CAMERA SCANNER -->
     <div id="modal-camera" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] hidden flex flex-col items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-5 space-y-3 text-center shadow-2xl relative">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
@@ -546,6 +570,7 @@
         </div>
     </div>
 
+    <!-- MODAL CADASTRO PRODUTO -->
     <div id="modal-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -606,6 +631,7 @@
         </div>
     </div>
 
+    <!-- MODAL NOVO CLIENTE CADERNETA -->
     <div id="modal-caderneta-cliente" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
@@ -665,6 +691,62 @@
         let chartFinanceiroInstance = null;
         let audioCtx = null;
 
+        // HELPER DE DATA LOCAL (Resolve o erro do fuso horário UTC em brasileiras de noite)
+        function getObterDataLocalISO() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // MODAL DE CONFIRMAÇÃO PERSONALIZADO (Substitui confirm e alert)
+        function confirmarAcao(titulo, mensagem, textoBotao = "Sim, Confirmar", icone = "fa-triangle-exclamation", corOk = "rose") {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-confirmacao');
+                const box = document.getElementById('modal-confirmacao-box');
+                const titleEl = document.getElementById('modal-confirmacao-titulo');
+                const msgEl = document.getElementById('modal-confirmacao-mensagem');
+                const btnOk = document.getElementById('btn-confirmar-ok');
+                const btnCancel = document.getElementById('btn-confirmar-cancelar');
+                const iconContainer = document.getElementById('modal-confirmacao-icone');
+
+                titleEl.innerText = titulo;
+                msgEl.innerText = mensagem;
+                btnOk.innerText = textoBotao;
+                iconContainer.innerHTML = `<i class="fa-solid ${icone}"></i>`;
+
+                if (corOk === 'rose') {
+                    btnOk.className = "w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-rose-950/50";
+                    iconContainer.className = "w-14 h-14 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-lg";
+                } else if (corOk === 'amber') {
+                    btnOk.className = "w-1/2 bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-amber-950/30";
+                    iconContainer.className = "w-14 h-14 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-lg";
+                } else {
+                    btnOk.className = "w-1/2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-emerald-950/30";
+                    iconContainer.className = "w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-lg";
+                }
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    box.classList.remove('scale-95', 'opacity-0');
+                    box.classList.add('scale-100', 'opacity-100');
+                }, 10);
+
+                const fechar = (resposta) => {
+                    box.classList.remove('scale-100', 'opacity-100');
+                    box.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        resolve(resposta);
+                    }, 150);
+                };
+
+                btnOk.onclick = () => fechar(true);
+                btnCancel.onclick = () => fechar(false);
+            });
+        }
+
         function desbloquearAudioNoClique() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -687,10 +769,16 @@
             } catch(e) {}
         }
 
+        // PARSER MELHORADO DE DINHEIRO (Formatação Brasileira 1.234,56 -> 1234.56)
         function parseNum(val) {
             if (!val) return 0;
-            const clean = String(val).replace(',', '.').trim();
-            const num = parseFloat(clean);
+            let str = String(val).trim();
+            if (str.includes(',') && str.includes('.')) {
+                str = str.replace(/\./g, '').replace(',', '.');
+            } else if (str.includes(',')) {
+                str = str.replace(',', '.');
+            }
+            const num = parseFloat(str);
             return isNaN(num) ? 0 : num;
         }
 
@@ -700,18 +788,23 @@
 
             try {
                 const resProd = await supabaseClient.from('mercearia_produtos').select('*').order('nome');
+                if (resProd.error) mostrarToast(`Erro produtos: ${resProd.error.message}`, 'erro');
                 if (resProd.data) appData.produtos = resProd.data;
 
                 const resLote = await supabaseClient.from('mercearia_lotes').select('*').order('validade');
+                if (resLote.error) mostrarToast(`Erro lotes: ${resLote.error.message}`, 'erro');
                 if (resLote.data) appData.lotes = resLote.data;
 
                 const resPerd = await supabaseClient.from('mercearia_perdas').select('*').order('data_perda', { ascending: false });
+                if (resPerd.error) mostrarToast(`Erro perdas: ${resPerd.error.message}`, 'erro');
                 if (resPerd.data) appData.perdas = resPerd.data;
 
                 const resCaixa = await supabaseClient.from('mercearia_caixa').select('*').order('data', { ascending: false });
+                if (resCaixa.error) mostrarToast(`Erro caixa: ${resCaixa.error.message}`, 'erro');
                 if (resCaixa.data) appData.caixa = resCaixa.data;
 
                 const resCad = await supabaseClient.from('mercearia_caderneta').select('*').order('cliente_nome');
+                if (resCad.error) mostrarToast(`Erro caderneta: ${resCad.error.message}`, 'erro');
                 if (resCad.data) appData.caderneta = resCad.data;
 
             } catch (e) {
@@ -731,7 +824,7 @@
             renderizarCaderneta();
             popularDatalists();
 
-            const hoje = new Date().toISOString().split('T')[0];
+            const hoje = getObterDataLocalISO();
             if (document.getElementById('caixa-data') && !document.getElementById('caixa-data').value) {
                 document.getElementById('caixa-data').value = hoje;
             }
@@ -859,7 +952,7 @@
 
         function desenharGraficoFinanceiro() {
             try {
-                // Só desenha se o painel estiver visível no DOM
+                // CORREÇÃO: Só desenha se a secao dashboard estiver visível
                 const secDash = document.getElementById('secao-dashboard');
                 if (secDash && secDash.classList.contains('hidden')) return;
 
@@ -922,7 +1015,7 @@
         }
 
         function renderizarCaixaStatus() {
-            const hoje = new Date().toISOString().split('T')[0];
+            const hoje = getObterDataLocalISO();
             const registroHoje = appData.caixa.find(c => c.data === hoje);
             const badge = document.getElementById('status-caixa-badge');
 
@@ -989,7 +1082,7 @@
                 await carregarDados();
                 navegar('dashboard');
             } else {
-                alert(`Erro ao salvar caixa:\n\n${res.error.message}`);
+                mostrarToast(`Erro ao salvar caixa: ${res.error.message}`, 'erro');
             }
         }
 
@@ -1035,12 +1128,17 @@
             const hojeDate = new Date();
             hojeDate.setHours(0,0,0,0);
 
-            let lotesValidos = appData.lotes.filter(l => parseFloat(l.quantidade || 0) >= 0);
+            // CORREÇÃO: Filtra apenas lotes com quantidade MAIOR que 0
+            let lotesValidos = appData.lotes.filter(l => parseFloat(l.quantidade || 0) > 0);
 
             let cCritico = 0, cAtencao = 0, cOk = 0, cVencidos = 0;
 
             if (lotesValidos.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum lote cadastrado.</div>`;
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum lote ativo no estoque.</div>`;
+                document.getElementById('kpi-critico').innerText = '0';
+                document.getElementById('kpi-atencao').innerText = '0';
+                document.getElementById('kpi-ok').innerText = '0';
+                document.getElementById('kpi-vencidos').innerText = '0';
                 return;
             }
 
@@ -1264,7 +1362,7 @@
                         const { data: newProd, error: errP } = await supabaseClient.from('mercearia_produtos').insert([pData]).select();
 
                         if (errP) {
-                            alert(`Erro ao cadastrar produto:\n\n${errP.message}`);
+                            mostrarToast(`Erro ao cadastrar produto: ${errP.message}`, 'erro');
                             return;
                         }
 
@@ -1287,7 +1385,7 @@
                 if (!prodId) return;
 
                 // GERAÇÃO AUTOMÁTICA DE LOTE
-                const hojeTag = new Date().toISOString().split('T')[0].replace(/-/g, '');
+                const hojeTag = getObterDataLocalISO().replace(/-/g, '');
                 const loteAutoTag = `LT-${hojeTag}-${Math.floor(Math.random() * 89 + 10)}`;
 
                 const loteData = {
@@ -1301,7 +1399,7 @@
                 const { error: errL } = await supabaseClient.from('mercearia_lotes').insert([loteData]);
 
                 if (errL) {
-                    alert(`Erro ao salvar estoque:\n\n${errL.message}`);
+                    mostrarToast(`Erro ao salvar estoque: ${errL.message}`, 'erro');
                     return;
                 }
 
@@ -1357,18 +1455,19 @@
                 fecharModalEditarLote();
                 await carregarDados();
             } else {
-                alert(`Erro ao alterar lote:\n\n${error.message}`);
+                mostrarToast(`Erro ao alterar lote: ${error.message}`, 'erro');
             }
         }
 
         async function excluirLote(loteId) {
-            if (confirm("Tem certeza que deseja apagar este lote do sistema?")) {
+            const confirmou = await confirmarAcao("Excluir Lote", "Tem certeza que deseja apagar este lote de produtos do sistema?", "Sim, Apagar", "fa-trash-can", "rose");
+            if (confirmou) {
                 const { error } = await supabaseClient.from('mercearia_lotes').delete().eq('id', loteId);
                 if (!error) {
                     mostrarToast("Lote removido com sucesso!");
                     await carregarDados();
                 } else {
-                    alert(`Erro ao apagar lote:\n\n${error.message}`);
+                    mostrarToast(`Erro ao apagar lote: ${error.message}`, 'erro');
                 }
             }
         }
@@ -1434,7 +1533,6 @@
             let prodId = document.getElementById('perda-prod-id').value;
             const inputVal = document.getElementById('perda-prod-input').value.trim();
 
-            // CORREÇÃO: Garante resolução do ID caso o usuário tenha clicado sem dar Enter
             if (!prodId && inputVal) {
                 const matchId = inputVal.match(/\[id:(\d+)\]/i);
                 let prod = null;
@@ -1453,6 +1551,21 @@
                 return;
             }
 
+            // CORREÇÃO: Valida se a perda é maior do que o estoque total disponível
+            const lotesDoProd = appData.lotes.filter(l => l.produto_id == prodId && parseFloat(l.quantidade || 0) > 0);
+            const totalEmEstoque = lotesDoProd.reduce((acc, l) => acc + parseFloat(l.quantidade || 0), 0);
+
+            if (qtd > totalEmEstoque) {
+                const prosseguir = await confirmarAcao(
+                    "⚠️ ALERTA DE ESTOQUE INSUFICIENTE",
+                    `Você está descartando ${qtd} unidade(s), mas existem apenas ${totalEmEstoque} unidade(s) cadastradas no estoque desse produto.\n\nDeseja registrar a perda e zerar o estoque assim mesmo?`,
+                    "Sim, Descartar Tudo",
+                    "fa-triangle-exclamation",
+                    "amber"
+                );
+                if (!prosseguir) return;
+            }
+
             try {
                 const perdaData = {
                     produto_id: parseInt(prodId),
@@ -1465,14 +1578,14 @@
                 const { error: errP } = await supabaseClient.from('mercearia_perdas').insert([perdaData]);
 
                 if (errP) {
-                    alert(`Erro ao salvar perda:\n\n${errP.message}`);
+                    mostrarToast(`Erro ao salvar perda: ${errP.message}`, 'erro');
                     return;
                 }
 
                 await abaterEstoqueLotesPorVenda(prodId, qtd);
 
                 tocarSomBipe();
-                mostrarToast("Perda registrada e estoque atualizado!");
+                mostrarToast("Perda registrada e estoque baixado!");
 
                 document.getElementById('perda-prod-id').value = '';
                 document.getElementById('perda-prod-input').value = '';
@@ -1558,7 +1671,7 @@
                 fecharModalCadernetaCliente();
                 await carregarDados();
             } else {
-                alert(`Erro ao salvar caderneta:\n\n${res.error.message}`);
+                mostrarToast(`Erro ao salvar caderneta: ${res.error.message}`, 'erro');
             }
         }
 
@@ -1586,6 +1699,8 @@
             if (!error) {
                 mostrarToast(`Saldo de "${cliente.cliente_nome}" atualizado!`);
                 await carregarDados();
+            } else {
+                mostrarToast(`Erro ao atualizar: ${error.message}`, 'erro');
             }
         }
 
@@ -1602,7 +1717,6 @@
             }
 
             appData.caderneta.forEach(c => {
-                // CORREÇÃO: Tratamento de nulos no filtro de busca
                 const buscaTexto = `${c.cliente_nome || ''} ${c.telefone || ''}`.toLowerCase();
                 if (busca && !buscaTexto.includes(busca)) return;
 
@@ -1654,7 +1768,6 @@
             }
 
             appData.produtos.forEach(p => {
-                // CORREÇÃO: Tratamento de nulos no filtro de busca
                 const buscaTexto = `${p.nome || ''} ${p.ean || ''} ${p.categoria || ''}`.toLowerCase();
                 if (busca && !buscaTexto.includes(busca)) return;
 
@@ -1748,18 +1861,22 @@
                 fecharModalProduto();
                 await carregarDados();
             } else {
-                alert(`Erro ao salvar produto:\n\n${res.error.message}`);
+                mostrarToast(`Erro ao salvar produto: ${res.error.message}`, 'erro');
             }
         }
 
         async function excluirProduto(prodId) {
-            if (confirm("Tem certeza que deseja apagar este produto e TODOS os seus lotes?")) {
+            const prod = appData.produtos.find(p => p.id == prodId);
+            const nomeP = prod ? prod.nome : 'este produto';
+
+            const confirmou = await confirmarAcao("Excluir Produto", `Tem certeza que deseja apagar "${nomeP}" e TODOS os seus lotes do sistema?`, "Sim, Apagar", "fa-trash-can", "rose");
+            if (confirmou) {
                 const { error } = await supabaseClient.from('mercearia_produtos').delete().eq('id', prodId);
                 if (!error) {
                     mostrarToast("Produto apagado com sucesso!");
                     await carregarDados();
                 } else {
-                    alert(`Erro ao apagar produto:\n\n${error.message}`);
+                    mostrarToast(`Erro ao apagar produto: ${error.message}`, 'erro');
                 }
             }
         }
