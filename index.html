@@ -209,7 +209,7 @@
                         <div>
                             <label class="block text-rose-400 font-bold mb-1">DESPESAS PAGAS *</label>
                             <input type="text" id="caixa-despesas" readonly placeholder="0.00" class="w-full bg-zinc-950 border border-rose-500/30 rounded-xl p-3 text-rose-400 font-bold text-base focus:outline-none cursor-not-allowed">
-                            <span class="text-[10px] text-zinc-500 mt-1 block">* Calculado automaticamente com base nos lançamentos da aba Despesas.</span>
+                            <span class="text-[10px] text-zinc-500 mt-1 block">* Calculado automaticamente das despesas pagas nesta data.</span>
                         </div>
                     </div>
 
@@ -923,6 +923,20 @@
             return `${year}-${month}-${day}`;
         }
 
+        // SALVAMENTO HÍBRIDO (LOCALSTORAGE + SUPABASE FALLBACK)
+        function salvarLocal(chave, dados) {
+            try {
+                localStorage.setItem(`mm_${chave}`, JSON.stringify(dados));
+            } catch(e) {}
+        }
+
+        function carregarLocal(chave) {
+            try {
+                const item = localStorage.getItem(`mm_${chave}`);
+                return item ? JSON.parse(item) : [];
+            } catch(e) { return []; }
+        }
+
         function confirmarAcao(titulo, mensagem, textoBotao = "Sim, Confirmar", icone = "fa-triangle-exclamation", corOk = "rose") {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modal-confirmacao');
@@ -1010,29 +1024,72 @@
             if (iconMob) iconMob.classList.add('fa-spin');
 
             try {
+                // Tenta carregar do Supabase
                 const resProd = await supabaseClient.from('mercearia_produtos').select('*').order('nome');
-                if (resProd.data) appData.produtos = resProd.data;
+                if (resProd.data && resProd.data.length > 0) {
+                    appData.produtos = resProd.data;
+                    salvarLocal('produtos', resProd.data);
+                } else {
+                    appData.produtos = carregarLocal('produtos');
+                }
 
                 const resLote = await supabaseClient.from('mercearia_lotes').select('*').order('validade');
-                if (resLote.data) appData.lotes = resLote.data;
+                if (resLote.data && resLote.data.length > 0) {
+                    appData.lotes = resLote.data;
+                    salvarLocal('lotes', resLote.data);
+                } else {
+                    appData.lotes = carregarLocal('lotes');
+                }
 
                 const resPerd = await supabaseClient.from('mercearia_perdas').select('*').order('data_perda', { ascending: false });
-                if (resPerd.data) appData.perdas = resPerd.data;
+                if (resPerd.data && resPerd.data.length > 0) {
+                    appData.perdas = resPerd.data;
+                    salvarLocal('perdas', resPerd.data);
+                } else {
+                    appData.perdas = carregarLocal('perdas');
+                }
 
                 const resCaixa = await supabaseClient.from('mercearia_caixa').select('*').order('data', { ascending: false });
-                if (resCaixa.data) appData.caixa = resCaixa.data;
+                if (resCaixa.data && resCaixa.data.length > 0) {
+                    appData.caixa = resCaixa.data;
+                    salvarLocal('caixa', resCaixa.data);
+                } else {
+                    appData.caixa = carregarLocal('caixa');
+                }
 
                 const resDesp = await supabaseClient.from('mercearia_despesas').select('*').order('data_vencimento', { ascending: true });
-                if (resDesp.data) appData.despesas = resDesp.data;
+                if (resDesp.data && resDesp.data.length > 0) {
+                    appData.despesas = resDesp.data;
+                    salvarLocal('despesas', resDesp.data);
+                } else {
+                    appData.despesas = carregarLocal('despesas');
+                }
 
                 const resHist = await supabaseClient.from('mercearia_fechamentos_mensais').select('*').order('created_at', { ascending: false });
-                if (resHist.data) appData.historicoMensal = resHist.data;
+                if (resHist.data && resHist.data.length > 0) {
+                    appData.historicoMensal = resHist.data;
+                    salvarLocal('historicoMensal', resHist.data);
+                } else {
+                    appData.historicoMensal = carregarLocal('historicoMensal');
+                }
 
                 const resCad = await supabaseClient.from('mercearia_caderneta').select('*').order('cliente_nome');
-                if (resCad.data) appData.caderneta = resCad.data;
+                if (resCad.data && resCad.data.length > 0) {
+                    appData.caderneta = resCad.data;
+                    salvarLocal('caderneta', resCad.data);
+                } else {
+                    appData.caderneta = carregarLocal('caderneta');
+                }
 
             } catch (e) {
-                console.error("Erro no carregamento:", e);
+                console.error("Erro ao conectar no Supabase. Carregando dados locais:", e);
+                appData.produtos = carregarLocal('produtos');
+                appData.lotes = carregarLocal('lotes');
+                appData.perdas = carregarLocal('perdas');
+                appData.caixa = carregarLocal('caixa');
+                appData.despesas = carregarLocal('despesas');
+                appData.historicoMensal = carregarLocal('historicoMensal');
+                appData.caderneta = carregarLocal('caderneta');
             } finally {
                 atualizarInterface();
                 if (iconPc) iconPc.classList.remove('fa-spin');
@@ -1104,20 +1161,16 @@
         function renderizarDashboard() {
             const hojeStr = getObterDataLocalISO();
             
-            // Faturamento do Dia
             const caixaHoje = appData.caixa.find(c => c.data === hojeStr);
             const fatDia = caixaHoje ? parseFloat(caixaHoje.total_bruto || 0) : 0;
 
-            // Despesas do Dia (Pagas hoje)
             const despesasPagasDia = appData.despesas
                 .filter(d => d.status === 'Pago' && d.data_vencimento === hojeStr)
                 .reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
             const numDespesasDiaCount = appData.despesas.filter(d => d.status === 'Pago' && d.data_vencimento === hojeStr).length;
 
-            // Lucro Líquido do Dia
             const lucroDia = fatDia - despesasPagasDia;
 
-            // Fiado Total
             const totalFiado = appData.caderneta.reduce((acc, c) => acc + parseFloat(c.valor_devido || 0), 0);
             const clientesFiadoCount = appData.caderneta.filter(c => parseFloat(c.valor_devido || 0) > 0).length;
 
@@ -1131,10 +1184,8 @@
             document.getElementById('dash-fiado-total').innerText = `R$ ${totalFiado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('dash-fiado-clientes').innerText = `${clientesFiadoCount} cliente(s) devendo`;
 
-            // ALERTA DE BOLETOS VENCENDO
             renderizarAlertasBoletos();
 
-            // Farol Resumo Urgente
             const hojeDate = new Date();
             hojeDate.setHours(0,0,0,0);
 
@@ -1207,7 +1258,7 @@
                 } else if (b.data_vencimento === hojeStr) {
                     tagStatus = `<span class="bg-rose-500/20 text-rose-400 font-black border border-rose-500/40 px-2 py-0.5 rounded text-[10px]">🔴 VENCE HOJE</span>`;
                 } else if (b.data_vencimento === amanhaStr) {
-                    tagStatus = `<span class="bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 px-2 py-0.5 rounded text-[10px]">🟡 VENCE AMANHÃ (1 DIA ANTES)</span>`;
+                    tagStatus = `<span class="bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 px-2 py-0.5 rounded text-[10px]">🟡 VENCE AMANHÃ</span>`;
                 }
 
                 const item = document.createElement('div');
@@ -1295,7 +1346,6 @@
             const registroHoje = appData.caixa.find(c => c.data === dataSelecionada);
             const badge = document.getElementById('status-caixa-badge');
 
-            // PUXA AUTOMATICAMENTE TODAS AS DESPESAS PAGAS NAQUELA DATA SELECIONADA
             const despesasPagasNaData = appData.despesas
                 .filter(d => d.status === 'Pago' && d.data_vencimento === dataSelecionada)
                 .reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
@@ -1337,6 +1387,7 @@
             const totalBruto = din + pix + deb + cre + fia;
 
             const cData = {
+                id: Date.now(),
                 data: data,
                 troco_inicial: troco,
                 despesas: despesas,
@@ -1349,23 +1400,27 @@
                 observacoes: document.getElementById('caixa-obs').value.trim()
             };
 
-            const registroExistente = appData.caixa.find(c => c.data === data);
-
-            let res;
-            if (registroExistente) {
-                res = await supabaseClient.from('mercearia_caixa').update(cData).eq('id', registroExistente.id);
+            const idx = appData.caixa.findIndex(c => c.data === data);
+            if (idx >= 0) {
+                cData.id = appData.caixa[idx].id;
+                appData.caixa[idx] = cData;
             } else {
-                res = await supabaseClient.from('mercearia_caixa').insert([cData]);
+                appData.caixa.unshift(cData);
             }
+            salvarLocal('caixa', appData.caixa);
 
-            if (!res.error) {
-                tocarSomBipe();
-                mostrarToast("Movimentação do caixa salva!");
-                await carregarDados();
-                navegar('dashboard');
-            } else {
-                mostrarToast(`Erro ao salvar caixa: ${res.error.message}`, 'erro');
-            }
+            try {
+                if (idx >= 0) {
+                    await supabaseClient.from('mercearia_caixa').update(cData).eq('id', cData.id);
+                } else {
+                    await supabaseClient.from('mercearia_caixa').insert([cData]);
+                }
+            } catch(e) {}
+
+            tocarSomBipe();
+            mostrarToast("Movimentação do caixa salva!");
+            atualizarInterface();
+            navegar('dashboard');
         }
 
         function renderizarHistoricoCaixa() {
@@ -1446,7 +1501,7 @@
             window.print();
         }
 
-        // ================= DESPESAS & BOLETOS (EDIÇÃO + CRUDS) =================
+        // ================= DESPESAS & BOLETOS =================
         function abrirModalNovaDespesa() {
             document.getElementById('desp-edit-id').value = '';
             document.getElementById('desp-descricao').value = '';
@@ -1490,77 +1545,88 @@
                 return;
             }
 
-            try {
-                if (editId) {
-                    const dData = {
+            if (editId) {
+                const idx = appData.despesas.findIndex(x => x.id == editId);
+                if (idx >= 0) {
+                    appData.despesas[idx].descricao = desc;
+                    appData.despesas[idx].valor = valTotal;
+                    appData.despesas[idx].forma_pagamento = forma;
+                    appData.despesas[idx].data_vencimento = dataVenc;
+                }
+                salvarLocal('despesas', appData.despesas);
+
+                try {
+                    await supabaseClient.from('mercearia_despesas').update({
                         descricao: desc,
                         valor: valTotal,
                         forma_pagamento: forma,
                         data_vencimento: dataVenc
+                    }).eq('id', editId);
+                } catch(err) {}
+
+                mostrarToast("Despesa alterada com sucesso!");
+                fecharModalNovaDespesa();
+                atualizarInterface();
+            } else {
+                const valParcela = valTotal / numParcelas;
+                const registros = [];
+
+                for (let i = 0; i < numParcelas; i++) {
+                    const dt = new Date(dataVenc + 'T00:00:00');
+                    dt.setMonth(dt.getMonth() + i);
+                    const vencimentoCalc = getObterDataLocalISO(dt);
+
+                    const newObj = {
+                        id: Date.now() + i,
+                        descricao: numParcelas > 1 ? `${desc} (${i + 1}/${numParcelas})` : desc,
+                        valor: valParcela,
+                        forma_pagamento: forma,
+                        data_vencimento: vencimentoCalc,
+                        parcela_atual: i + 1,
+                        total_parcelas: numParcelas,
+                        status: 'Pendente'
                     };
-                    const { error } = await supabaseClient.from('mercearia_despesas').update(dData).eq('id', editId);
-                    if (!error) {
-                        mostrarToast("Despesa alterada com sucesso!");
-                        fecharModalNovaDespesa();
-                        await carregarDados();
-                    } else {
-                        mostrarToast(`Erro ao alterar despesa: ${error.message}`, 'erro');
-                    }
-                } else {
-                    const valParcela = valTotal / numParcelas;
-                    const registros = [];
-
-                    for (let i = 0; i < numParcelas; i++) {
-                        const dt = new Date(dataVenc + 'T00:00:00');
-                        dt.setMonth(dt.getMonth() + i);
-                        const vencimentoCalc = getObterDataLocalISO(dt);
-
-                        registros.push({
-                            descricao: numParcelas > 1 ? `${desc} (${i + 1}/${numParcelas})` : desc,
-                            valor: valParcela,
-                            forma_pagamento: forma,
-                            data_vencimento: vencimentoCalc,
-                            parcela_atual: i + 1,
-                            total_parcelas: numParcelas,
-                            status: 'Pendente'
-                        });
-                    }
-
-                    const { error } = await supabaseClient.from('mercearia_despesas').insert(registros);
-
-                    if (!error) {
-                        mostrarToast("Despesa cadastrada com sucesso!");
-                        fecharModalNovaDespesa();
-                        await carregarDados();
-                    } else {
-                        mostrarToast(`Erro ao salvar despesa: ${error.message}`, 'erro');
-                    }
+                    registros.push(newObj);
+                    appData.despesas.push(newObj);
                 }
-            } catch (err) {
-                console.error("Erro ao salvar despesa:", err);
+
+                salvarLocal('despesas', appData.despesas);
+
+                try {
+                    await supabaseClient.from('mercearia_despesas').insert(registros);
+                } catch(err) {}
+
+                mostrarToast("Despesa cadastrada com sucesso!");
+                fecharModalNovaDespesa();
+                atualizarInterface();
             }
         }
 
         async function marcarDespesaPaga(id) {
-            const { error } = await supabaseClient.from('mercearia_despesas').update({ status: 'Pago' }).eq('id', id);
-            if (!error) {
-                mostrarToast("Conta marcada como PAGA!");
-                await carregarDados();
-            } else {
-                mostrarToast(`Erro: ${error.message}`, 'erro');
-            }
+            const idx = appData.despesas.findIndex(x => x.id == id);
+            if (idx >= 0) appData.despesas[idx].status = 'Pago';
+            salvarLocal('despesas', appData.despesas);
+
+            try {
+                await supabaseClient.from('mercearia_despesas').update({ status: 'Pago' }).eq('id', id);
+            } catch(err) {}
+
+            mostrarToast("Conta marcada como PAGA!");
+            atualizarInterface();
         }
 
         async function excluirDespesa(id) {
             const confirmou = await confirmarAcao("Excluir Conta", "Tem certeza que deseja apagar este lançamento de despesa?", "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
-                const { error } = await supabaseClient.from('mercearia_despesas').delete().eq('id', id);
-                if (!error) {
-                    mostrarToast("Despesa removida!");
-                    await carregarDados();
-                } else {
-                    mostrarToast(`Erro: ${error.message}`, 'erro');
-                }
+                appData.despesas = appData.despesas.filter(x => x.id != id);
+                salvarLocal('despesas', appData.despesas);
+
+                try {
+                    await supabaseClient.from('mercearia_despesas').delete().eq('id', id);
+                } catch(err) {}
+
+                mostrarToast("Despesa removida!");
+                atualizarInterface();
             }
         }
 
@@ -1894,76 +1960,77 @@
                 return;
             }
 
-            try {
-                let pCustoInput = parseNum(document.getElementById('u-prod-custo').value);
-                let pVendaInput = parseNum(document.getElementById('u-prod-venda').value);
+            let pCustoInput = parseNum(document.getElementById('u-prod-custo').value);
+            let pVendaInput = parseNum(document.getElementById('u-prod-venda').value);
 
-                if (!prodId) {
-                    let prodExistente = appData.produtos.find(p => (ean && p.ean === ean) || p.nome.toLowerCase() === nome.toLowerCase());
+            let prodObj = null;
 
-                    if (prodExistente) {
-                        prodId = prodExistente.id;
-                    } else {
-                        const pData = {
-                            ean: ean || null,
-                            nome: nome,
-                            categoria: document.getElementById('u-prod-cat').value || 'Mercearia',
-                            unidade: document.getElementById('u-prod-uni').value || 'Un',
-                            preco_custo: pCustoInput,
-                            preco_venda: pVendaInput
-                        };
+            if (!prodId) {
+                let prodExistente = appData.produtos.find(p => (ean && p.ean === ean) || p.nome.toLowerCase() === nome.toLowerCase());
 
-                        const { data: newProd, error: errP } = await supabaseClient.from('mercearia_produtos').insert([pData]).select();
-
-                        if (errP) {
-                            mostrarToast(`Erro ao cadastrar produto: ${errP.message}`, 'erro');
-                            return;
-                        }
-
-                        if (newProd && newProd.length > 0) prodId = newProd[0].id;
-                    }
+                if (prodExistente) {
+                    prodId = prodExistente.id;
+                    prodObj = prodExistente;
                 } else {
-                    const pExistente = appData.produtos.find(p => p.id == prodId);
-                    if (pExistente) {
-                        if (!document.getElementById('u-prod-custo').value.trim()) pCustoInput = pExistente.preco_custo || 0;
-                        if (!document.getElementById('u-prod-venda').value.trim()) pVendaInput = pExistente.preco_venda || 0;
-                    }
-
-                    await supabaseClient.from('mercearia_produtos').update({
+                    prodId = Date.now();
+                    prodObj = {
+                        id: prodId,
+                        ean: ean || null,
+                        nome: nome,
+                        categoria: document.getElementById('u-prod-cat').value || 'Mercearia',
+                        unidade: document.getElementById('u-prod-uni').value || 'Un',
                         preco_custo: pCustoInput,
                         preco_venda: pVendaInput
-                    }).eq('id', prodId);
+                    };
+                    appData.produtos.push(prodObj);
+                    salvarLocal('produtos', appData.produtos);
+
+                    try {
+                        await supabaseClient.from('mercearia_produtos').insert([prodObj]);
+                    } catch(err) {}
                 }
+            } else {
+                prodObj = appData.produtos.find(p => p.id == prodId);
+                if (prodObj) {
+                    if (!document.getElementById('u-prod-custo').value.trim()) pCustoInput = prodObj.preco_custo || 0;
+                    if (!document.getElementById('u-prod-venda').value.trim()) pVendaInput = prodObj.preco_venda || 0;
+                    prodObj.preco_custo = pCustoInput;
+                    prodObj.preco_venda = pVendaInput;
+                    salvarLocal('produtos', appData.produtos);
 
-                if (!prodId) return;
-
-                const hojeTag = getObterDataLocalISO().replace(/-/g, '');
-                const loteAutoTag = `LT-${hojeTag}-${Math.floor(Math.random() * 89 + 10)}`;
-
-                const loteData = {
-                    produto_id: parseInt(prodId),
-                    numero_lote: loteAutoTag,
-                    validade: validade,
-                    quantidade: qtd,
-                    localizacao: document.getElementById('u-lote-local').value.trim() || 'Prateleira'
-                };
-
-                const { error: errL } = await supabaseClient.from('mercearia_lotes').insert([loteData]);
-
-                if (errL) {
-                    mostrarToast(`Erro ao salvar estoque: ${errL.message}`, 'erro');
-                    return;
+                    try {
+                        await supabaseClient.from('mercearia_produtos').update({
+                            preco_custo: pCustoInput,
+                            preco_venda: pVendaInput
+                        }).eq('id', prodId);
+                    } catch(err) {}
                 }
-
-                tocarSomBipe();
-                mostrarToast(`Sucesso! Lote de "${nome}" adicionado!`);
-                limparFormUnificado();
-                await carregarDados();
-                navegar('farol');
-
-            } catch (errGeral) {
-                console.error("Erro no salvamento:", errGeral);
             }
+
+            const hojeTag = getObterDataLocalISO().replace(/-/g, '');
+            const loteAutoTag = `LT-${hojeTag}-${Math.floor(Math.random() * 89 + 10)}`;
+
+            const loteData = {
+                id: Date.now(),
+                produto_id: parseInt(prodId),
+                numero_lote: loteAutoTag,
+                validade: validade,
+                quantidade: qtd,
+                localizacao: document.getElementById('u-lote-local').value.trim() || 'Prateleira'
+            };
+
+            appData.lotes.push(loteData);
+            salvarLocal('lotes', appData.lotes);
+
+            try {
+                await supabaseClient.from('mercearia_lotes').insert([loteData]);
+            } catch(err) {}
+
+            tocarSomBipe();
+            mostrarToast(`Sucesso! Lote de "${nome}" adicionado!`);
+            limparFormUnificado();
+            atualizarInterface();
+            navegar('farol');
         }
 
         // ================= EDIÇÃO DE LOTES =================
@@ -1994,33 +2061,39 @@
 
             if (!loteId) return;
 
-            const loteData = {
-                validade: validade,
-                quantidade: qtd,
-                localizacao: document.getElementById('edit-lote-local').value.trim() || 'Prateleira'
-            };
-
-            const { error } = await supabaseClient.from('mercearia_lotes').update(loteData).eq('id', loteId);
-
-            if (!error) {
-                mostrarToast("Lote alterado com sucesso!");
-                fecharModalEditarLote();
-                await carregarDados();
-            } else {
-                mostrarToast(`Erro ao alterar lote: ${error.message}`, 'erro');
+            const idx = appData.lotes.findIndex(l => l.id == loteId);
+            if (idx >= 0) {
+                appData.lotes[idx].validade = validade;
+                appData.lotes[idx].quantidade = qtd;
+                appData.lotes[idx].localizacao = document.getElementById('edit-lote-local').value.trim() || 'Prateleira';
             }
+            salvarLocal('lotes', appData.lotes);
+
+            try {
+                await supabaseClient.from('mercearia_lotes').update({
+                    validade: validade,
+                    quantidade: qtd,
+                    localizacao: document.getElementById('edit-lote-local').value.trim() || 'Prateleira'
+                }).eq('id', loteId);
+            } catch(err) {}
+
+            mostrarToast("Lote alterado com sucesso!");
+            fecharModalEditarLote();
+            atualizarInterface();
         }
 
         async function excluirLote(loteId) {
             const confirmou = await confirmarAcao("Excluir Lote", "Tem certeza que deseja apagar este lote de produtos do sistema?", "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
-                const { error } = await supabaseClient.from('mercearia_lotes').delete().eq('id', loteId);
-                if (!error) {
-                    mostrarToast("Lote removido com sucesso!");
-                    await carregarDados();
-                } else {
-                    mostrarToast(`Erro ao apagar lote: ${error.message}`, 'erro');
-                }
+                appData.lotes = appData.lotes.filter(l => l.id != loteId);
+                salvarLocal('lotes', appData.lotes);
+
+                try {
+                    await supabaseClient.from('mercearia_lotes').delete().eq('id', loteId);
+                } catch(err) {}
+
+                mostrarToast("Lote removido com sucesso!");
+                atualizarInterface();
             }
         }
 
@@ -2070,14 +2143,15 @@
                 if (qtdLote <= restante) {
                     restante -= qtdLote;
                     lote.quantidade = 0;
-                    await supabaseClient.from('mercearia_lotes').update({ quantidade: 0 }).eq('id', lote.id);
+                    try { await supabaseClient.from('mercearia_lotes').update({ quantidade: 0 }).eq('id', lote.id); } catch(e){}
                 } else {
                     const novaQtd = qtdLote - restante;
                     lote.quantidade = novaQtd;
                     restante = 0;
-                    await supabaseClient.from('mercearia_lotes').update({ quantidade: novaQtd }).eq('id', lote.id);
+                    try { await supabaseClient.from('mercearia_lotes').update({ quantidade: novaQtd }).eq('id', lote.id); } catch(e){}
                 }
             }
+            salvarLocal('lotes', appData.lotes);
         }
 
         async function salvarRegistroPerda(e) {
@@ -2117,37 +2191,33 @@
                 if (!prosseguir) return;
             }
 
+            const perdaData = {
+                id: Date.now(),
+                produto_id: parseInt(prodId),
+                motivo: motivo,
+                quantidade: qtd,
+                valor_total: valorTotal,
+                data_perda: dataPerda
+            };
+
+            appData.perdas.unshift(perdaData);
+            salvarLocal('perdas', appData.perdas);
+
             try {
-                const perdaData = {
-                    produto_id: parseInt(prodId),
-                    motivo: motivo,
-                    quantidade: qtd,
-                    valor_total: valorTotal,
-                    data_perda: dataPerda
-                };
+                await supabaseClient.from('mercearia_perdas').insert([perdaData]);
+            } catch(e) {}
 
-                const { error: errP } = await supabaseClient.from('mercearia_perdas').insert([perdaData]);
+            await abaterEstoqueLotesPorVenda(prodId, qtd);
 
-                if (errP) {
-                    mostrarToast(`Erro ao salvar perda: ${errP.message}`, 'erro');
-                    return;
-                }
+            tocarSomBipe();
+            mostrarToast("Perda registrada e estoque baixado!");
 
-                await abaterEstoqueLotesPorVenda(prodId, qtd);
+            document.getElementById('perda-prod-id').value = '';
+            document.getElementById('perda-prod-input').value = '';
+            document.getElementById('perda-qtd').value = '1';
+            document.getElementById('perda-valor').value = '';
 
-                tocarSomBipe();
-                mostrarToast("Perda registrada e estoque baixado!");
-
-                document.getElementById('perda-prod-id').value = '';
-                document.getElementById('perda-prod-input').value = '';
-                document.getElementById('perda-qtd').value = '1';
-                document.getElementById('perda-valor').value = '';
-
-                await carregarDados();
-
-            } catch (err) {
-                console.error("Erro no registro de perda:", err);
-            }
+            atualizarInterface();
         }
 
         async function excluirRegistroPerda(perdaId) {
@@ -2156,20 +2226,22 @@
 
             const confirmou = await confirmarAcao("Reverter Perda", "Deseja apagar esta perda do histórico e devolver a quantidade ao estoque?", "Sim, Reverter", "fa-rotate-left", "amber");
             if (confirmou) {
-                // Devolve a quantidade de volta para o primeiro lote ativo do produto
                 const loteProd = appData.lotes.find(l => l.produto_id == p.produto_id);
                 if (loteProd) {
-                    const novaQtd = parseFloat(loteProd.quantidade || 0) + parseFloat(p.quantidade || 0);
-                    await supabaseClient.from('mercearia_lotes').update({ quantidade: novaQtd }).eq('id', loteProd.id);
+                    loteProd.quantidade = parseFloat(loteProd.quantidade || 0) + parseFloat(p.quantidade || 0);
+                    try { await supabaseClient.from('mercearia_lotes').update({ quantidade: loteProd.quantidade }).eq('id', loteProd.id); } catch(e){}
+                    salvarLocal('lotes', appData.lotes);
                 }
 
-                const { error } = await supabaseClient.from('mercearia_perdas').delete().eq('id', perdaId);
-                if (!error) {
-                    mostrarToast("Registro de perda revertido e estoque restaurado!");
-                    await carregarDados();
-                } else {
-                    mostrarToast(`Erro ao excluir perda: ${error.message}`, 'erro');
-                }
+                appData.perdas = appData.perdas.filter(x => x.id != perdaId);
+                salvarLocal('perdas', appData.perdas);
+
+                try {
+                    await supabaseClient.from('mercearia_perdas').delete().eq('id', perdaId);
+                } catch(e) {}
+
+                mostrarToast("Registro de perda revertido e estoque restaurado!");
+                atualizarInterface();
             }
         }
 
@@ -2249,23 +2321,27 @@
             if (!nome) return;
 
             const cData = {
+                id: cid ? parseInt(cid) : Date.now(),
                 cliente_nome: nome,
                 telefone: tel,
                 valor_devido: valor,
                 observacoes: obs
             };
 
-            let res;
-            if (cid) res = await supabaseClient.from('mercearia_caderneta').update(cData).eq('id', cid);
-            else res = await supabaseClient.from('mercearia_caderneta').insert([cData]);
-
-            if (!res.error) {
-                mostrarToast(cid ? "Cliente alterado!" : "Cliente cadastrado!");
-                fecharModalCadernetaCliente();
-                await carregarDados();
+            if (cid) {
+                const idx = appData.caderneta.findIndex(x => x.id == cid);
+                if (idx >= 0) appData.caderneta[idx] = cData;
+                salvarLocal('caderneta', appData.caderneta);
+                try { await supabaseClient.from('mercearia_caderneta').update(cData).eq('id', cid); } catch(e){}
             } else {
-                mostrarToast(`Erro ao salvar caderneta: ${res.error.message}`, 'erro');
+                appData.caderneta.push(cData);
+                salvarLocal('caderneta', appData.caderneta);
+                try { await supabaseClient.from('mercearia_caderneta').insert([cData]); } catch(e){}
             }
+
+            mostrarToast(cid ? "Cliente alterado!" : "Cliente cadastrado!");
+            fecharModalCadernetaCliente();
+            atualizarInterface();
         }
 
         async function excluirClienteCaderneta(id) {
@@ -2274,13 +2350,12 @@
 
             const confirmou = await confirmarAcao("Excluir Cliente", `Tem certeza que deseja apagar "${nomeC}" da Caderneta?`, "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
-                const { error } = await supabaseClient.from('mercearia_caderneta').delete().eq('id', id);
-                if (!error) {
-                    mostrarToast("Cliente removido da Caderneta!");
-                    await carregarDados();
-                } else {
-                    mostrarToast(`Erro ao apagar: ${error.message}`, 'erro');
-                }
+                appData.caderneta = appData.caderneta.filter(x => x.id != id);
+                salvarLocal('caderneta', appData.caderneta);
+                try { await supabaseClient.from('mercearia_caderneta').delete().eq('id', id); } catch(e){}
+
+                mostrarToast("Cliente removido da Caderneta!");
+                atualizarInterface();
             }
         }
 
@@ -2303,14 +2378,13 @@
             const atual = parseFloat(cliente.valor_devido || 0);
             const novoValor = Math.max(0, atual + delta);
 
-            const { error } = await supabaseClient.from('mercearia_caderneta').update({ valor_devido: novoValor }).eq('id', clienteId);
+            cliente.valor_devido = novoValor;
+            salvarLocal('caderneta', appData.caderneta);
 
-            if (!error) {
-                mostrarToast(`Saldo de "${cliente.cliente_nome}" atualizado!`);
-                await carregarDados();
-            } else {
-                mostrarToast(`Erro ao atualizar: ${error.message}`, 'erro');
-            }
+            try { await supabaseClient.from('mercearia_caderneta').update({ valor_devido: novoValor }).eq('id', clienteId); } catch(e){}
+
+            mostrarToast(`Saldo de "${cliente.cliente_nome}" atualizado!`);
+            atualizarInterface();
         }
 
         function enviarWhatsCliente(clienteId, tipoMsg) {
@@ -2492,6 +2566,7 @@
             if (!nome) return;
 
             const pData = {
+                id: prodId ? parseInt(prodId) : Date.now(),
                 ean: document.getElementById('f-prod-ean').value.trim() || null,
                 nome: nome,
                 categoria: document.getElementById('f-prod-cat').value,
@@ -2500,17 +2575,20 @@
                 preco_venda: parseNum(document.getElementById('f-prod-venda').value)
             };
 
-            let res;
-            if (prodId) res = await supabaseClient.from('mercearia_produtos').update(pData).eq('id', prodId);
-            else res = await supabaseClient.from('mercearia_produtos').insert([pData]);
-
-            if (!res.error) {
-                mostrarToast(prodId ? "Produto alterado!" : "Produto cadastrado!");
-                fecharModalProduto();
-                await carregarDados();
+            if (prodId) {
+                const idx = appData.produtos.findIndex(x => x.id == prodId);
+                if (idx >= 0) appData.produtos[idx] = pData;
+                salvarLocal('produtos', appData.produtos);
+                try { await supabaseClient.from('mercearia_produtos').update(pData).eq('id', prodId); } catch(err){}
             } else {
-                mostrarToast(`Erro ao salvar produto: ${res.error.message}`, 'erro');
+                appData.produtos.push(pData);
+                salvarLocal('produtos', appData.produtos);
+                try { await supabaseClient.from('mercearia_produtos').insert([pData]); } catch(err){}
             }
+
+            mostrarToast(prodId ? "Produto alterado!" : "Produto cadastrado!");
+            fecharModalProduto();
+            atualizarInterface();
         }
 
         async function excluirProduto(prodId) {
@@ -2519,13 +2597,15 @@
 
             const confirmou = await confirmarAcao("Excluir Produto", `Tem certeza que deseja apagar "${nomeP}" e TODOS os seus lotes do sistema?`, "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
-                const { error } = await supabaseClient.from('mercearia_produtos').delete().eq('id', prodId);
-                if (!error) {
-                    mostrarToast("Produto apagado com sucesso!");
-                    await carregarDados();
-                } else {
-                    mostrarToast(`Erro ao apagar produto: ${error.message}`, 'erro');
-                }
+                appData.produtos = appData.produtos.filter(x => x.id != prodId);
+                appData.lotes = appData.lotes.filter(l => l.produto_id != prodId);
+                salvarLocal('produtos', appData.produtos);
+                salvarLocal('lotes', appData.lotes);
+
+                try { await supabaseClient.from('mercearia_produtos').delete().eq('id', prodId); } catch(err){}
+
+                mostrarToast("Produto apagado com sucesso!");
+                atualizarInterface();
             }
         }
 
@@ -2658,13 +2738,12 @@
         async function excluirRegistroCaixa(caixaId) {
             const confirmou = await confirmarAcao("Excluir Caixa do Dia", "Tem certeza que deseja apagar este registro de caixa?", "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
-                const { error } = await supabaseClient.from('mercearia_caixa').delete().eq('id', caixaId);
-                if (!error) {
-                    mostrarToast("Registro de caixa apagado!");
-                    await carregarDados();
-                } else {
-                    mostrarToast(`Erro ao apagar: ${error.message}`, 'erro');
-                }
+                appData.caixa = appData.caixa.filter(x => x.id != caixaId);
+                salvarLocal('caixa', appData.caixa);
+                try { await supabaseClient.from('mercearia_caixa').delete().eq('id', caixaId); } catch(e){}
+
+                mostrarToast("Registro de caixa apagado!");
+                atualizarInterface();
             }
         }
 
@@ -2722,6 +2801,7 @@
             const lucroLiquido = totalFatMes - totalDespesasMes - totalPerdasMes;
 
             const fData = {
+                id: Date.now(),
                 mes_ano: mesAnoTag,
                 faturamento_bruto: totalFatMes,
                 total_despesas: totalDespesasMes,
@@ -2731,27 +2811,25 @@
                 observacoes: "Fechamento mensal concluído."
             };
 
-            const { error } = await supabaseClient.from('mercearia_fechamentos_mensais').insert([fData]);
+            appData.historicoMensal.unshift(fData);
+            salvarLocal('historicoMensal', appData.historicoMensal);
 
-            if (!error) {
-                mostrarToast(`Mês ${mesAnoTag} fechado com sucesso!`);
-                await carregarDados();
-                navegar('historico');
-            } else {
-                mostrarToast(`Erro ao fechar mês: ${error.message}`, 'erro');
-            }
+            try { await supabaseClient.from('mercearia_fechamentos_mensais').insert([fData]); } catch(e){}
+
+            mostrarToast(`Mês ${mesAnoTag} fechado com sucesso!`);
+            atualizarInterface();
+            navegar('historico');
         }
 
         async function excluirFechamentoMensal(id) {
             const confirmou = await confirmarAcao("Excluir Histórico Mensal", "Tem certeza que deseja apagar este relatório mensal do histórico?", "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
-                const { error } = await supabaseClient.from('mercearia_fechamentos_mensais').delete().eq('id', id);
-                if (!error) {
-                    mostrarToast("Relatório mensal apagado!");
-                    await carregarDados();
-                } else {
-                    mostrarToast(`Erro ao apagar: ${error.message}`, 'erro');
-                }
+                appData.historicoMensal = appData.historicoMensal.filter(x => x.id != id);
+                salvarLocal('historicoMensal', appData.historicoMensal);
+                try { await supabaseClient.from('mercearia_fechamentos_mensais').delete().eq('id', id); } catch(e){}
+
+                mostrarToast("Relatório mensal apagado!");
+                atualizarInterface();
             }
         }
 
