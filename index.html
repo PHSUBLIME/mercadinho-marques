@@ -24,7 +24,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* FORMATO IMPRESSÃO A4 */
         @media print {
             @page { size: A4 portrait; margin: 12mm; }
             .no-print, header, nav, aside, button, .pc-nav-btn { display: none !important; }
@@ -37,7 +36,7 @@
 </head>
 <body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col md:flex-row justify-between" onclick="desbloquearAudioNoClique()" ontouchstart="desbloquearAudioNoClique()">
 
-    <!-- BARRA LATERAL ESQUERDA (SIDEBAR DESKTOP) -->
+    <!-- BARRA LATERAL ESQUERDA (DESKTOP) -->
     <aside class="hidden md:flex flex-col w-64 bg-zinc-900 border-r border-zinc-800 p-4 fixed left-0 top-0 bottom-0 z-50 no-print justify-between shrink-0">
         <div class="space-y-6">
             <!-- LOGO -->
@@ -270,12 +269,10 @@
             </div>
         </section>
 
-        <!-- ================= SEÇÃO 3: DESPESAS & BOLETOS (ESTILO PHSUBLIME) ================= -->
+        <!-- ================= SEÇÃO 3: DESPESAS & BOLETOS ================= -->
         <section id="secao-despesas" class="secao-conteudo hidden space-y-6">
             <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-6xl mx-auto space-y-6 shadow-2xl">
-                
-                <!-- CABEÇALHO COM CARDS KPI DE DESPESAS (IGUAL PHSUBLIME) -->
-                <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div class="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                     <div>
                         <h2 class="text-base md:text-xl font-black text-rose-400 flex items-center gap-2">
                             <i class="fa-solid fa-file-invoice-dollar"></i> Controle de Despesas & Boletos
@@ -292,7 +289,7 @@
                     </div>
                 </div>
 
-                <!-- CARDS DE RESUMO DE DESPESAS (IGUAL PHSUBLIME) -->
+                <!-- CARDS DE RESUMO DE DESPESAS -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
                         <span class="text-[10px] text-zinc-400 font-bold uppercase block">Despesas Pagas (Mês)</span>
@@ -314,7 +311,7 @@
                     <input type="text" id="busca-despesas" onkeyup="renderizarDespesas()" placeholder="Pesquisar por fornecedor, descrição, tipo de pagamento ou status..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
                 </div>
 
-                <!-- TABELA DETALHADA DE DESPESAS (IGUAL PHSUBLIME) -->
+                <!-- TABELA DE DESPESAS -->
                 <div class="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-950">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-zinc-300">
@@ -528,7 +525,7 @@
             </div>
         </section>
 
-        <!-- ================= SEÇÃO 7: CADERNETA / CLIENTES FIADO (ESTILO PHSUBLIME) ================= -->
+        <!-- ================= SEÇÃO 7: CADERNETA / CLIENTES FIADO ================= -->
         <section id="secao-caderneta" class="secao-conteudo hidden space-y-6">
             <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-6xl mx-auto space-y-6 shadow-2xl">
                 <div class="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
@@ -548,7 +545,6 @@
                     <input type="text" id="busca-caderneta" onkeyup="renderizarCaderneta()" placeholder="Pesquisar por nome ou telefone do cliente..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
                 </div>
 
-                <!-- TABELA DE CLIENTES FIADO (ESTILO PHSUBLIME) -->
                 <div class="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-950">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-zinc-300">
@@ -589,7 +585,7 @@
             <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"></div>
         </section>
 
-        <!-- ================= SEÇÃO 9: FINANCEIRO (ESTILO PHSUBLIME) ================= -->
+        <!-- ================= SEÇÃO 9: FINANCEIRO ================= -->
         <section id="secao-financeiro" class="secao-conteudo hidden space-y-6">
             <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-6xl mx-auto space-y-6 shadow-2xl">
                 <div class="border-b border-zinc-800 pb-4">
@@ -626,7 +622,6 @@
                     <strong class="text-xl md:text-2xl font-black text-blue-400" id="fin-lucro-liquido-total">R$ 0,00</strong>
                 </div>
 
-                <!-- EXTRATO GERAL DE MOVIMENTAÇÕES (IGUAL PHSUBLIME) -->
                 <div class="space-y-3 pt-2">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
                         <i class="fa-solid fa-list-check"></i> Histórico Geral de Movimentações (Tempo Real)
@@ -652,7 +647,7 @@
             </div>
         </section>
 
-        <!-- ================= SEÇÃO 10: HISTÓRICO (DIÁRIO & MENSAL) ================= -->
+        <!-- ================= SEÇÃO 10: HISTÓRICO ================= -->
         <section id="secao-historico" class="secao-conteudo hidden space-y-6">
             <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
                 <div class="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
@@ -981,7 +976,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        // SALVAMENTO HÍBRIDO (LOCALSTORAGE + SUPABASE FALLBACK)
         function salvarLocal(chave, dados) {
             try {
                 localStorage.setItem(`mm_${chave}`, JSON.stringify(dados));
@@ -1155,17 +1149,17 @@
         }
 
         function atualizarInterface() {
-            renderizarDashboard();
-            renderizarCaixaStatus();
-            renderizarDespesas();
-            renderizarFarol();
-            renderizarProdutos();
-            renderizarHistoricoPerdas();
-            renderizarHistoricoMensal();
-            renderizarHistoricoDiario();
-            renderizarCaderneta();
-            renderizarFinanceiro();
-            popularDatalists();
+            try { renderizarDashboard(); } catch(e){ console.error("Erro Dashboard:", e); }
+            try { renderizarCaixaStatus(); } catch(e){ console.error("Erro Caixa:", e); }
+            try { renderizarDespesas(); } catch(e){ console.error("Erro Despesas:", e); }
+            try { renderizarFarol(); } catch(e){ console.error("Erro Farol:", e); }
+            try { renderizarProdutos(); } catch(e){ console.error("Erro Produtos:", e); }
+            try { renderizarHistoricoPerdas(); } catch(e){ console.error("Erro Perdas:", e); }
+            try { renderizarHistoricoMensal(); } catch(e){ console.error("Erro Histórico Mensal:", e); }
+            try { renderizarHistoricoDiario(); } catch(e){ console.error("Erro Histórico Diário:", e); }
+            try { renderizarCaderneta(); } catch(e){ console.error("Erro Caderneta:", e); }
+            try { renderizarFinanceiro(); } catch(e){ console.error("Erro Financeiro:", e); }
+            try { popularDatalists(); } catch(e){}
 
             const hoje = getObterDataLocalISO();
             if (document.getElementById('caixa-data') && !document.getElementById('caixa-data').value) {
@@ -1558,7 +1552,7 @@
             window.print();
         }
 
-        // ================= DESPESAS & BOLETOS (EDIÇÃO + CRUDS) =================
+        // ================= DESPESAS & BOLETOS =================
         function abrirModalNovaDespesa() {
             document.getElementById('desp-edit-id').value = '';
             document.getElementById('desp-descricao').value = '';
@@ -1703,7 +1697,6 @@
 
             despesasFiltradas.sort((a, b) => new Date(b.data_vencimento) - new Date(a.data_vencimento));
 
-            // Atualiza CARDS DE RESUMO DE DESPESAS (Igual PHSUBLIME)
             const pagas = appData.despesas.filter(d => d.status === 'Pago').reduce((a, b) => a + parseFloat(b.valor || 0), 0);
             const pendentes = appData.despesas.filter(d => d.status === 'Pendente').reduce((a, b) => a + parseFloat(b.valor || 0), 0);
             const totalGasto = pagas + pendentes;
@@ -2699,14 +2692,13 @@
             document.getElementById('fin-fiado-receber').innerText = `R$ ${totalFiadoReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('fin-lucro-liquido-total').innerText = `R$ ${lucroLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-            // EXTRATO UNIFICADO EM TEMPO REAL (ESTILO PHSUBLIME)
+            // EXTRATO UNIFICADO EM TEMPO REAL
             const tbodyExtrato = document.getElementById('tbody-financeiro-extrato');
             if (!tbodyExtrato) return;
             tbodyExtrato.innerHTML = '';
 
             let extratoList = [];
 
-            // Adiciona Entradas de Caixa
             appData.caixa.forEach(c => {
                 extratoList.push({
                     data: c.data,
@@ -2718,7 +2710,6 @@
                 });
             });
 
-            // Adiciona Saídas de Despesas
             appData.despesas.forEach(d => {
                 if (d.status === 'Pago') {
                     extratoList.push({
@@ -2732,7 +2723,6 @@
                 }
             });
 
-            // Adiciona Saídas por Perdas
             appData.perdas.forEach(p => {
                 const prod = appData.produtos.find(x => x.id == p.produto_id);
                 extratoList.push({
@@ -2924,7 +2914,7 @@
                 total_perdas: totalPerdasMes,
                 lucro_liquido: lucroLiquido,
                 data_fechamento: getObterDataLocalISO(),
-observacoes: "Fechamento mensal concluído."
+                observacoes: "Fechamento mensal concluído."
             };
 
             appData.historicoMensal.unshift(fData);
