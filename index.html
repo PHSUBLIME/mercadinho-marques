@@ -24,7 +24,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* FORMATO IMPRESSÃO EM FOLHA A4 PERFEITA */
         @media print {
             @page { size: A4 portrait; margin: 12mm; }
             .no-print, header, nav, aside, button, .pc-nav-btn { display: none !important; }
@@ -37,7 +36,7 @@
 </head>
 <body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col md:flex-row justify-between" onclick="desbloquearAudioNoClique()" ontouchstart="desbloquearAudioNoClique()">
 
-    <!-- BARRA LATERAL ESQUERDA (SIDEBAR DESKTOP - ESTILO PHSUBLIME) -->
+    <!-- BARRA LATERAL ESQUERDA (DESKTOP) -->
     <aside class="hidden md:flex flex-col w-64 bg-zinc-900 border-r border-zinc-800 p-4 fixed left-0 top-0 bottom-0 z-50 no-print justify-between shrink-0">
         <div class="space-y-6">
             <!-- LOGO -->
@@ -51,7 +50,7 @@
                 </div>
             </div>
 
-            <!-- MENU DE NAVEGAÇÃO VERTICAL -->
+            <!-- MENU VERTICAL -->
             <nav class="space-y-1.5" id="menu-sidebar-pc">
                 <button onclick="navegar('dashboard')" id="pc-nav-dashboard" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-bold text-xs transition-all text-emerald-400 bg-emerald-500/10 border-l-4 border-emerald-400">
                     <i class="fa-solid fa-chart-pie text-base"></i> Painel
@@ -116,7 +115,6 @@
 
         <!-- ================= SEÇÃO 1: DASHBOARD ================= -->
         <section id="secao-dashboard" class="secao-conteudo space-y-6">
-            <!-- CARDS KPI DO DIA -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div class="bg-emerald-950/20 border border-emerald-800/50 p-4 rounded-2xl shadow-md">
                     <span class="text-[10px] md:text-xs font-extrabold uppercase text-emerald-400 tracking-wider block">Faturamento do Dia</span>
@@ -143,7 +141,6 @@
                 </div>
             </div>
 
-            <!-- BOLETOS E CONTAS A VENCER (ALERTA DE DESTAQUE COM AVISO DE 1 DIA ANTES) -->
             <div id="box-alerta-boletos" class="hidden bg-amber-950/40 border-2 border-amber-500/80 p-4 rounded-2xl space-y-2 shadow-xl animate-pulse">
                 <div class="flex items-center justify-between border-b border-amber-500/30 pb-2">
                     <h3 class="text-xs md:text-sm font-black text-amber-400 flex items-center gap-2">
@@ -155,7 +152,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- GRÁFICO FINANCEIRO -->
                 <div class="lg:col-span-2 bg-zinc-900 p-5 rounded-2xl border border-zinc-800 space-y-4">
                     <div class="border-b border-zinc-800 pb-3 flex justify-between items-center">
                         <div>
@@ -170,7 +166,6 @@
                     </div>
                 </div>
 
-                <!-- ALERTA URGENTE DE VALIDADE -->
                 <div class="bg-zinc-900 p-5 rounded-2xl border border-zinc-800 space-y-3 flex flex-col justify-between">
                     <div>
                         <div class="border-b border-zinc-800 pb-3 flex justify-between items-center">
@@ -266,6 +261,11 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="pt-4 border-t border-zinc-800 space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Histórico de Caixas Anteriores</h3>
+                    <div id="lista-caixa-historico" class="space-y-2 text-xs"></div>
+                </div>
             </div>
         </section>
 
@@ -609,7 +609,6 @@
                     </button>
                 </div>
 
-                <!-- GUIAS DE NAVEGAÇÃO INTERNA DO HISTÓRICO -->
                 <div class="flex gap-2 border-b border-zinc-800 pb-3">
                     <button onclick="alternarAbaHistorico('diario')" id="btn-hist-diario" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-zinc-950">Caixas Diários</button>
                     <button onclick="alternarAbaHistorico('mensal')" id="btn-hist-mensal" class="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-400 border border-zinc-700">Fechamentos Mensais</button>
@@ -631,7 +630,7 @@
 
     </main>
 
-    <!-- AREA EXCLUSIVA DE IMPRESSÃO DE PDF (SÓ APARECE AO IMPRIMIR) -->
+    <!-- AREA EXCLUSIVA DE IMPRESSÃO DE PDF (A4) -->
     <div id="area-impressao-recibo" class="hidden"></div>
 
     <!-- BARRA DE NAVEGAÇÃO MOBILE FIXA -->
@@ -663,6 +662,230 @@
             <span class="text-[10px]">Farol</span>
         </button>
     </nav>
+
+    <!-- MODAIS DE SISTEMA -->
+
+    <!-- MODAL CONFIRMAÇÃO PERSONALIZADO -->
+    <div id="modal-confirmacao" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[2000] hidden flex items-center justify-center p-4">
+        <div id="modal-confirmacao-box" class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl scale-95 opacity-0 transition-all duration-200">
+            <div id="modal-confirmacao-icone" class="w-14 h-14 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-lg">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-black text-white" id="modal-confirmacao-titulo">Confirmar Ação</h3>
+                <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed" id="modal-confirmacao-mensagem">Deseja realmente prosseguir?</p>
+            </div>
+            <div class="flex gap-2.5 pt-2" id="modal-confirmacao-botoes">
+                <button id="btn-confirmar-cancelar" class="w-1/2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-2.5 rounded-xl text-xs transition-all border border-zinc-700">
+                    Cancelar
+                </button>
+                <button id="btn-confirmar-ok" class="w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-rose-950/50">
+                    Sim, Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOVA / EDITAR DESPESA -->
+    <div id="modal-despesa" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-sm font-black text-rose-400 flex items-center gap-2" id="desp-modal-titulo">
+                    <i class="fa-solid fa-file-circle-plus"></i> Nova Despesa ou Boleto
+                </h3>
+                <button onclick="fecharModalNovaDespesa()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="salvarNovaDespesa(event)" class="space-y-3 text-xs md:text-sm">
+                <input type="hidden" id="desp-edit-id">
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">Descrição / Fornecedor *</label>
+                    <input type="text" id="desp-descricao" required placeholder="Ex: Boleto Ambev, Sacolas, Conta de Luz" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none focus:border-rose-400">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Valor Total (R$) *</label>
+                        <input type="text" id="desp-valor" required placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Forma Pagto *</label>
+                        <select id="desp-forma" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                            <option value="Dinheiro">Dinheiro (Gaveta)</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Boleto">Boleto</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Débito">Cartão de Débito</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-amber-400 font-bold mb-1">1º Vencimento *</label>
+                        <input type="date" id="desp-vencimento" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-3 text-white font-bold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Nº Parcelas</label>
+                        <select id="desp-parcelas" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                            <option value="1">1x (À Vista)</option>
+                            <option value="2">2x</option>
+                            <option value="3">3x</option>
+                            <option value="4">4x</option>
+                            <option value="5">5x</option>
+                            <option value="6">6x</option>
+                            <option value="10">10x</option>
+                            <option value="12">12x</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalNovaDespesa()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-rose-600 text-white font-bold rounded-xl">Salvar Despesa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR LOTE -->
+    <div id="modal-editar-lote" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-sm font-black text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Editar Validade e Quantidade
+                </h3>
+                <button onclick="fecharModalEditarLote()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="salvarLoteEdicao(event)" class="space-y-3 text-xs md:text-sm">
+                <input type="hidden" id="edit-lote-id">
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">Produto</label>
+                    <input type="text" id="edit-lote-prod-nome" disabled class="w-full bg-zinc-800/60 border border-zinc-700/60 rounded-xl p-3 text-zinc-300 font-bold focus:outline-none cursor-not-allowed">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-amber-400 font-black uppercase mb-1">Validade *</label>
+                        <input type="date" id="edit-lote-val" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-3 text-white font-bold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Quantidade *</label>
+                        <input type="number" id="edit-lote-qtd" required min="0" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">Prateleira / Local</label>
+                    <input type="text" id="edit-lote-local" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalEditarLote()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-amber-400 text-zinc-950 font-bold rounded-xl">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CAMERA SCANNER -->
+    <div id="modal-camera" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] hidden flex flex-col items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-5 space-y-3 text-center shadow-2xl relative">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                <h3 class="text-xs font-black text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-camera"></i> Apunte a Câmera para o Código</h3>
+                <button onclick="fecharCameraScanner()" class="text-zinc-400 text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="reader" class="w-full bg-black rounded-2xl overflow-hidden border border-amber-500/40 min-h-[220px]"></div>
+            <button onclick="fecharCameraScanner()" class="w-full bg-zinc-800 text-zinc-300 font-bold py-2.5 rounded-xl text-xs border border-zinc-700">Fechar Câmera</button>
+        </div>
+    </div>
+
+    <!-- MODAL CADASTRO / EDIÇÃO PRODUTO -->
+    <div id="modal-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-sm font-black text-blue-400" id="prod-modal-titulo">Novo Produto</h3>
+                <button onclick="fecharModalProduto()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="salvarProdutoForm(event)" class="space-y-3 text-xs md:text-sm">
+                <input type="hidden" id="f-prod-id">
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">EAN (Código de Barras)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="f-prod-ean" placeholder="789..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none">
+                        <button type="button" onclick="abrirCameraScanner('prod')" class="bg-amber-500 text-zinc-950 font-bold px-3 py-3 rounded-xl">📷</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">Nome do Produto *</label>
+                    <input type="text" id="f-prod-nome" required placeholder="Ex: Arroz Tio João 5kg" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Categoria</label>
+                        <select id="f-prod-cat" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                            <option value="Mercearia">Mercearia</option>
+                            <option value="Laticínios">Laticínios</option>
+                            <option value="Bebidas">Bebidas</option>
+                            <option value="Padaria">Padaria</option>
+                            <option value="Limpeza">Limpeza</option>
+                            <option value="Frios">Frios</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Unidade</label>
+                        <select id="f-prod-uni" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                            <option value="Un">Unidade (Un)</option>
+                            <option value="Kg">Quilo (Kg)</option>
+                            <option value="L">Litro (L)</option>
+                            <option value="Cx">Caixa (Cx)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 font-semibold mb-1">Preço Custo (R$)</label>
+                        <input type="text" id="f-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-emerald-400 font-semibold mb-1">Preço Venda (R$)</label>
+                        <input type="text" id="f-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-emerald-400 font-bold focus:outline-none">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalProduto()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CADERNETA / CLIENTE -->
+    <div id="modal-caderneta-cliente" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+                <h3 class="text-sm font-black text-purple-400" id="caderneta-modal-titulo">Novo Cliente Fiado</h3>
+                <button onclick="fecharModalCadernetaCliente()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="salvarClienteCaderneta(event)" class="space-y-3 text-xs md:text-sm">
+                <input type="hidden" id="c-caderneta-id">
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">Nome do Cliente *</label>
+                    <input type="text" id="c-caderneta-nome" required placeholder="Ex: Dona Maria (Casa 4)" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">Telefone / Whats</label>
+                    <input type="text" id="c-caderneta-tel" placeholder="(21) 90000-0000" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-purple-400 font-bold mb-1">Saldo Devido Inicial (R$)</label>
+                    <input type="text" id="c-caderneta-valor" placeholder="0.00" class="w-full bg-zinc-800 border border-purple-500/60 rounded-xl p-3 text-purple-300 font-bold focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 font-semibold mb-1">Observações</label>
+                    <textarea id="c-caderneta-obs" rows="2" placeholder="Observações..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                    <button type="button" onclick="fecharModalCadernetaCliente()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 bg-purple-600 text-white font-bold rounded-xl">Salvar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- TOAST DE NOTIFICAÇÃO -->
     <div id="toast" class="fixed top-5 left-4 right-4 bg-zinc-900 text-white border border-emerald-400 px-4 py-3 rounded-2xl shadow-2xl transform -translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-[2000] max-w-sm mx-auto">
@@ -1223,13 +1446,29 @@
             window.print();
         }
 
-        // ================= DESPESAS & BOLETOS =================
+        // ================= DESPESAS & BOLETOS (EDIÇÃO + CRUDS) =================
         function abrirModalNovaDespesa() {
+            document.getElementById('desp-edit-id').value = '';
             document.getElementById('desp-descricao').value = '';
             document.getElementById('desp-valor').value = '';
             document.getElementById('desp-forma').value = 'Dinheiro';
             document.getElementById('desp-vencimento').value = getObterDataLocalISO();
             document.getElementById('desp-parcelas').value = '1';
+            document.getElementById('desp-modal-titulo').innerText = "Nova Despesa ou Boleto";
+            document.getElementById('modal-despesa').classList.remove('hidden');
+        }
+
+        function abrirModalEditarDespesa(id) {
+            const d = appData.despesas.find(x => x.id == id);
+            if (!d) return;
+
+            document.getElementById('desp-edit-id').value = d.id;
+            document.getElementById('desp-descricao').value = d.descricao || '';
+            document.getElementById('desp-valor').value = d.valor || 0;
+            document.getElementById('desp-forma').value = d.forma_pagamento || 'Dinheiro';
+            document.getElementById('desp-vencimento').value = d.data_vencimento || getObterDataLocalISO();
+            document.getElementById('desp-parcelas').value = d.total_parcelas || 1;
+            document.getElementById('desp-modal-titulo').innerText = "Editar Despesa / Conta";
             document.getElementById('modal-despesa').classList.remove('hidden');
         }
 
@@ -1239,6 +1478,7 @@
 
         async function salvarNovaDespesa(e) {
             e.preventDefault();
+            const editId = document.getElementById('desp-edit-id').value;
             const desc = document.getElementById('desp-descricao').value.trim();
             const valTotal = parseNum(document.getElementById('desp-valor').value);
             const forma = document.getElementById('desp-forma').value;
@@ -1251,33 +1491,50 @@
             }
 
             try {
-                const valParcela = valTotal / numParcelas;
-                const registros = [];
-
-                for (let i = 0; i < numParcelas; i++) {
-                    const dt = new Date(dataVenc + 'T00:00:00');
-                    dt.setMonth(dt.getMonth() + i);
-                    const vencimentoCalc = getObterDataLocalISO(dt);
-
-                    registros.push({
-                        descricao: numParcelas > 1 ? `${desc} (${i + 1}/${numParcelas})` : desc,
-                        valor: valParcela,
+                if (editId) {
+                    const dData = {
+                        descricao: desc,
+                        valor: valTotal,
                         forma_pagamento: forma,
-                        data_vencimento: vencimentoCalc,
-                        parcela_atual: i + 1,
-                        total_parcelas: numParcelas,
-                        status: 'Pendente'
-                    });
-                }
-
-                const { error } = await supabaseClient.from('mercearia_despesas').insert(registros);
-
-                if (!error) {
-                    mostrarToast("Despesa cadastrada com sucesso!");
-                    fecharModalNovaDespesa();
-                    await carregarDados();
+                        data_vencimento: dataVenc
+                    };
+                    const { error } = await supabaseClient.from('mercearia_despesas').update(dData).eq('id', editId);
+                    if (!error) {
+                        mostrarToast("Despesa alterada com sucesso!");
+                        fecharModalNovaDespesa();
+                        await carregarDados();
+                    } else {
+                        mostrarToast(`Erro ao alterar despesa: ${error.message}`, 'erro');
+                    }
                 } else {
-                    mostrarToast(`Erro ao salvar despesa: ${error.message}`, 'erro');
+                    const valParcela = valTotal / numParcelas;
+                    const registros = [];
+
+                    for (let i = 0; i < numParcelas; i++) {
+                        const dt = new Date(dataVenc + 'T00:00:00');
+                        dt.setMonth(dt.getMonth() + i);
+                        const vencimentoCalc = getObterDataLocalISO(dt);
+
+                        registros.push({
+                            descricao: numParcelas > 1 ? `${desc} (${i + 1}/${numParcelas})` : desc,
+                            valor: valParcela,
+                            forma_pagamento: forma,
+                            data_vencimento: vencimentoCalc,
+                            parcela_atual: i + 1,
+                            total_parcelas: numParcelas,
+                            status: 'Pendente'
+                        });
+                    }
+
+                    const { error } = await supabaseClient.from('mercearia_despesas').insert(registros);
+
+                    if (!error) {
+                        mostrarToast("Despesa cadastrada com sucesso!");
+                        fecharModalNovaDespesa();
+                        await carregarDados();
+                    } else {
+                        mostrarToast(`Erro ao salvar despesa: ${error.message}`, 'erro');
+                    }
                 }
             } catch (err) {
                 console.error("Erro ao salvar despesa:", err);
@@ -1321,7 +1578,6 @@
 
             let despesasFiltradas = [...appData.despesas];
 
-            // Ordena por data mais recente de modificação / vencimento
             despesasFiltradas.sort((a, b) => new Date(b.data_vencimento) - new Date(a.data_vencimento));
 
             if (despesasFiltradas.length === 0) {
@@ -1365,7 +1621,10 @@
                                 ✔ Pagar
                             </button>
                         ` : ''}
-                        <button onclick="excluirDespesa(${d.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 px-2 py-1 rounded-lg text-xs border border-rose-800/50">
+                        <button onclick="abrirModalEditarDespesa(${d.id})" class="bg-blue-500/20 hover:bg-blue-500 text-blue-400 hover:text-white px-2 py-1 rounded-lg text-xs border border-blue-500/30" title="Editar Despesa">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="excluirDespesa(${d.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 px-2 py-1 rounded-lg text-xs border border-rose-800/50" title="Excluir Despesa">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -1394,7 +1653,7 @@
 
             areaPrint.innerHTML = `
                 <div style="font-family: sans-serif; padding: 25px; max-width: 700px; margin: 0 auto; background: #fff;">
-                    <h2 style="text-align: center; font-size: 20px; margin-bottom: 2px;">MERCEARIA MARQUES</h2>
+                    <h2 style="text-align: center; font-size: 20px; margin-bottom: 2px; font-weight: 900;">MERCEARIA MARQUES</h2>
                     <p style="text-align: center; font-size: 12px; margin-top: 0; color: #444;">RELATÓRIO CONSOLIDADO DE DESPESAS</p>
                     <hr style="border-top: 1px solid #000; margin: 15px 0;">
                     <table style="width: 100%; text-align: left; font-size: 12px; border-collapse: collapse;">
@@ -1891,6 +2150,29 @@
             }
         }
 
+        async function excluirRegistroPerda(perdaId) {
+            const p = appData.perdas.find(x => x.id == perdaId);
+            if (!p) return;
+
+            const confirmou = await confirmarAcao("Reverter Perda", "Deseja apagar esta perda do histórico e devolver a quantidade ao estoque?", "Sim, Reverter", "fa-rotate-left", "amber");
+            if (confirmou) {
+                // Devolve a quantidade de volta para o primeiro lote ativo do produto
+                const loteProd = appData.lotes.find(l => l.produto_id == p.produto_id);
+                if (loteProd) {
+                    const novaQtd = parseFloat(loteProd.quantidade || 0) + parseFloat(p.quantidade || 0);
+                    await supabaseClient.from('mercearia_lotes').update({ quantidade: novaQtd }).eq('id', loteProd.id);
+                }
+
+                const { error } = await supabaseClient.from('mercearia_perdas').delete().eq('id', perdaId);
+                if (!error) {
+                    mostrarToast("Registro de perda revertido e estoque restaurado!");
+                    await carregarDados();
+                } else {
+                    mostrarToast(`Erro ao excluir perda: ${error.message}`, 'erro');
+                }
+            }
+        }
+
         function renderizarHistoricoPerdas() {
             const container = document.getElementById('lista-perdas-historico');
             if (!container) return;
@@ -1914,22 +2196,41 @@
                         <strong class="text-white block font-bold">${escapeAttr(nomeP)}</strong>
                         <span class="text-[10px] text-zinc-400">${dataFmt} • Motivo: <strong class="text-rose-400">${escapeAttr(p.motivo)}</strong></span>
                     </div>
-                    <div class="text-right">
-                        <span class="text-xs text-rose-400 font-bold block">-${p.quantidade} un</span>
-                        <strong class="text-xs text-zinc-400">R$ ${parseFloat(p.valor_total || 0).toFixed(2)}</strong>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="text-xs text-rose-400 font-bold block">-${p.quantidade} un</span>
+                            <strong class="text-xs text-zinc-400">R$ ${parseFloat(p.valor_total || 0).toFixed(2)}</strong>
+                        </div>
+                        <button onclick="excluirRegistroPerda(${p.id})" class="bg-zinc-800 hover:bg-zinc-700 text-amber-400 p-2 rounded-lg text-xs" title="Reverter / Apagar Perda">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // ================= CADERNETA FIADO COM WHATSAPP =================
+        // ================= CADERNETA FIADO COM WHATSAPP & EDICAO =================
         function abrirModalCadernetaCliente() {
             document.getElementById('c-caderneta-id').value = '';
             document.getElementById('c-caderneta-nome').value = '';
             document.getElementById('c-caderneta-tel').value = '';
             document.getElementById('c-caderneta-valor').value = '';
             document.getElementById('c-caderneta-obs').value = '';
+            document.getElementById('caderneta-modal-titulo').innerText = "Novo Cliente Fiado";
+            document.getElementById('modal-caderneta-cliente').classList.remove('hidden');
+        }
+
+        function abrirModalEditarCadernetaCliente(id) {
+            const c = appData.caderneta.find(x => x.id == id);
+            if (!c) return;
+
+            document.getElementById('c-caderneta-id').value = c.id;
+            document.getElementById('c-caderneta-nome').value = c.cliente_nome || '';
+            document.getElementById('c-caderneta-tel').value = c.telefone || '';
+            document.getElementById('c-caderneta-valor').value = c.valor_devido || 0;
+            document.getElementById('c-caderneta-obs').value = c.observacoes || '';
+            document.getElementById('caderneta-modal-titulo').innerText = "Editar Cliente Fiado";
             document.getElementById('modal-caderneta-cliente').classList.remove('hidden');
         }
 
@@ -1964,6 +2265,22 @@
                 await carregarDados();
             } else {
                 mostrarToast(`Erro ao salvar caderneta: ${res.error.message}`, 'erro');
+            }
+        }
+
+        async function excluirClienteCaderneta(id) {
+            const c = appData.caderneta.find(x => x.id == id);
+            const nomeC = c ? c.cliente_nome : 'este cliente';
+
+            const confirmou = await confirmarAcao("Excluir Cliente", `Tem certeza que deseja apagar "${nomeC}" da Caderneta?`, "Sim, Apagar", "fa-trash-can", "rose");
+            if (confirmou) {
+                const { error } = await supabaseClient.from('mercearia_caderneta').delete().eq('id', id);
+                if (!error) {
+                    mostrarToast("Cliente removido da Caderneta!");
+                    await carregarDados();
+                } else {
+                    mostrarToast(`Erro ao apagar: ${error.message}`, 'erro');
+                }
             }
         }
 
@@ -2042,9 +2359,13 @@
                     <div class="space-y-1">
                         <div class="flex justify-between items-start">
                             <strong class="text-white font-bold text-sm block">${escapeAttr(c.cliente_nome)}</strong>
-                            <span class="text-xs font-bold ${valorDevido > 0 ? 'text-purple-400' : 'text-emerald-400'}">
-                                ${valorDevido > 0 ? '🔴 Devendo' : '🟢 Quitado'}
-                            </span>
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs font-bold ${valorDevido > 0 ? 'text-purple-400' : 'text-emerald-400'}">
+                                    ${valorDevido > 0 ? '🔴 Devendo' : '🟢 Quitado'}
+                                </span>
+                                <button onclick="abrirModalEditarCadernetaCliente(${c.id})" class="text-zinc-400 hover:text-white ml-2 text-xs" title="Editar Cliente"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="excluirClienteCaderneta(${c.id})" class="text-rose-400 hover:text-rose-300 ml-1 text-xs" title="Apagar Cliente"><i class="fa-solid fa-trash"></i></button>
+                            </div>
                         </div>
                         ${c.telefone ? `<span class="text-xs text-zinc-400 font-mono block"><i class="fa-solid fa-phone"></i> ${escapeAttr(c.telefone)}</span>` : ''}
                         ${c.observacoes ? `<p class="text-[11px] text-zinc-500 italic pt-1">${escapeAttr(c.observacoes)}</p>` : ''}
@@ -2307,9 +2628,14 @@
                             <strong class="text-white font-bold text-sm block">DATA: ${dataFmt}</strong>
                             <span class="text-[10px] text-zinc-400">Troco Inicial: R$ ${parseFloat(c.troco_inicial||0).toFixed(2)}</span>
                         </div>
-                        <button onclick="imprimirComprovanteCaixaDiario('${c.data}')" class="bg-zinc-800 hover:bg-zinc-700 text-amber-400 border border-zinc-700 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-print"></i> PDF do Dia
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="imprimirComprovanteCaixaDiario('${c.data}')" class="bg-zinc-800 hover:bg-zinc-700 text-amber-400 border border-zinc-700 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> PDF do Dia
+                            </button>
+                            <button onclick="excluirRegistroCaixa(${c.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-800/50 font-bold px-2.5 py-1.5 rounded-xl text-xs" title="Excluir Caixa do Dia">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
@@ -2327,6 +2653,19 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        async function excluirRegistroCaixa(caixaId) {
+            const confirmou = await confirmarAcao("Excluir Caixa do Dia", "Tem certeza que deseja apagar este registro de caixa?", "Sim, Apagar", "fa-trash-can", "rose");
+            if (confirmou) {
+                const { error } = await supabaseClient.from('mercearia_caixa').delete().eq('id', caixaId);
+                if (!error) {
+                    mostrarToast("Registro de caixa apagado!");
+                    await carregarDados();
+                } else {
+                    mostrarToast(`Erro ao apagar: ${error.message}`, 'erro');
+                }
+            }
         }
 
         async function fecharMesAtivo() {
@@ -2403,6 +2742,19 @@
             }
         }
 
+        async function excluirFechamentoMensal(id) {
+            const confirmou = await confirmarAcao("Excluir Histórico Mensal", "Tem certeza que deseja apagar este relatório mensal do histórico?", "Sim, Apagar", "fa-trash-can", "rose");
+            if (confirmou) {
+                const { error } = await supabaseClient.from('mercearia_fechamentos_mensais').delete().eq('id', id);
+                if (!error) {
+                    mostrarToast("Relatório mensal apagado!");
+                    await carregarDados();
+                } else {
+                    mostrarToast(`Erro ao apagar: ${error.message}`, 'erro');
+                }
+            }
+        }
+
         function renderizarHistoricoMensal() {
             const container = document.getElementById('lista-historico-meses');
             if (!container) return;
@@ -2425,9 +2777,14 @@
                             <strong class="text-emerald-400 font-black text-base">MÊS: ${escapeAttr(h.mes_ano)}</strong>
                             <span class="text-[10px] text-zinc-400 block">Encerrado em ${dataFmt}</span>
                         </div>
-                        <button onclick="imprimirRelatorioMensalPDF('${escapeAttr(h.mes_ano)}', ${h.faturamento_bruto}, ${h.total_despesas}, ${h.total_perdas}, ${h.lucro_liquido}, '${dataFmt}')" class="bg-zinc-800 hover:bg-zinc-700 text-amber-400 border border-zinc-700 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-print"></i> PDF do Mês
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="imprimirRelatorioMensalPDF('${escapeAttr(h.mes_ano)}', ${h.faturamento_bruto}, ${h.total_despesas}, ${h.total_perdas}, ${h.lucro_liquido}, '${dataFmt}')" class="bg-zinc-800 hover:bg-zinc-700 text-amber-400 border border-zinc-700 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> PDF do Mês
+                            </button>
+                            <button onclick="excluirFechamentoMensal(${h.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-800/50 font-bold px-2.5 py-1.5 rounded-xl text-xs" title="Apagar Relatório Mensal">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
