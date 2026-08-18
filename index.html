@@ -24,6 +24,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* FORMATO IMPRESSÃO A4 */
         @media print {
             @page { size: A4 portrait; margin: 12mm; }
             .no-print, header, nav, aside, button, .pc-nav-btn { display: none !important; }
@@ -36,7 +37,7 @@
 </head>
 <body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col md:flex-row justify-between" onclick="desbloquearAudioNoClique()" ontouchstart="desbloquearAudioNoClique()">
 
-    <!-- BARRA LATERAL ESQUERDA (DESKTOP) -->
+    <!-- BARRA LATERAL ESQUERDA (SIDEBAR DESKTOP) -->
     <aside class="hidden md:flex flex-col w-64 bg-zinc-900 border-r border-zinc-800 p-4 fixed left-0 top-0 bottom-0 z-50 no-print justify-between shrink-0">
         <div class="space-y-6">
             <!-- LOGO -->
@@ -269,15 +270,17 @@
             </div>
         </section>
 
-        <!-- ================= SEÇÃO 3: DESPESAS & BOLETOS ================= -->
+        <!-- ================= SEÇÃO 3: DESPESAS & BOLETOS (ESTILO PHSUBLIME) ================= -->
         <section id="secao-despesas" class="secao-conteudo hidden space-y-6">
-            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
-                <div class="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-6xl mx-auto space-y-6 shadow-2xl">
+                
+                <!-- CABEÇALHO COM CARDS KPI DE DESPESAS (IGUAL PHSUBLIME) -->
+                <div class="border-b border-zinc-800 pb-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
                     <div>
-                        <h2 class="text-base md:text-lg font-black text-rose-400 flex items-center gap-2">
-                            <i class="fa-solid fa-file-invoice-dollar"></i> Lançamento de Despesas & Boletos
+                        <h2 class="text-base md:text-xl font-black text-rose-400 flex items-center gap-2">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> Controle de Despesas & Boletos
                         </h2>
-                        <p class="text-xs text-zinc-400 mt-0.5">Gerencie contas diárias, boletos com alerta de vencimento e parcelamentos.</p>
+                        <p class="text-xs text-zinc-400 mt-0.5">Gerencie contas diárias, fornecedores, boletos a vencer e parcelamentos.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="imprimirRelatorioDespesasPDF()" class="bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-2 border border-zinc-700">
@@ -289,25 +292,41 @@
                     </div>
                 </div>
 
+                <!-- CARDS DE RESUMO DE DESPESAS (IGUAL PHSUBLIME) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Despesas Pagas (Mês)</span>
+                        <strong class="text-lg font-black text-rose-400 mt-1 block" id="desp-card-pagas">R$ 0,00</strong>
+                    </div>
+                    <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Boletos / A Vencer</span>
+                        <strong class="text-lg font-black text-amber-400 mt-1 block" id="desp-card-pendentes">R$ 0,00</strong>
+                    </div>
+                    <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Total Geral de Saídas</span>
+                        <strong class="text-lg font-black text-white mt-1 block" id="desp-card-total">R$ 0,00</strong>
+                    </div>
+                </div>
+
                 <!-- CAMPO DE PESQUISA DE DESPESAS -->
                 <div class="bg-zinc-950 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
                     <i class="fa-solid fa-magnifying-glass text-rose-400 text-base"></i>
-                    <input type="text" id="busca-despesas" onkeyup="renderizarDespesas()" placeholder="Pesquisar despesa por descrição, forma de pagamento ou status..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
+                    <input type="text" id="busca-despesas" onkeyup="renderizarDespesas()" placeholder="Pesquisar por fornecedor, descrição, tipo de pagamento ou status..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
                 </div>
 
-                <!-- TABELA DE DESPESAS -->
+                <!-- TABELA DETALHADA DE DESPESAS (IGUAL PHSUBLIME) -->
                 <div class="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-950">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-zinc-300">
                             <thead class="bg-zinc-900 text-zinc-400 uppercase text-[10px]">
                                 <tr>
                                     <th class="p-3">Descrição / Fornecedor</th>
-                                    <th class="p-3">Vencimento</th>
+                                    <th class="p-3">Data / Vencimento</th>
                                     <th class="p-3">Forma Pagto</th>
                                     <th class="p-3">Parcela</th>
                                     <th class="p-3">Valor (R$)</th>
                                     <th class="p-3">Status</th>
-                                    <th class="p-3 text-right">Ação</th>
+                                    <th class="p-3 text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-despesas" class="divide-y divide-zinc-800/80"></tbody>
@@ -509,27 +528,44 @@
             </div>
         </section>
 
-        <!-- ================= SEÇÃO 7: FIADO / CADERNETA ================= -->
+        <!-- ================= SEÇÃO 7: CADERNETA / CLIENTES FIADO (ESTILO PHSUBLIME) ================= -->
         <section id="secao-caderneta" class="secao-conteudo hidden space-y-6">
-            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
-                <div class="border-b border-zinc-800 pb-4 flex justify-between items-center">
+            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-6xl mx-auto space-y-6 shadow-2xl">
+                <div class="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                     <div>
-                        <h2 class="text-base md:text-lg font-black text-purple-400 flex items-center gap-2">
+                        <h2 class="text-base md:text-xl font-black text-purple-400 flex items-center gap-2">
                             <i class="fa-solid fa-book"></i> Caderneta de Clientes (Fiado)
                         </h2>
-                        <p class="text-xs text-zinc-400 mt-0.5">Cadastre clientes de confiança e gerencie as contas do mês.</p>
+                        <p class="text-xs text-zinc-400 mt-0.5">Gerenciamento completo da base de clientes e cobranças da Mercearia Marques.</p>
                     </div>
-                    <button onclick="abrirModalCadernetaCliente()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
+                    <button onclick="abrirModalCadernetaCliente()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-purple-950/40">
                         <i class="fa-solid fa-user-plus"></i> + Novo Cliente
                     </button>
                 </div>
 
                 <div class="bg-zinc-950 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
                     <i class="fa-solid fa-magnifying-glass text-purple-400 text-base"></i>
-                    <input type="text" id="busca-caderneta" onkeyup="renderizarCaderneta()" placeholder="Buscar cliente por nome ou telefone..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
+                    <input type="text" id="busca-caderneta" onkeyup="renderizarCaderneta()" placeholder="Pesquisar por nome ou telefone do cliente..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
                 </div>
 
-                <div id="lista-caderneta-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <!-- TABELA DE CLIENTES FIADO (ESTILO PHSUBLIME) -->
+                <div class="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-950">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-zinc-300">
+                            <thead class="bg-zinc-900 text-purple-400 uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-3">Nome do Cliente</th>
+                                    <th class="p-3">Telefone / Whats</th>
+                                    <th class="p-3">Observações / Casa</th>
+                                    <th class="p-3">Saldo Devido (R$)</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-caderneta" class="divide-y divide-zinc-800/80"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -553,19 +589,17 @@
             <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"></div>
         </section>
 
-        <!-- ================= SEÇÃO 9: FINANCEIRO EM TEMPO REAL ================= -->
+        <!-- ================= SEÇÃO 9: FINANCEIRO (ESTILO PHSUBLIME) ================= -->
         <section id="secao-financeiro" class="secao-conteudo hidden space-y-6">
-            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
-                <div class="border-b border-zinc-800 pb-4 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-base md:text-lg font-black text-emerald-400 flex items-center gap-2">
-                            <i class="fa-solid fa-wallet"></i> Resumo Financeiro Unificado
-                        </h2>
-                        <p class="text-xs text-zinc-400 mt-0.5">Visão consolidada de entradas, contas pagas, pendentes e saldos em tempo real.</p>
-                    </div>
+            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-6xl mx-auto space-y-6 shadow-2xl">
+                <div class="border-b border-zinc-800 pb-4">
+                    <h2 class="text-base md:text-xl font-black text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-wallet"></i> Visão Financeira Unificada em Tempo Real
+                    </h2>
+                    <p class="text-xs text-zinc-400 mt-0.5">Fluxo de caixa consolidado, entradas, despesas pagas, boletos a vencer e extrato geral.</p>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
                         <span class="text-[10px] text-zinc-400 font-bold uppercase block">Entradas Totais (Mês)</span>
                         <strong class="text-lg font-black text-emerald-400 mt-1 block" id="fin-entradas-mes">R$ 0,00</strong>
@@ -575,7 +609,7 @@
                         <strong class="text-lg font-black text-rose-400 mt-1 block" id="fin-despesas-mes">R$ 0,00</strong>
                     </div>
                     <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
-                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Boletos A Vencer</span>
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Boletos / A Vencer</span>
                         <strong class="text-lg font-black text-amber-400 mt-1 block" id="fin-boletos-vencer">R$ 0,00</strong>
                     </div>
                     <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
@@ -587,9 +621,33 @@
                 <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800 flex justify-between items-center">
                     <div>
                         <span class="text-xs text-zinc-400 uppercase font-bold block">Lucro Líquido do Mês</span>
-                        <span class="text-[10px] text-zinc-500">Entradas - Despesas Pagas - Perdas</span>
+                        <span class="text-[10px] text-zinc-500">Faturamento Bruto - Despesas Pagas - Perdas</span>
                     </div>
                     <strong class="text-xl md:text-2xl font-black text-blue-400" id="fin-lucro-liquido-total">R$ 0,00</strong>
+                </div>
+
+                <!-- EXTRATO GERAL DE MOVIMENTAÇÕES (IGUAL PHSUBLIME) -->
+                <div class="space-y-3 pt-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i> Histórico Geral de Movimentações (Tempo Real)
+                    </h3>
+                    <div class="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-950">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-zinc-300">
+                                <thead class="bg-zinc-900 text-emerald-400 uppercase text-[10px]">
+                                    <tr>
+                                        <th class="p-3">Data</th>
+                                        <th class="p-3">Tipo</th>
+                                        <th class="p-3">Categoria</th>
+                                        <th class="p-3">Descrição / Origem</th>
+                                        <th class="p-3">Valor (R$)</th>
+                                        <th class="p-3">Forma</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-financeiro-extrato" class="divide-y divide-zinc-800/80"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1024,7 +1082,6 @@
             if (iconMob) iconMob.classList.add('fa-spin');
 
             try {
-                // Tenta carregar do Supabase
                 const resProd = await supabaseClient.from('mercearia_produtos').select('*').order('nome');
                 if (resProd.data && resProd.data.length > 0) {
                     appData.produtos = resProd.data;
@@ -1258,7 +1315,7 @@
                 } else if (b.data_vencimento === hojeStr) {
                     tagStatus = `<span class="bg-rose-500/20 text-rose-400 font-black border border-rose-500/40 px-2 py-0.5 rounded text-[10px]">🔴 VENCE HOJE</span>`;
                 } else if (b.data_vencimento === amanhaStr) {
-                    tagStatus = `<span class="bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 px-2 py-0.5 rounded text-[10px]">🟡 VENCE AMANHÃ</span>`;
+                    tagStatus = `<span class="bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 px-2 py-0.5 rounded text-[10px]">🟡 VENCE AMANHÃ (1 DIA ANTES)</span>`;
                 }
 
                 const item = document.createElement('div');
@@ -1501,7 +1558,7 @@
             window.print();
         }
 
-        // ================= DESPESAS & BOLETOS =================
+        // ================= DESPESAS & BOLETOS (EDIÇÃO + CRUDS) =================
         function abrirModalNovaDespesa() {
             document.getElementById('desp-edit-id').value = '';
             document.getElementById('desp-descricao').value = '';
@@ -1645,6 +1702,15 @@
             let despesasFiltradas = [...appData.despesas];
 
             despesasFiltradas.sort((a, b) => new Date(b.data_vencimento) - new Date(a.data_vencimento));
+
+            // Atualiza CARDS DE RESUMO DE DESPESAS (Igual PHSUBLIME)
+            const pagas = appData.despesas.filter(d => d.status === 'Pago').reduce((a, b) => a + parseFloat(b.valor || 0), 0);
+            const pendentes = appData.despesas.filter(d => d.status === 'Pendente').reduce((a, b) => a + parseFloat(b.valor || 0), 0);
+            const totalGasto = pagas + pendentes;
+
+            document.getElementById('desp-card-pagas').innerText = `R$ ${pagas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('desp-card-pendentes').innerText = `R$ ${pendentes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('desp-card-total').innerText = `R$ ${totalGasto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
             if (despesasFiltradas.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-zinc-500 italic">Nenhuma despesa cadastrada.</td></tr>`;
@@ -1985,9 +2051,7 @@
                     appData.produtos.push(prodObj);
                     salvarLocal('produtos', appData.produtos);
 
-                    try {
-                        await supabaseClient.from('mercearia_produtos').insert([prodObj]);
-                    } catch(err) {}
+                    try { await supabaseClient.from('mercearia_produtos').insert([prodObj]); } catch(err) {}
                 }
             } else {
                 prodObj = appData.produtos.find(p => p.id == prodId);
@@ -2022,9 +2086,7 @@
             appData.lotes.push(loteData);
             salvarLocal('lotes', appData.lotes);
 
-            try {
-                await supabaseClient.from('mercearia_lotes').insert([loteData]);
-            } catch(err) {}
+            try { await supabaseClient.from('mercearia_lotes').insert([loteData]); } catch(err) {}
 
             tocarSomBipe();
             mostrarToast(`Sucesso! Lote de "${nome}" adicionado!`);
@@ -2088,9 +2150,7 @@
                 appData.lotes = appData.lotes.filter(l => l.id != loteId);
                 salvarLocal('lotes', appData.lotes);
 
-                try {
-                    await supabaseClient.from('mercearia_lotes').delete().eq('id', loteId);
-                } catch(err) {}
+                try { await supabaseClient.from('mercearia_lotes').delete().eq('id', loteId); } catch(err) {}
 
                 mostrarToast("Lote removido com sucesso!");
                 atualizarInterface();
@@ -2203,9 +2263,7 @@
             appData.perdas.unshift(perdaData);
             salvarLocal('perdas', appData.perdas);
 
-            try {
-                await supabaseClient.from('mercearia_perdas').insert([perdaData]);
-            } catch(e) {}
+            try { await supabaseClient.from('mercearia_perdas').insert([perdaData]); } catch(e) {}
 
             await abaterEstoqueLotesPorVenda(prodId, qtd);
 
@@ -2236,9 +2294,7 @@
                 appData.perdas = appData.perdas.filter(x => x.id != perdaId);
                 salvarLocal('perdas', appData.perdas);
 
-                try {
-                    await supabaseClient.from('mercearia_perdas').delete().eq('id', perdaId);
-                } catch(e) {}
+                try { await supabaseClient.from('mercearia_perdas').delete().eq('id', perdaId); } catch(e) {}
 
                 mostrarToast("Registro de perda revertido e estoque restaurado!");
                 atualizarInterface();
@@ -2410,69 +2466,52 @@
         }
 
         function renderizarCaderneta() {
-            const container = document.getElementById('lista-caderneta-cards');
-            if (!container) return;
-            container.innerHTML = '';
+            const tbody = document.getElementById('tbody-caderneta');
+            if (!tbody) return;
+            tbody.innerHTML = '';
 
             const busca = (document.getElementById('busca-caderneta')?.value || '').toLowerCase();
 
             if (appData.caderneta.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-8 text-center text-zinc-500 text-xs italic bg-zinc-900 rounded-2xl border border-zinc-800">Nenhum cliente cadastrado na caderneta.</div>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-zinc-500 italic">Nenhum cliente cadastrado na caderneta.</td></tr>`;
                 return;
             }
 
             appData.caderneta.forEach(c => {
-                const buscaTexto = `${c.cliente_nome || ''} ${c.telefone || ''}`.toLowerCase();
+                const buscaTexto = `${c.cliente_nome || ''} ${c.telefone || ''} ${c.observacoes || ''}`.toLowerCase();
                 if (busca && !buscaTexto.includes(busca)) return;
 
                 const valorDevido = parseFloat(c.valor_devido || 0);
 
-                const card = document.createElement('div');
-                card.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl space-y-3 shadow-md flex flex-col justify-between hover:border-purple-800/60 transition-all";
-                card.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex justify-between items-start">
-                            <strong class="text-white font-bold text-sm block">${escapeAttr(c.cliente_nome)}</strong>
-                            <div class="flex items-center gap-1">
-                                <span class="text-xs font-bold ${valorDevido > 0 ? 'text-purple-400' : 'text-emerald-400'}">
-                                    ${valorDevido > 0 ? '🔴 Devendo' : '🟢 Quitado'}
-                                </span>
-                                <button onclick="abrirModalEditarCadernetaCliente(${c.id})" class="text-zinc-400 hover:text-white ml-2 text-xs" title="Editar Cliente"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="excluirClienteCaderneta(${c.id})" class="text-rose-400 hover:text-rose-300 ml-1 text-xs" title="Apagar Cliente"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </div>
-                        ${c.telefone ? `<span class="text-xs text-zinc-400 font-mono block"><i class="fa-solid fa-phone"></i> ${escapeAttr(c.telefone)}</span>` : ''}
-                        ${c.observacoes ? `<p class="text-[11px] text-zinc-500 italic pt-1">${escapeAttr(c.observacoes)}</p>` : ''}
-                    </div>
-
-                    <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex justify-between items-center">
-                        <span class="text-xs text-zinc-400 uppercase font-bold">Saldo Devido</span>
-                        <strong class="text-base font-black ${valorDevido > 0 ? 'text-purple-400' : 'text-emerald-400'}">R$ ${valorDevido.toFixed(2)}</strong>
-                    </div>
-
-                    <div class="space-y-2 pt-2 border-t border-zinc-800">
-                        <div class="flex gap-2">
-                            <button onclick="solicitarValorFiado(${c.id}, 'add')" class="w-1/2 bg-rose-950/60 hover:bg-rose-900 text-rose-300 font-bold py-2 rounded-xl text-xs border border-rose-800/50 flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-plus"></i> Fiado
-                            </button>
-                            <button onclick="solicitarValorFiado(${c.id}, 'sub')" class="w-1/2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 font-bold py-2 rounded-xl text-xs border border-emerald-500/30 flex items-center justify-center gap-1">
-                                <i class="fa-solid fa-hand-holding-dollar"></i> Pagar
-                            </button>
-                        </div>
-
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-zinc-900/60 transition-all";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-white">${escapeAttr(c.cliente_nome)}</td>
+                    <td class="p-3 font-mono text-zinc-400">${escapeAttr(c.telefone || '-')}</td>
+                    <td class="p-3 text-zinc-400 italic text-[11px]">${escapeAttr(c.observacoes || '-')}</td>
+                    <td class="p-3 font-bold ${valorDevido > 0 ? 'text-purple-400' : 'text-emerald-400'}">R$ ${valorDevido.toFixed(2)}</td>
+                    <td class="p-3 font-bold">${valorDevido > 0 ? '🔴 Devendo' : '🟢 Quitado'}</td>
+                    <td class="p-3 text-right space-x-1">
+                        <button onclick="solicitarValorFiado(${c.id}, 'add')" class="bg-rose-950/60 hover:bg-rose-900 text-rose-300 font-bold px-2.5 py-1 rounded-lg text-[10px] border border-rose-800/50">
+                            + Fiado
+                        </button>
+                        <button onclick="solicitarValorFiado(${c.id}, 'sub')" class="bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 font-bold px-2.5 py-1 rounded-lg text-[10px] border border-emerald-500/30">
+                            💵 Pagar
+                        </button>
                         ${c.telefone ? `
-                            <div class="flex gap-1.5 pt-1">
-                                <button onclick="enviarWhatsCliente(${c.id}, 'cobranca')" class="w-1/2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white font-bold py-1.5 rounded-lg text-[10px] border border-emerald-500/30 flex items-center justify-center gap-1">
-                                    <i class="fa-brands fa-whatsapp text-xs"></i> Lembrete Doce
-                                </button>
-                                <button onclick="enviarWhatsCliente(${c.id}, 'promocao')" class="w-1/2 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white font-bold py-1.5 rounded-lg text-[10px] border border-blue-500/30 flex items-center justify-center gap-1">
-                                    <i class="fa-brands fa-whatsapp text-xs"></i> Promoção
-                                </button>
-                            </div>
+                            <button onclick="enviarWhatsCliente(${c.id}, 'cobranca')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-2 py-1 rounded-lg text-xs border border-emerald-500/30" title="Cobrança Delicada">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </button>
                         ` : ''}
-                    </div>
+                        <button onclick="abrirModalEditarCadernetaCliente(${c.id})" class="bg-blue-500/20 hover:bg-blue-500 text-blue-400 hover:text-white px-2 py-1 rounded-lg text-xs border border-blue-500/30" title="Editar Cliente">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="excluirClienteCaderneta(${c.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 px-2 py-1 rounded-lg text-xs border border-rose-800/50" title="Apagar Cliente">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
                 `;
-                container.appendChild(card);
+                tbody.appendChild(tr);
             });
         }
 
@@ -2659,6 +2698,83 @@
             document.getElementById('fin-boletos-vencer').innerText = `R$ ${totalBoletosVencer.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('fin-fiado-receber').innerText = `R$ ${totalFiadoReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('fin-lucro-liquido-total').innerText = `R$ ${lucroLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            // EXTRATO UNIFICADO EM TEMPO REAL (ESTILO PHSUBLIME)
+            const tbodyExtrato = document.getElementById('tbody-financeiro-extrato');
+            if (!tbodyExtrato) return;
+            tbodyExtrato.innerHTML = '';
+
+            let extratoList = [];
+
+            // Adiciona Entradas de Caixa
+            appData.caixa.forEach(c => {
+                extratoList.push({
+                    data: c.data,
+                    tipo: 'ENTRADA',
+                    categoria: 'Fechamento de Caixa',
+                    descricao: `Caixa Diário (${c.data})`,
+                    valor: parseFloat(c.total_bruto || 0),
+                    forma: 'Diversas (Misto)'
+                });
+            });
+
+            // Adiciona Saídas de Despesas
+            appData.despesas.forEach(d => {
+                if (d.status === 'Pago') {
+                    extratoList.push({
+                        data: d.data_vencimento,
+                        tipo: 'SAÍDA',
+                        categoria: 'Despesa / Conta',
+                        descricao: d.descricao,
+                        valor: parseFloat(d.valor || 0),
+                        forma: d.forma_pagamento
+                    });
+                }
+            });
+
+            // Adiciona Saídas por Perdas
+            appData.perdas.forEach(p => {
+                const prod = appData.produtos.find(x => x.id == p.produto_id);
+                extratoList.push({
+                    data: p.data_perda,
+                    tipo: 'SAÍDA',
+                    categoria: 'Perda / Descarte',
+                    descricao: prod ? prod.nome : 'Produto Descartado',
+                    valor: parseFloat(p.valor_total || 0),
+                    forma: 'Avaria/Vencido'
+                });
+            });
+
+            extratoList.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            if (extratoList.length === 0) {
+                tbodyExtrato.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-zinc-500 italic">Nenhuma movimentação registrada.</td></tr>`;
+                return;
+            }
+
+            extratoList.slice(0, 15).forEach(item => {
+                const parts = item.data ? item.data.split('-') : ['--', '--', '----'];
+                const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                const isEntrada = item.tipo === 'ENTRADA';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-zinc-900/60 transition-all";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono">${dataFmt}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black ${isEntrada ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'}">
+                            ${item.tipo}
+                        </span>
+                    </td>
+                    <td class="p-3 text-zinc-400">${escapeAttr(item.categoria)}</td>
+                    <td class="p-3 font-bold text-white">${escapeAttr(item.descricao)}</td>
+                    <td class="p-3 font-bold ${isEntrada ? 'text-emerald-400' : 'text-rose-400'}">
+                        ${isEntrada ? '+' : '-'} R$ ${item.valor.toFixed(2)}
+                    </td>
+                    <td class="p-3 text-zinc-400">${escapeAttr(item.forma)}</td>
+                `;
+                tbodyExtrato.appendChild(tr);
+            });
         }
 
         // ================= HISTÓRICO (DIÁRIO & MENSAL) =================
@@ -2808,7 +2924,7 @@
                 total_perdas: totalPerdasMes,
                 lucro_liquido: lucroLiquido,
                 data_fechamento: getObterDataLocalISO(),
-                observacoes: "Fechamento mensal concluído."
+observacoes: "Fechamento mensal concluído."
             };
 
             appData.historicoMensal.unshift(fData);
