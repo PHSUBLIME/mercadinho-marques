@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mercearia Marques - Gestão, Caixa & Validades</title>
+    <title>Mercearia Marques - Gestão & Validades</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,8 +24,10 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* FORMATO IMPRESSÃO EM FOLHA A4 PERFEITA */
         @media print {
-            .no-print, header, nav, button, .pc-nav-btn { display: none !important; }
+            @page { size: A4 portrait; margin: 12mm; }
+            .no-print, header, nav, aside, button, .pc-nav-btn { display: none !important; }
             body { background-color: #ffffff !important; color: #000000 !important; }
             .secao-conteudo { display: none !important; }
             #area-impressao-recibo { display: block !important; width: 100% !important; color: #000000 !important; }
@@ -33,86 +35,105 @@
         }
     </style>
 </head>
-<body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col justify-between" onclick="desbloquearAudioNoClique()" ontouchstart="desbloquearAudioNoClique()">
+<body class="bg-zinc-950 text-slate-100 min-h-screen flex flex-col md:flex-row justify-between" onclick="desbloquearAudioNoClique()" ontouchstart="desbloquearAudioNoClique()">
 
-    <!-- CABEÇALHO PRINCIPAL -->
-    <header class="bg-zinc-900 border-b border-zinc-800 p-3.5 sticky top-0 z-40 shadow-lg w-full no-print">
-        <div class="w-full px-2 md:px-6 flex justify-between items-center">
+    <!-- BARRA LATERAL ESQUERDA (SIDEBAR DESKTOP - ESTILO PHSUBLIME) -->
+    <aside class="hidden md:flex flex-col w-64 bg-zinc-900 border-r border-zinc-800 p-4 fixed left-0 top-0 bottom-0 z-50 no-print justify-between shrink-0">
+        <div class="space-y-6">
             <!-- LOGO -->
-            <div class="flex items-center gap-3 cursor-pointer" onclick="navegar('dashboard')">
+            <div class="flex items-center gap-3 px-2 py-2 border-b border-zinc-800/80 cursor-pointer" onclick="navegar('dashboard')">
                 <div class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-md">
                     <i class="fa-solid fa-store"></i>
                 </div>
                 <div>
-                    <h1 class="text-base md:text-lg font-black text-emerald-400 leading-tight tracking-wide">MERCEARIA MARQUES</h1>
-                    <span class="text-[10px] md:text-xs text-zinc-400 font-semibold block">Caixa, Validades & Gestão</span>
+                    <h1 class="text-base font-black text-emerald-400 leading-tight tracking-wide">MERCEARIA MARQUES</h1>
+                    <span class="text-[10px] text-zinc-400 font-semibold block">Painel de Gestão</span>
                 </div>
             </div>
 
-            <!-- NAVEGAÇÃO DESKTOP -->
-            <nav class="hidden lg:flex items-center gap-1 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
-                <button onclick="navegar('dashboard')" id="pc-nav-dashboard" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-chart-pie"></i> Painel
+            <!-- MENU DE NAVEGAÇÃO VERTICAL -->
+            <nav class="space-y-1.5" id="menu-sidebar-pc">
+                <button onclick="navegar('dashboard')" id="pc-nav-dashboard" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-bold text-xs transition-all text-emerald-400 bg-emerald-500/10 border-l-4 border-emerald-400">
+                    <i class="fa-solid fa-chart-pie text-base"></i> Painel
                 </button>
-                <button onclick="navegar('caixa')" id="pc-nav-caixa" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-cash-register text-amber-400"></i> Caixa Diário
+                <button onclick="navegar('caixa')" id="pc-nav-caixa" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-cash-register text-base text-amber-400"></i> Caixa Diário
                 </button>
-                <button onclick="navegar('despesas')" id="pc-nav-despesas" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-file-invoice-dollar text-rose-400"></i> Despesas
+                <button onclick="navegar('despesas')" id="pc-nav-despesas" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-file-invoice-dollar text-base text-rose-400"></i> Despesas
                 </button>
-                <button onclick="navegar('bipar')" id="pc-nav-bipar" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-barcode text-amber-300"></i> Bipar Estoque
+                <button onclick="navegar('bipar')" id="pc-nav-bipar" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-barcode text-base text-amber-300"></i> Bipar Estoque
                 </button>
-                <button onclick="navegar('farol')" id="pc-nav-farol" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-traffic-light text-rose-400"></i> Validades
+                <button onclick="navegar('farol')" id="pc-nav-farol" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-traffic-light text-base text-rose-400"></i> Validades
                 </button>
-                <button onclick="navegar('perdas')" id="pc-nav-perdas" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-dumpster text-rose-400"></i> Perdas
+                <button onclick="navegar('perdas')" id="pc-nav-perdas" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-dumpster text-base text-rose-400"></i> Perdas
                 </button>
-                <button onclick="navegar('caderneta')" id="pc-nav-caderneta" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-book text-purple-400"></i> Fiado
+                <button onclick="navegar('caderneta')" id="pc-nav-caderneta" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-book text-base text-purple-400"></i> Fiado
                 </button>
-                <button onclick="navegar('produtos')" id="pc-nav-produtos" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-boxes-stacked text-blue-400"></i> Produtos
+                <button onclick="navegar('produtos')" id="pc-nav-produtos" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-boxes-stacked text-base text-blue-400"></i> Produtos
                 </button>
-                <button onclick="navegar('historico')" id="pc-nav-historico" class="pc-nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-clock-rotate-left text-zinc-300"></i> Histórico
+                <button onclick="navegar('financeiro')" id="pc-nav-financeiro" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-wallet text-base text-emerald-400"></i> Financeiro
+                </button>
+                <button onclick="navegar('historico')" id="pc-nav-historico" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-semibold text-xs transition-all text-zinc-400 hover:text-white hover:bg-zinc-800">
+                    <i class="fa-solid fa-clock-rotate-left text-base text-zinc-300"></i> Histórico
                 </button>
             </nav>
+        </div>
 
-            <!-- AÇÕES DE TOPO -->
-            <div class="flex items-center gap-2">
-                <button onclick="carregarDados()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-3 py-2.5 rounded-xl text-xs font-bold border border-zinc-700 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-rotate text-emerald-400" id="icon-sync"></i>
-                    <span class="hidden sm:inline">Sincronizar</span>
-                </button>
+        <div class="pt-4 border-t border-zinc-800 text-[11px] text-zinc-500">
+            <button onclick="carregarDados()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 py-2.5 rounded-xl font-bold border border-zinc-700 flex items-center justify-center gap-2 transition-all">
+                <i class="fa-solid fa-rotate text-emerald-400" id="icon-sync-pc"></i> Sincronizar
+            </button>
+        </div>
+    </aside>
+
+    <!-- CABEÇALHO MOBILE -->
+    <header class="md:hidden bg-zinc-900 border-b border-zinc-800 p-3.5 sticky top-0 z-40 shadow-lg w-full no-print">
+        <div class="flex justify-between items-center px-1">
+            <div class="flex items-center gap-2.5" onclick="navegar('dashboard')">
+                <div class="w-9 h-10 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center justify-center text-lg shrink-0">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-black text-emerald-400 leading-tight">MERCEARIA MARQUES</h1>
+                    <span class="text-[9px] text-zinc-400 block font-semibold">Caixa & Validades</span>
+                </div>
             </div>
+            <button onclick="carregarDados()" class="bg-zinc-800 text-zinc-200 p-2.5 rounded-xl text-xs border border-zinc-700">
+                <i class="fa-solid fa-rotate text-emerald-400" id="icon-sync-mobile"></i>
+            </button>
         </div>
     </header>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="flex-1 p-4 md:p-6 pb-28 w-full max-w-7xl mx-auto space-y-6">
+    <main class="flex-1 p-4 md:p-6 pb-28 md:ml-64 w-full max-w-7xl space-y-6">
 
         <!-- ================= SEÇÃO 1: DASHBOARD ================= -->
         <section id="secao-dashboard" class="secao-conteudo space-y-6">
-            <!-- CARDS KPI -->
+            <!-- CARDS KPI DO DIA -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div class="bg-emerald-950/20 border border-emerald-800/50 p-4 rounded-2xl shadow-md">
-                    <span class="text-[10px] md:text-xs font-extrabold uppercase text-emerald-400 tracking-wider block">Faturamento (Mês)</span>
-                    <strong class="text-lg md:text-2xl font-black text-emerald-400 mt-1 block" id="dash-faturamento-mes">R$ 0,00</strong>
-                    <span class="text-[10px] md:text-xs text-emerald-300/80 font-medium" id="dash-fechamentos-qtd">0 fechamentos</span>
+                    <span class="text-[10px] md:text-xs font-extrabold uppercase text-emerald-400 tracking-wider block">Faturamento do Dia</span>
+                    <strong class="text-lg md:text-2xl font-black text-emerald-400 mt-1 block" id="dash-faturamento-dia">R$ 0,00</strong>
+                    <span class="text-[10px] md:text-xs text-emerald-300/80 font-medium" id="dash-data-hoje">Data: --/--/----</span>
                 </div>
 
                 <div class="bg-rose-950/20 border border-rose-800/50 p-4 rounded-2xl shadow-md">
-                    <span class="text-[10px] md:text-xs font-extrabold uppercase text-rose-400 tracking-wider block">Despesas Paga (Mês)</span>
-                    <strong class="text-lg md:text-2xl font-black text-rose-400 mt-1 block" id="dash-despesas-mes">R$ 0,00</strong>
-                    <span class="text-[10px] md:text-xs text-rose-300/80 font-medium" id="dash-despesas-qtd">0 contas pagas</span>
+                    <span class="text-[10px] md:text-xs font-extrabold uppercase text-rose-400 tracking-wider block">Despesas do Dia</span>
+                    <strong class="text-lg md:text-2xl font-black text-rose-400 mt-1 block" id="dash-despesas-dia">R$ 0,00</strong>
+                    <span class="text-[10px] md:text-xs text-rose-300/80 font-medium" id="dash-despesas-qtd">0 despesas pagas</span>
                 </div>
 
                 <div class="bg-blue-950/20 border border-blue-800/50 p-4 rounded-2xl shadow-md">
-                    <span class="text-[10px] md:text-xs font-extrabold uppercase text-blue-400 tracking-wider block">Lucro Líquido Estimado</span>
-                    <strong class="text-lg md:text-2xl font-black text-blue-400 mt-1 block" id="dash-lucro-liquido">R$ 0,00</strong>
-                    <span class="text-[10px] md:text-xs text-blue-300/80 font-medium">Faturamento - Despesas - Perdas</span>
+                    <span class="text-[10px] md:text-xs font-extrabold uppercase text-blue-400 tracking-wider block">Lucro Líquido do Dia</span>
+                    <strong class="text-lg md:text-2xl font-black text-blue-400 mt-1 block" id="dash-lucro-liquido-dia">R$ 0,00</strong>
+                    <span class="text-[10px] md:text-xs text-blue-300/80 font-medium">Entradas - Despesas</span>
                 </div>
 
                 <div class="bg-purple-950/20 border border-purple-800/50 p-4 rounded-2xl shadow-md">
@@ -122,13 +143,13 @@
                 </div>
             </div>
 
-            <!-- BOLETOS A VENCER (ALERTA DE DESTAQUE) -->
+            <!-- BOLETOS E CONTAS A VENCER (ALERTA DE DESTAQUE COM AVISO DE 1 DIA ANTES) -->
             <div id="box-alerta-boletos" class="hidden bg-amber-950/40 border-2 border-amber-500/80 p-4 rounded-2xl space-y-2 shadow-xl animate-pulse">
                 <div class="flex items-center justify-between border-b border-amber-500/30 pb-2">
                     <h3 class="text-xs md:text-sm font-black text-amber-400 flex items-center gap-2">
                         <i class="fa-solid fa-bell text-base"></i> ALERTA DE VENCIMENTO DE BOLETOS / CONTAS
                     </h3>
-                    <button onclick="navegar('despesas')" class="text-xs text-amber-300 hover:underline font-bold">Gerenciar Contas →</button>
+                    <button onclick="navegar('despesas')" class="text-xs text-amber-300 hover:underline font-bold">Ver Despesas →</button>
                 </div>
                 <div id="lista-boletos-alerta" class="space-y-1.5 text-xs"></div>
             </div>
@@ -139,9 +160,9 @@
                     <div class="border-b border-zinc-800 pb-3 flex justify-between items-center">
                         <div>
                             <h3 class="text-sm md:text-base font-black text-emerald-400 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-line"></i> Fluxo de Caixa vs Despesas
+                                <i class="fa-solid fa-chart-line"></i> Fluxo do Caixa Diário
                             </h3>
-                            <span class="text-xs text-zinc-400">Comparativo dos últimos lançamentos de caixa e contas</span>
+                            <span class="text-xs text-zinc-400">Comparativo das Entradas e Despesas dos últimos dias</span>
                         </div>
                     </div>
                     <div class="relative h-64 md:h-72 w-full">
@@ -167,7 +188,7 @@
             </div>
         </section>
 
-        <!-- ================= SEÇÃO 2: CAIXA (ABERTURA & FECHAMENTO) ================= -->
+        <!-- ================= SEÇÃO 2: CAIXA DIÁRIO ================= -->
         <section id="secao-caixa" class="secao-conteudo hidden space-y-6">
             <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
                 <div class="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
@@ -184,16 +205,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-zinc-400 font-bold mb-1">Data da Operação *</label>
-                            <input type="date" id="caixa-data" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-amber-400">
+                            <input type="date" id="caixa-data" onchange="renderizarCaixaStatus()" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none focus:border-amber-400">
                         </div>
                         <div>
                             <label class="block text-amber-400 font-bold mb-1">Troco Inicial / Fundo (R$) *</label>
                             <input type="text" id="caixa-troco-inicial" placeholder="100.00" class="w-full bg-zinc-800 border border-amber-500/50 rounded-xl p-3 text-amber-300 font-bold text-base focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-rose-400 font-bold mb-1">Despesas Pagas em Dinheiro (R$)</label>
+                            <label class="block text-rose-400 font-bold mb-1">DESPESAS PAGAS *</label>
                             <input type="text" id="caixa-despesas" readonly placeholder="0.00" class="w-full bg-zinc-950 border border-rose-500/30 rounded-xl p-3 text-rose-400 font-bold text-base focus:outline-none cursor-not-allowed">
-                            <span class="text-[10px] text-zinc-500 mt-1 block">* Abatido automaticamente dos lançamentos da aba Despesas.</span>
+                            <span class="text-[10px] text-zinc-500 mt-1 block">* Calculado automaticamente com base nos lançamentos da aba Despesas.</span>
                         </div>
                     </div>
 
@@ -245,11 +266,6 @@
                         </button>
                     </div>
                 </form>
-
-                <div class="pt-4 border-t border-zinc-800 space-y-3">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">Histórico de Caixas Anteriores</h3>
-                    <div id="lista-caixa-historico" class="space-y-2 text-xs"></div>
-                </div>
             </div>
         </section>
 
@@ -261,11 +277,22 @@
                         <h2 class="text-base md:text-lg font-black text-rose-400 flex items-center gap-2">
                             <i class="fa-solid fa-file-invoice-dollar"></i> Lançamento de Despesas & Boletos
                         </h2>
-                        <p class="text-xs text-zinc-400 mt-0.5">Gerencie compras, contas diárias, boletos com alerta de vencimento e parcelamentos.</p>
+                        <p class="text-xs text-zinc-400 mt-0.5">Gerencie contas diárias, boletos com alerta de vencimento e parcelamentos.</p>
                     </div>
-                    <button onclick="abrirModalNovaDespesa()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-rose-950/40">
-                        <i class="fa-solid fa-plus"></i> + Nova Despesa
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="imprimirRelatorioDespesasPDF()" class="bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-2 border border-zinc-700">
+                            <i class="fa-solid fa-print"></i> PDF Despesas
+                        </button>
+                        <button onclick="abrirModalNovaDespesa()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-rose-950/40">
+                            <i class="fa-solid fa-plus"></i> + Nova Despesa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CAMPO DE PESQUISA DE DESPESAS -->
+                <div class="bg-zinc-950 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
+                    <i class="fa-solid fa-magnifying-glass text-rose-400 text-base"></i>
+                    <input type="text" id="busca-despesas" onkeyup="renderizarDespesas()" placeholder="Pesquisar despesa por descrição, forma de pagamento ou status..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
                 </div>
 
                 <!-- TABELA DE DESPESAS -->
@@ -526,22 +553,79 @@
             <div id="lista-produtos-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"></div>
         </section>
 
-        <!-- ================= SEÇÃO 9: HISTÓRICO DE MESES FECHADOS ================= -->
+        <!-- ================= SEÇÃO 9: FINANCEIRO EM TEMPO REAL ================= -->
+        <section id="secao-financeiro" class="secao-conteudo hidden space-y-6">
+            <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
+                <div class="border-b border-zinc-800 pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-base md:text-lg font-black text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-wallet"></i> Resumo Financeiro Unificado
+                        </h2>
+                        <p class="text-xs text-zinc-400 mt-0.5">Visão consolidada de entradas, contas pagas, pendentes e saldos em tempo real.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Entradas Totais (Mês)</span>
+                        <strong class="text-lg font-black text-emerald-400 mt-1 block" id="fin-entradas-mes">R$ 0,00</strong>
+                    </div>
+                    <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Despesas Pagas (Mês)</span>
+                        <strong class="text-lg font-black text-rose-400 mt-1 block" id="fin-despesas-mes">R$ 0,00</strong>
+                    </div>
+                    <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Boletos A Vencer</span>
+                        <strong class="text-lg font-black text-amber-400 mt-1 block" id="fin-boletos-vencer">R$ 0,00</strong>
+                    </div>
+                    <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                        <span class="text-[10px] text-zinc-400 font-bold uppercase block">Fiado A Receber</span>
+                        <strong class="text-lg font-black text-purple-400 mt-1 block" id="fin-fiado-receber">R$ 0,00</strong>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800 flex justify-between items-center">
+                    <div>
+                        <span class="text-xs text-zinc-400 uppercase font-bold block">Lucro Líquido do Mês</span>
+                        <span class="text-[10px] text-zinc-500">Entradas - Despesas Pagas - Perdas</span>
+                    </div>
+                    <strong class="text-xl md:text-2xl font-black text-blue-400" id="fin-lucro-liquido-total">R$ 0,00</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SEÇÃO 10: HISTÓRICO (DIÁRIO & MENSAL) ================= -->
         <section id="secao-historico" class="secao-conteudo hidden space-y-6">
             <div class="bg-zinc-900 p-5 md:p-8 rounded-2xl border border-zinc-800 max-w-4xl mx-auto space-y-6 shadow-2xl">
                 <div class="border-b border-zinc-800 pb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                     <div>
                         <h2 class="text-base md:text-lg font-black text-zinc-200 flex items-center gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Histórico de Fechamentos Mensais
+                            <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Histórico de Fechamentos
                         </h2>
-                        <p class="text-xs text-zinc-400 mt-0.5">Consulte os balanços passados e faça o encerramento do mês ativo com 1 clique.</p>
+                        <p class="text-xs text-zinc-400 mt-0.5">Consulte registros diários ou encerre o mês ativo com 1 clique.</p>
                     </div>
                     <button onclick="fecharMesAtivo()" class="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-950/30">
                         <i class="fa-solid fa-lock"></i> FECHAR MÊS ATIVO
                     </button>
                 </div>
 
-                <div id="lista-historico-meses" class="space-y-3"></div>
+                <!-- GUIAS DE NAVEGAÇÃO INTERNA DO HISTÓRICO -->
+                <div class="flex gap-2 border-b border-zinc-800 pb-3">
+                    <button onclick="alternarAbaHistorico('diario')" id="btn-hist-diario" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-zinc-950">Caixas Diários</button>
+                    <button onclick="alternarAbaHistorico('mensal')" id="btn-hist-mensal" class="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-400 border border-zinc-700">Fechamentos Mensais</button>
+                </div>
+
+                <div id="conteudo-hist-diario" class="space-y-3">
+                    <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex items-center gap-2">
+                        <label class="text-xs text-zinc-400 font-bold shrink-0">Consultar Dia:</label>
+                        <input type="date" id="filtro-hist-data" onchange="renderizarHistoricoDiario()" class="bg-zinc-800 border border-zinc-700 rounded-lg p-2 text-xs text-white focus:outline-none">
+                    </div>
+                    <div id="lista-historico-diario-cards" class="space-y-2 text-xs"></div>
+                </div>
+
+                <div id="conteudo-hist-mensal" class="hidden space-y-3">
+                    <div id="lista-historico-meses" class="space-y-3"></div>
+                </div>
             </div>
         </section>
 
@@ -551,7 +635,7 @@
     <div id="area-impressao-recibo" class="hidden"></div>
 
     <!-- BARRA DE NAVEGAÇÃO MOBILE FIXA -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 flex justify-around items-center py-2.5 z-50 px-1 no-print">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 flex justify-around items-center py-2.5 z-50 px-1 no-print">
         <button onclick="navegar('dashboard')" id="nav-dashboard" class="nav-item active flex flex-col items-center gap-1 text-emerald-400 font-bold">
             <i class="fa-solid fa-chart-pie text-lg"></i>
             <span class="text-[10px]">Painel</span>
@@ -579,229 +663,6 @@
             <span class="text-[10px]">Farol</span>
         </button>
     </nav>
-
-    <!-- MODAIS DE SISTEMA -->
-
-    <!-- MODAL CONFIRMAÇÃO PERSONALIZADO -->
-    <div id="modal-confirmacao" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[2000] hidden flex items-center justify-center p-4">
-        <div id="modal-confirmacao-box" class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl scale-95 opacity-0 transition-all duration-200">
-            <div id="modal-confirmacao-icone" class="w-14 h-14 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-lg">
-                <i class="fa-solid fa-trash-can"></i>
-            </div>
-            <div>
-                <h3 class="text-base font-black text-white" id="modal-confirmacao-titulo">Confirmar Ação</h3>
-                <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed" id="modal-confirmacao-mensagem">Deseja realmente prosseguir?</p>
-            </div>
-            <div class="flex gap-2.5 pt-2" id="modal-confirmacao-botoes">
-                <button id="btn-confirmar-cancelar" class="w-1/2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-2.5 rounded-xl text-xs transition-all border border-zinc-700">
-                    Cancelar
-                </button>
-                <button id="btn-confirmar-ok" class="w-1/2 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-rose-950/50">
-                    Sim, Confirmar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL NOVA DESPESA / BOLETO -->
-    <div id="modal-despesa" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h3 class="text-sm font-black text-rose-400 flex items-center gap-2">
-                    <i class="fa-solid fa-file-circle-plus"></i> Nova Despesa ou Boleto
-                </h3>
-                <button onclick="fecharModalNovaDespesa()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form onsubmit="salvarNovaDespesa(event)" class="space-y-3 text-xs md:text-sm">
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Descrição / Fornecedor *</label>
-                    <input type="text" id="desp-descricao" required placeholder="Ex: Boleto Ambev, Sacolas, Conta de Luz" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none focus:border-rose-400">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-zinc-400 font-semibold mb-1">Valor Total (R$) *</label>
-                        <input type="text" id="desp-valor" required placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-zinc-400 font-semibold mb-1">Forma Pagto *</label>
-                        <select id="desp-forma" required class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                            <option value="Dinheiro">Dinheiro (Gaveta)</option>
-                            <option value="Pix">Pix</option>
-                            <option value="Boleto">Boleto</option>
-                            <option value="Cartão de Crédito">Cartão de Crédito</option>
-                            <option value="Débito">Cartão de Débito</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-amber-400 font-bold mb-1">1º Vencimento *</label>
-                        <input type="date" id="desp-vencimento" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-3 text-white font-bold focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-zinc-400 font-semibold mb-1">Nº Parcelas</label>
-                        <select id="desp-parcelas" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                            <option value="1">1x (À Vista)</option>
-                            <option value="2">2x</option>
-                            <option value="3">3x</option>
-                            <option value="4">4x</option>
-                            <option value="5">5x</option>
-                            <option value="6">6x</option>
-                            <option value="10">10x</option>
-                            <option value="12">12x</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
-                    <button type="button" onclick="fecharModalNovaDespesa()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2.5 bg-rose-600 text-white font-bold rounded-xl">Salvar Despesa</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL EDITAR LOTE -->
-    <div id="modal-editar-lote" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h3 class="text-sm font-black text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square"></i> Editar Validade e Quantidade
-                </h3>
-                <button onclick="fecharModalEditarLote()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form onsubmit="salvarLoteEdicao(event)" class="space-y-3 text-xs md:text-sm">
-                <input type="hidden" id="edit-lote-id">
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Produto</label>
-                    <input type="text" id="edit-lote-prod-nome" disabled class="w-full bg-zinc-800/60 border border-zinc-700/60 rounded-xl p-3 text-zinc-300 font-bold focus:outline-none cursor-not-allowed">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-amber-400 font-black uppercase mb-1">Validade *</label>
-                        <input type="date" id="edit-lote-val" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-3 text-white font-bold focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-zinc-400 font-semibold mb-1">Quantidade *</label>
-                        <input type="number" id="edit-lote-qtd" required min="0" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-bold focus:outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Prateleira / Local</label>
-                    <input type="text" id="edit-lote-local" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                </div>
-                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
-                    <button type="button" onclick="fecharModalEditarLote()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2.5 bg-amber-400 text-zinc-950 font-bold rounded-xl">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL CAMERA SCANNER -->
-    <div id="modal-camera" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] hidden flex flex-col items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-sm w-full p-5 space-y-3 text-center shadow-2xl relative">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
-                <h3 class="text-xs font-black text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-camera"></i> Apunte a Câmera para o Código</h3>
-                <button onclick="fecharCameraScanner()" class="text-zinc-400 text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="reader" class="w-full bg-black rounded-2xl overflow-hidden border border-amber-500/40 min-h-[220px]"></div>
-            <button onclick="fecharCameraScanner()" class="w-full bg-zinc-800 text-zinc-300 font-bold py-2.5 rounded-xl text-xs border border-zinc-700">Fechar Câmera</button>
-        </div>
-    </div>
-
-    <!-- MODAL CADASTRO PRODUTO -->
-    <div id="modal-produto" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h3 class="text-sm font-black text-blue-400" id="prod-modal-titulo">Novo Produto</h3>
-                <button onclick="fecharModalProduto()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form onsubmit="salvarProdutoForm(event)" class="space-y-3 text-xs md:text-sm">
-                <input type="hidden" id="f-prod-id">
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">EAN (Código de Barras)</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="f-prod-ean" placeholder="789..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white font-mono focus:outline-none">
-                        <button type="button" onclick="abrirCameraScanner('prod')" class="bg-amber-500 text-zinc-950 font-bold px-3 py-3 rounded-xl">📷</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Nome do Produto *</label>
-                    <input type="text" id="f-prod-nome" required placeholder="Ex: Arroz Tio João 5kg" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-zinc-400 font-semibold mb-1">Categoria</label>
-                        <select id="f-prod-cat" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                            <option value="Mercearia">Mercearia</option>
-                            <option value="Laticínios">Laticínios</option>
-                            <option value="Bebidas">Bebidas</option>
-                            <option value="Padaria">Padaria</option>
-                            <option value="Limpeza">Limpeza</option>
-                            <option value="Frios">Frios</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-zinc-400 font-semibold mb-1">Unidade</label>
-                        <select id="f-prod-uni" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                            <option value="Un">Unidade (Un)</option>
-                            <option value="Kg">Quilo (Kg)</option>
-                            <option value="L">Litro (L)</option>
-                            <option value="Cx">Caixa (Cx)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-zinc-400 font-semibold mb-1">Preço Custo (R$)</label>
-                        <input type="text" id="f-prod-custo" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-rose-300 font-bold focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-emerald-400 font-semibold mb-1">Preço Venda (R$)</label>
-                        <input type="text" id="f-prod-venda" placeholder="0.00" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-emerald-400 font-bold focus:outline-none">
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
-                    <button type="button" onclick="fecharModalProduto()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl">Salvar Produto</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL CADERNETA -->
-    <div id="modal-caderneta-cliente" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-                <h3 class="text-sm font-black text-purple-400">Novo Cliente Fiado</h3>
-                <button onclick="fecharModalCadernetaCliente()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <form onsubmit="salvarClienteCaderneta(event)" class="space-y-3 text-xs md:text-sm">
-                <input type="hidden" id="c-caderneta-id">
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Nome do Cliente *</label>
-                    <input type="text" id="c-caderneta-nome" required placeholder="Ex: Dona Maria (Casa 4)" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Telefone / Whats</label>
-                    <input type="text" id="c-caderneta-tel" placeholder="(21) 90000-0000" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-purple-400 font-bold mb-1">Saldo Devido Inicial (R$)</label>
-                    <input type="text" id="c-caderneta-valor" placeholder="0.00" class="w-full bg-zinc-800 border border-purple-500/60 rounded-xl p-3 text-purple-300 font-bold focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-zinc-400 font-semibold mb-1">Observações</label>
-                    <textarea id="c-caderneta-obs" rows="2" placeholder="Observações..." class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-white focus:outline-none"></textarea>
-                </div>
-                <div class="flex justify-end gap-2 pt-3 border-t border-zinc-800">
-                    <button type="button" onclick="fecharModalCadernetaCliente()" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 rounded-xl">Cancelar</button>
-                    <button type="submit" class="px-5 py-2.5 bg-purple-600 text-white font-bold rounded-xl">Salvar Cliente</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- TOAST DE NOTIFICAÇÃO -->
     <div id="toast" class="fixed top-5 left-4 right-4 bg-zinc-900 text-white border border-emerald-400 px-4 py-3 rounded-2xl shadow-2xl transform -translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-[2000] max-w-sm mx-auto">
@@ -920,8 +781,10 @@
         }
 
         async function carregarDados() {
-            const iconSync = document.getElementById('icon-sync');
-            if (iconSync) iconSync.classList.add('fa-spin');
+            const iconPc = document.getElementById('icon-sync-pc');
+            const iconMob = document.getElementById('icon-sync-mobile');
+            if (iconPc) iconPc.classList.add('fa-spin');
+            if (iconMob) iconMob.classList.add('fa-spin');
 
             try {
                 const resProd = await supabaseClient.from('mercearia_produtos').select('*').order('nome');
@@ -949,7 +812,8 @@
                 console.error("Erro no carregamento:", e);
             } finally {
                 atualizarInterface();
-                if (iconSync) iconSync.classList.remove('fa-spin');
+                if (iconPc) iconPc.classList.remove('fa-spin');
+                if (iconMob) iconMob.classList.remove('fa-spin');
             }
         }
 
@@ -961,7 +825,9 @@
             renderizarProdutos();
             renderizarHistoricoPerdas();
             renderizarHistoricoMensal();
+            renderizarHistoricoDiario();
             renderizarCaderneta();
+            renderizarFinanceiro();
             popularDatalists();
 
             const hoje = getObterDataLocalISO();
@@ -973,6 +839,9 @@
             }
             if (document.getElementById('desp-vencimento') && !document.getElementById('desp-vencimento').value) {
                 document.getElementById('desp-vencimento').value = hoje;
+            }
+            if (document.getElementById('filtro-hist-data') && !document.getElementById('filtro-hist-data').value) {
+                document.getElementById('filtro-hist-data').value = hoje;
             }
         }
 
@@ -993,77 +862,48 @@
             }
 
             document.querySelectorAll('.pc-nav-btn').forEach(b => {
-                b.classList.remove('text-emerald-400', 'bg-emerald-500/10', 'border', 'border-emerald-500/30', 'font-bold');
+                b.classList.remove('text-emerald-400', 'bg-emerald-500/10', 'border-l-4', 'border-emerald-400', 'font-bold');
                 b.classList.add('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800', 'font-semibold');
             });
 
             const btnPC = document.getElementById(`pc-nav-${secao}`);
             if (btnPC) {
                 btnPC.classList.remove('text-zinc-400', 'hover:text-white', 'hover:bg-zinc-800', 'font-semibold');
-                btnPC.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border', 'border-emerald-500/30', 'font-bold');
+                btnPC.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border-l-4', 'border-emerald-400', 'font-bold');
             }
 
             if (secao === 'dashboard') renderizarDashboard();
             else if (secao === 'bipar') setTimeout(() => document.getElementById('u-prod-ean')?.focus(), 200);
+            else if (secao === 'financeiro') renderizarFinanceiro();
         }
 
         // ================= DASHBOARD =================
         function renderizarDashboard() {
-            const hoje = new Date();
-            const mesAtual = hoje.getMonth();
-            const anoAtual = hoje.getFullYear();
+            const hojeStr = getObterDataLocalISO();
+            
+            // Faturamento do Dia
+            const caixaHoje = appData.caixa.find(c => c.data === hojeStr);
+            const fatDia = caixaHoje ? parseFloat(caixaHoje.total_bruto || 0) : 0;
 
-            let totalFatMes = 0;
-            let totalPerdasMes = 0;
-            let totalDespesasPagasMes = 0;
-            let qtdItensPerdidosMes = 0;
-            let numFechamentos = 0;
-            let numDespesasPagas = 0;
+            // Despesas do Dia (Pagas hoje)
+            const despesasPagasDia = appData.despesas
+                .filter(d => d.status === 'Pago' && d.data_vencimento === hojeStr)
+                .reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
+            const numDespesasDiaCount = appData.despesas.filter(d => d.status === 'Pago' && d.data_vencimento === hojeStr).length;
 
-            appData.caixa.forEach(c => {
-                if (c.data) {
-                    const parts = c.data.split('-');
-                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-                    if (d.getMonth() === mesAtual && d.getFullYear() === anoAtual) {
-                        totalFatMes += parseFloat(c.total_bruto || 0);
-                        numFechamentos++;
-                    }
-                }
-            });
+            // Lucro Líquido do Dia
+            const lucroDia = fatDia - despesasPagasDia;
 
-            appData.despesas.forEach(d => {
-                if (d.status === 'Pago' && d.data_vencimento) {
-                    const parts = d.data_vencimento.split('-');
-                    const dt = new Date(parts[0], parts[1] - 1, parts[2]);
-                    if (dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual) {
-                        totalDespesasPagasMes += parseFloat(d.valor || 0);
-                        numDespesasPagas++;
-                    }
-                }
-            });
-
-            appData.perdas.forEach(p => {
-                if (p.data_perda) {
-                    const parts = p.data_perda.split('-');
-                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-                    if (d.getMonth() === mesAtual && d.getFullYear() === anoAtual) {
-                        totalPerdasMes += parseFloat(p.valor_total || 0);
-                        qtdItensPerdidosMes += parseFloat(p.quantidade || 0);
-                    }
-                }
-            });
-
-            const lucroLiquidoEstimado = totalFatMes - totalDespesasPagasMes - totalPerdasMes;
+            // Fiado Total
             const totalFiado = appData.caderneta.reduce((acc, c) => acc + parseFloat(c.valor_devido || 0), 0);
             const clientesFiadoCount = appData.caderneta.filter(c => parseFloat(c.valor_devido || 0) > 0).length;
 
-            document.getElementById('dash-faturamento-mes').innerText = `R$ ${totalFatMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('dash-fechamentos-qtd').innerText = `${numFechamentos} registro(s) no mês`;
-
-            document.getElementById('dash-despesas-mes').innerText = `R$ ${totalDespesasPagasMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('dash-despesas-qtd').innerText = `${numDespesasPagas} conta(s) pagas`;
-
-            document.getElementById('dash-lucro-liquido').innerText = `R$ ${lucroLiquidoEstimado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            const partsH = hojeStr.split('-');
+            document.getElementById('dash-data-hoje').innerText = `Data: ${partsH[2]}/${partsH[1]}/${partsH[0]}`;
+            document.getElementById('dash-faturamento-dia').innerText = `R$ ${fatDia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-despesas-dia').innerText = `R$ ${despesasPagasDia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-despesas-qtd').innerText = `${numDespesasDiaCount} despesa(s) pagas hoje`;
+            document.getElementById('dash-lucro-liquido-dia').innerText = `R$ ${lucroDia.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
             document.getElementById('dash-fiado-total').innerText = `R$ ${totalFiado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('dash-fiado-clientes').innerText = `${clientesFiadoCount} cliente(s) devendo`;
@@ -1118,7 +958,9 @@
             if (!boxAlerta || !containerLista) return;
 
             const hojeStr = getObterDataLocalISO();
-            const amanhaStr = getObterDataLocalISO(new Date(Date.now() + 86400000));
+            const dtAmanha = new Date();
+            dtAmanha.setDate(dtAmanha.getDate() + 1);
+            const amanhaStr = getObterDataLocalISO(dtAmanha);
 
             const boletosAlertar = appData.despesas.filter(d => {
                 return d.status === 'Pendente' && (d.data_vencimento <= amanhaStr);
@@ -1193,7 +1035,7 @@
                                 borderRadius: 6
                             },
                             {
-                                label: 'Despesas do Dia',
+                                label: 'Despesas Pagas',
                                 data: dataDespesas.length > 0 ? dataDespesas : [0],
                                 backgroundColor: 'rgba(244, 63, 94, 0.8)',
                                 borderRadius: 6
@@ -1226,20 +1068,20 @@
         }
 
         function renderizarCaixaStatus() {
-            const hoje = getObterDataLocalISO();
-            const registroHoje = appData.caixa.find(c => c.data === hoje);
+            const dataSelecionada = document.getElementById('caixa-data')?.value || getObterDataLocalISO();
+            const registroHoje = appData.caixa.find(c => c.data === dataSelecionada);
             const badge = document.getElementById('status-caixa-badge');
 
-            // Calcula despesas pagas em dinheiro no dia de hoje
-            const despesasDinheiroHoje = appData.despesas
-                .filter(d => d.status === 'Pago' && d.forma_pagamento === 'Dinheiro' && d.data_vencimento === hoje)
+            // PUXA AUTOMATICAMENTE TODAS AS DESPESAS PAGAS NAQUELA DATA SELECIONADA
+            const despesasPagasNaData = appData.despesas
+                .filter(d => d.status === 'Pago' && d.data_vencimento === dataSelecionada)
                 .reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
 
-            document.getElementById('caixa-despesas').value = despesasDinheiroHoje.toFixed(2);
+            document.getElementById('caixa-despesas').value = despesasPagasNaData.toFixed(2);
 
             if (registroHoje) {
                 badge.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
-                badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> Caixa Movimentado Hoje`;
+                badge.innerHTML = `<i class="fa-solid fa-circle-check"></i> Caixa Movimentado Nesta Data`;
                 
                 document.getElementById('caixa-troco-inicial').value = registroHoje.troco_inicial || '';
                 document.getElementById('caixa-dinheiro').value = registroHoje.dinheiro || '';
@@ -1251,7 +1093,7 @@
                 calcularTotalCaixa();
             } else {
                 badge.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border-amber-500/30";
-                badge.innerHTML = `<i class="fa-solid fa-clock"></i> Caixa Pendente Hoje`;
+                badge.innerHTML = `<i class="fa-solid fa-clock"></i> Caixa Pendente Nesta Data`;
             }
 
             renderizarHistoricoCaixa();
@@ -1327,7 +1169,7 @@
                         <span class="text-[10px] text-zinc-400">Troco: <strong>R$ ${parseFloat(c.troco_inicial||0).toFixed(2)}</strong> | Entradas: <strong class="text-emerald-400">R$ ${tot.toFixed(2)}</strong></span>
                     </div>
                     <div class="text-right">
-                        <span class="text-[10px] text-zinc-500 block uppercase font-bold">Saídas</span>
+                        <span class="text-[10px] text-zinc-500 block uppercase font-bold">Despesas Pagas</span>
                         <strong class="text-xs font-bold text-rose-400">R$ ${sai.toFixed(2)}</strong>
                     </div>
                 `;
@@ -1335,40 +1177,42 @@
             });
         }
 
-        function imprimirComprovanteCaixaDiario() {
-            const dataStr = document.getElementById('caixa-data').value;
+        function imprimirComprovanteCaixaDiario(dataTarget = null) {
+            const dataStr = dataTarget || document.getElementById('caixa-data').value;
+            const registro = appData.caixa.find(c => c.data === dataStr);
+
             const parts = dataStr.split('-');
             const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
 
-            const troco = parseNum(document.getElementById('caixa-troco-inicial').value);
-            const despesas = parseNum(document.getElementById('caixa-despesas').value);
-            const din = parseNum(document.getElementById('caixa-dinheiro').value);
-            const pix = parseNum(document.getElementById('caixa-pix').value);
-            const deb = parseNum(document.getElementById('caixa-debito').value);
-            const cre = parseNum(document.getElementById('caixa-credito').value);
-            const fia = parseNum(document.getElementById('caixa-fiado').value);
+            const troco = registro ? parseFloat(registro.troco_inicial || 0) : parseNum(document.getElementById('caixa-troco-inicial').value);
+            const despesas = registro ? parseFloat(registro.despesas || 0) : parseNum(document.getElementById('caixa-despesas').value);
+            const din = registro ? parseFloat(registro.dinheiro || 0) : parseNum(document.getElementById('caixa-dinheiro').value);
+            const pix = registro ? parseFloat(registro.pix || 0) : parseNum(document.getElementById('caixa-pix').value);
+            const deb = registro ? parseFloat(registro.debito || 0) : parseNum(document.getElementById('caixa-debito').value);
+            const cre = registro ? parseFloat(registro.credito || 0) : parseNum(document.getElementById('caixa-credito').value);
+            const fia = registro ? parseFloat(registro.fiado || 0) : parseNum(document.getElementById('caixa-fiado').value);
             const totalBruto = din + pix + deb + cre + fia;
             const saldoGaveta = (troco + din) - despesas;
 
             const areaPrint = document.getElementById('area-impressao-recibo');
             areaPrint.innerHTML = `
-                <div style="font-family: sans-serif; padding: 20px; border: 2px solid #000; border-radius: 12px; max-width: 500px; margin: 0 auto;">
-                    <h2 style="text-align: center; font-size: 18px; margin-bottom: 4px;">MERCEARIA MARQUES</h2>
-                    <p style="text-align: center; font-size: 12px; margin-top: 0;">COMPROVANTE DE FECHAMENTO DE CAIXA</p>
+                <div style="font-family: sans-serif; padding: 25px; border: 2px solid #000; border-radius: 12px; max-width: 500px; margin: 0 auto; background: #fff;">
+                    <h2 style="text-align: center; font-size: 20px; margin-bottom: 2px; font-weight: 900;">MERCEARIA MARQUES</h2>
+                    <p style="text-align: center; font-size: 12px; margin-top: 0; color: #444;">COMPROVANTE DE FECHAMENTO DIÁRIO DE CAIXA</p>
                     <hr style="border-top: 1px dashed #000; margin: 15px 0;">
-                    <p style="font-size: 13px;"><strong>DATA:</strong> ${dataFmt}</p>
-                    <p style="font-size: 13px;"><strong>TROCO INICIAL (FUNDO):</strong> R$ ${troco.toFixed(2)}</p>
+                    <p style="font-size: 13px;"><strong>DATA DA OPERAÇÃO:</strong> ${dataFmt}</p>
+                    <p style="font-size: 13px;"><strong>TROCO INICIAL (FUNDO DE GAVETA):</strong> R$ ${troco.toFixed(2)}</p>
                     <hr style="border-top: 1px dashed #000; margin: 15px 0;">
-                    <h3 style="font-size: 14px; margin-bottom: 8px;">ENTRADAS POR FORMA DE PAGAMENTO:</h3>
-                    <p style="font-size: 12px;">💵 Dinheiro na Gaveta: R$ ${din.toFixed(2)}</p>
+                    <h3 style="font-size: 13px; margin-bottom: 8px;">ENTRADAS RECEBIDAS NO DIA:</h3>
+                    <p style="font-size: 12px;">💵 Dinheiro (Gaveta): R$ ${din.toFixed(2)}</p>
                     <p style="font-size: 12px;">⚡ Pix Recebido: R$ ${pix.toFixed(2)}</p>
                     <p style="font-size: 12px;">💳 Cartão Débito: R$ ${deb.toFixed(2)}</p>
                     <p style="font-size: 12px;">💳 Cartão Crédito: R$ ${cre.toFixed(2)}</p>
                     <p style="font-size: 12px;">📖 Fiado Lançado: R$ ${fia.toFixed(2)}</p>
-                    <p style="font-size: 14px; margin-top: 10px;"><strong>TOTAL BRUTO ENTRADAS: R$ ${totalBruto.toFixed(2)}</strong></p>
+                    <p style="font-size: 14px; margin-top: 10px;"><strong>TOTAL BRUTO DAS ENTRADAS: R$ ${totalBruto.toFixed(2)}</strong></p>
                     <hr style="border-top: 1px dashed #000; margin: 15px 0;">
-                    <p style="font-size: 13px; color: red;"><strong>DESPESAS PAGAS EM DINHEIRO:</strong> -R$ ${despesas.toFixed(2)}</p>
-                    <p style="font-size: 16px; margin-top: 10px;"><strong>SALDO FINAL EM GAVETA (Dinheiro + Troco - Despesas): R$ ${saldoGaveta.toFixed(2)}</strong></p>
+                    <p style="font-size: 13px; color: red;"><strong>DESPESAS PAGAS NO DIA:</strong> -R$ ${despesas.toFixed(2)}</p>
+                    <p style="font-size: 15px; margin-top: 10px;"><strong>SALDO FINAL ESPERADO NA GAVETA: R$ ${saldoGaveta.toFixed(2)}</strong></p>
                     <br><br>
                     <div style="border-top: 1px solid #000; text-align: center; font-size: 11px; padding-top: 5px;">
                         Assinatura do Responsável
@@ -1468,15 +1312,27 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
+            const busca = (document.getElementById('busca-despesas')?.value || '').toLowerCase();
             const hojeStr = getObterDataLocalISO();
-            const amanhaStr = getObterDataLocalISO(new Date(Date.now() + 86400000));
 
-            if (appData.despesas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-zinc-500 italic">Nenhuma despesa lançada.</td></tr>`;
+            const dtAmanha = new Date();
+            dtAmanha.setDate(dtAmanha.getDate() + 1);
+            const amanhaStr = getObterDataLocalISO(dtAmanha);
+
+            let despesasFiltradas = [...appData.despesas];
+
+            // Ordena por data mais recente de modificação / vencimento
+            despesasFiltradas.sort((a, b) => new Date(b.data_vencimento) - new Date(a.data_vencimento));
+
+            if (despesasFiltradas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-zinc-500 italic">Nenhuma despesa cadastrada.</td></tr>`;
                 return;
             }
 
-            appData.despesas.forEach(d => {
+            despesasFiltradas.forEach(d => {
+                const buscaTexto = `${d.descricao || ''} ${d.forma_pagamento || ''} ${d.status || ''}`.toLowerCase();
+                if (busca && !buscaTexto.includes(busca)) return;
+
                 const parts = d.data_vencimento ? d.data_vencimento.split('-') : ['--', '--', '----'];
                 const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
                 const isPago = d.status === 'Pago';
@@ -1516,6 +1372,46 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function imprimirRelatorioDespesasPDF() {
+            const areaPrint = document.getElementById('area-impressao-recibo');
+            let linhas = '';
+
+            appData.despesas.forEach(d => {
+                const parts = d.data_vencimento ? d.data_vencimento.split('-') : ['--', '--', '----'];
+                const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                linhas += `
+                    <tr>
+                        <td style="padding: 6px; border-bottom: 1px solid #ddd;">${escapeAttr(d.descricao)}</td>
+                        <td style="padding: 6px; border-bottom: 1px solid #ddd;">${dataFmt}</td>
+                        <td style="padding: 6px; border-bottom: 1px solid #ddd;">${escapeAttr(d.forma_pagamento)}</td>
+                        <td style="padding: 6px; border-bottom: 1px solid #ddd;">R$ ${parseFloat(d.valor||0).toFixed(2)}</td>
+                        <td style="padding: 6px; border-bottom: 1px solid #ddd;">${d.status}</td>
+                    </tr>
+                `;
+            });
+
+            areaPrint.innerHTML = `
+                <div style="font-family: sans-serif; padding: 25px; max-width: 700px; margin: 0 auto; background: #fff;">
+                    <h2 style="text-align: center; font-size: 20px; margin-bottom: 2px;">MERCEARIA MARQUES</h2>
+                    <p style="text-align: center; font-size: 12px; margin-top: 0; color: #444;">RELATÓRIO CONSOLIDADO DE DESPESAS</p>
+                    <hr style="border-top: 1px solid #000; margin: 15px 0;">
+                    <table style="width: 100%; text-align: left; font-size: 12px; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #eee;">
+                                <th style="padding: 6px;">Descrição</th>
+                                <th style="padding: 6px;">Vencimento</th>
+                                <th style="padding: 6px;">Forma</th>
+                                <th style="padding: 6px;">Valor</th>
+                                <th style="padding: 6px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>${linhas}</tbody>
+                    </table>
+                </div>
+            `;
+            window.print();
         }
 
         // ================= FAROL DE VALIDADES =================
@@ -2027,7 +1923,7 @@
             });
         }
 
-        // ================= CADERNETA FIADO =================
+        // ================= CADERNETA FIADO COM WHATSAPP =================
         function abrirModalCadernetaCliente() {
             document.getElementById('c-caderneta-id').value = '';
             document.getElementById('c-caderneta-nome').value = '';
@@ -2100,6 +1996,28 @@
             }
         }
 
+        function enviarWhatsCliente(clienteId, tipoMsg) {
+            const c = appData.caderneta.find(x => x.id == clienteId);
+            if (!c || !c.telefone) {
+                mostrarToast("Cliente não possui telefone cadastrado!", "erro");
+                return;
+            }
+
+            const telClean = c.telefone.replace(/\D/g, '');
+            const numWhats = (telClean.length === 10 || telClean.length === 11) ? `55${telClean}` : telClean;
+            const primeiroNome = c.cliente_nome.trim().split(' ')[0];
+            const valDevido = parseFloat(c.valor_devido || 0).toFixed(2);
+
+            let msg = '';
+            if (tipoMsg === 'cobranca') {
+                msg = `Olá ${primeiroNome}, tudo bem? Passando apenas para lembrar com carinho do saldinho pendente de R$ ${valDevido} na Mercearia Marques. Quando puder passar aqui, será um prazer te receber! Tenha um ótimo dia! 😊✨`;
+            } else {
+                msg = `Olá ${primeiroNome}! Passando para avisar que chegaram novidades e ofertas fresquinhas hoje na Mercearia Marques! Venha nos fazer uma visita. Abraço! 🛒🍎`;
+            }
+
+            window.open(`https://api.whatsapp.com/send?phone=${numWhats}&text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
         function renderizarCaderneta() {
             const container = document.getElementById('lista-caderneta-cards');
             if (!container) return;
@@ -2137,13 +2055,26 @@
                         <strong class="text-base font-black ${valorDevido > 0 ? 'text-purple-400' : 'text-emerald-400'}">R$ ${valorDevido.toFixed(2)}</strong>
                     </div>
 
-                    <div class="flex gap-2 pt-2 border-t border-zinc-800">
-                        <button onclick="solicitarValorFiado(${c.id}, 'add')" class="w-1/2 bg-rose-950/60 hover:bg-rose-900 text-rose-300 font-bold py-2 rounded-xl text-xs border border-rose-800/50 flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-plus"></i> Fiado
-                        </button>
-                        <button onclick="solicitarValorFiado(${c.id}, 'sub')" class="w-1/2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 font-bold py-2 rounded-xl text-xs border border-emerald-500/30 flex items-center justify-center gap-1">
-                            <i class="fa-solid fa-hand-holding-dollar"></i> Pagar
-                        </button>
+                    <div class="space-y-2 pt-2 border-t border-zinc-800">
+                        <div class="flex gap-2">
+                            <button onclick="solicitarValorFiado(${c.id}, 'add')" class="w-1/2 bg-rose-950/60 hover:bg-rose-900 text-rose-300 font-bold py-2 rounded-xl text-xs border border-rose-800/50 flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-plus"></i> Fiado
+                            </button>
+                            <button onclick="solicitarValorFiado(${c.id}, 'sub')" class="w-1/2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-zinc-950 font-bold py-2 rounded-xl text-xs border border-emerald-500/30 flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-hand-holding-dollar"></i> Pagar
+                            </button>
+                        </div>
+
+                        ${c.telefone ? `
+                            <div class="flex gap-1.5 pt-1">
+                                <button onclick="enviarWhatsCliente(${c.id}, 'cobranca')" class="w-1/2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white font-bold py-1.5 rounded-lg text-[10px] border border-emerald-500/30 flex items-center justify-center gap-1">
+                                    <i class="fa-brands fa-whatsapp text-xs"></i> Lembrete Doce
+                                </button>
+                                <button onclick="enviarWhatsCliente(${c.id}, 'promocao')" class="w-1/2 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white font-bold py-1.5 rounded-lg text-[10px] border border-blue-500/30 flex items-center justify-center gap-1">
+                                    <i class="fa-brands fa-whatsapp text-xs"></i> Promoção
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
                 container.appendChild(card);
@@ -2277,7 +2208,127 @@
             }
         }
 
-        // ================= HISTÓRICO DE MÊS FECHADO =================
+        // ================= FINANCEIRO UNIFICADO EM TEMPO REAL =================
+        function renderizarFinanceiro() {
+            const hoje = new Date();
+            const mesAtual = hoje.getMonth();
+            const anoAtual = hoje.getFullYear();
+
+            let totalEntradasMes = 0;
+            let totalDespesasPagasMes = 0;
+
+            appData.caixa.forEach(c => {
+                if (c.data) {
+                    const parts = c.data.split('-');
+                    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                    if (d.getMonth() === mesAtual && d.getFullYear() === anoAtual) {
+                        totalEntradasMes += parseFloat(c.total_bruto || 0);
+                    }
+                }
+            });
+
+            appData.despesas.forEach(d => {
+                if (d.status === 'Pago' && d.data_vencimento) {
+                    const parts = d.data_vencimento.split('-');
+                    const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+                    if (dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual) {
+                        totalDespesasPagasMes += parseFloat(d.valor || 0);
+                    }
+                }
+            });
+
+            const totalBoletosVencer = appData.despesas
+                .filter(d => d.status === 'Pendente')
+                .reduce((acc, d) => acc + parseFloat(d.valor || 0), 0);
+
+            const totalFiadoReceber = appData.caderneta
+                .reduce((acc, c) => acc + parseFloat(c.valor_devido || 0), 0);
+
+            const totalPerdasMes = appData.perdas.filter(p => {
+                if (!p.data_perda) return false;
+                const parts = p.data_perda.split('-');
+                const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
+            }).reduce((acc, p) => acc + parseFloat(p.valor_total || 0), 0);
+
+            const lucroLiquido = totalEntradasMes - totalDespesasPagasMes - totalPerdasMes;
+
+            document.getElementById('fin-entradas-mes').innerText = `R$ ${totalEntradasMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('fin-despesas-mes').innerText = `R$ ${totalDespesasPagasMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('fin-boletos-vencer').innerText = `R$ ${totalBoletosVencer.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('fin-fiado-receber').innerText = `R$ ${totalFiadoReceber.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('fin-lucro-liquido-total').innerText = `R$ ${lucroLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+
+        // ================= HISTÓRICO (DIÁRIO & MENSAL) =================
+        function alternarAbaHistorico(aba) {
+            const btnDiario = document.getElementById('btn-hist-diario');
+            const btnMensal = document.getElementById('btn-hist-mensal');
+            const contDiario = document.getElementById('conteudo-hist-diario');
+            const contMensal = document.getElementById('conteudo-hist-mensal');
+
+            if (aba === 'diario') {
+                btnDiario.className = "px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-zinc-950";
+                btnMensal.className = "px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-400 border border-zinc-700";
+                contDiario.classList.remove('hidden');
+                contMensal.classList.add('hidden');
+                renderizarHistoricoDiario();
+            } else {
+                btnMensal.className = "px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-zinc-950";
+                btnDiario.className = "px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-400 border border-zinc-700";
+                contMensal.classList.remove('hidden');
+                contDiario.classList.add('hidden');
+                renderizarHistoricoMensal();
+            }
+        }
+
+        function renderizarHistoricoDiario() {
+            const container = document.getElementById('lista-historico-diario-cards');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const dataFiltro = document.getElementById('filtro-hist-data')?.value || getObterDataLocalISO();
+            const caixasFiltro = appData.caixa.filter(c => c.data === dataFiltro);
+
+            if (caixasFiltro.length === 0) {
+                container.innerHTML = `<p class="text-zinc-500 italic p-4 text-center">Nenhum fechamento registrado na data de ${dataFiltro}.</p>`;
+                return;
+            }
+
+            caixasFiltro.forEach(c => {
+                const parts = c.data.split('-');
+                const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+                const card = document.createElement('div');
+                card.className = "bg-zinc-950 p-4 rounded-2xl border border-zinc-800 space-y-3";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                        <div>
+                            <strong class="text-white font-bold text-sm block">DATA: ${dataFmt}</strong>
+                            <span class="text-[10px] text-zinc-400">Troco Inicial: R$ ${parseFloat(c.troco_inicial||0).toFixed(2)}</span>
+                        </div>
+                        <button onclick="imprimirComprovanteCaixaDiario('${c.data}')" class="bg-zinc-800 hover:bg-zinc-700 text-amber-400 border border-zinc-700 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-print"></i> PDF do Dia
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                        <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800"><span class="text-[10px] text-zinc-500 block">💵 Dinheiro:</span> <strong>R$ ${parseFloat(c.dinheiro||0).toFixed(2)}</strong></div>
+                        <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800"><span class="text-[10px] text-zinc-500 block">⚡ Pix:</span> <strong>R$ ${parseFloat(c.pix||0).toFixed(2)}</strong></div>
+                        <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800"><span class="text-[10px] text-zinc-500 block">💳 Débito:</span> <strong>R$ ${parseFloat(c.debito||0).toFixed(2)}</strong></div>
+                        <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800"><span class="text-[10px] text-zinc-500 block">💳 Crédito:</span> <strong>R$ ${parseFloat(c.credito||0).toFixed(2)}</strong></div>
+                        <div class="bg-zinc-900 p-2 rounded-lg border border-zinc-800"><span class="text-[10px] text-zinc-500 block">📖 Fiado:</span> <strong>R$ ${parseFloat(c.fiado||0).toFixed(2)}</strong></div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-zinc-800/80 text-xs">
+                        <span class="text-zinc-400">Total Bruto Entradas: <strong class="text-emerald-400 font-bold">R$ ${parseFloat(c.total_bruto||0).toFixed(2)}</strong></span>
+                        <span class="text-zinc-400">Despesas Pagas: <strong class="text-rose-400 font-bold">R$ ${parseFloat(c.despesas||0).toFixed(2)}</strong></span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
         async function fecharMesAtivo() {
             const hoje = new Date();
             const mesAnoTag = `${String(hoje.getMonth() + 1).padStart(2, '0')}/${hoje.getFullYear()}`;
@@ -2405,13 +2456,13 @@
         function imprimirRelatorioMensalPDF(mesAno, fat, desp, perd, lucro, dataEnc) {
             const areaPrint = document.getElementById('area-impressao-recibo');
             areaPrint.innerHTML = `
-                <div style="font-family: sans-serif; padding: 25px; border: 2px solid #000; border-radius: 12px; max-width: 600px; margin: 0 auto;">
-                    <h2 style="text-align: center; font-size: 20px; margin-bottom: 4px;">MERCEARIA MARQUES</h2>
-                    <p style="text-align: center; font-size: 13px; margin-top: 0;">BALANÇO CONSOLIDADO DO MÊS (${mesAno})</p>
+                <div style="font-family: sans-serif; padding: 25px; border: 2px solid #000; border-radius: 12px; max-width: 600px; margin: 0 auto; background: #fff;">
+                    <h2 style="text-align: center; font-size: 20px; margin-bottom: 4px; font-weight: 900;">MERCEARIA MARQUES</h2>
+                    <p style="text-align: center; font-size: 13px; margin-top: 0; color: #444;">BALANÇO CONSOLIDADO DO MÊS (${mesAno})</p>
                     <hr style="border-top: 1px dashed #000; margin: 15px 0;">
                     <p style="font-size: 12px;"><strong>DATA DO FECHAMENTO:</strong> ${dataEnc}</p>
                     <br>
-                    <h3 style="font-size: 14px; margin-bottom: 10px;">RESUMO FINANCEIRO:</h3>
+                    <h3 style="font-size: 14px; margin-bottom: 10px;">RESUMO FINANCEIRO DO MÊS:</h3>
                     <p style="font-size: 13px; color: green;">(+) Faturamento Bruto (Entradas): R$ ${parseFloat(fat).toFixed(2)}</p>
                     <p style="font-size: 13px; color: red;">(-) Total de Despesas Pagas: R$ ${parseFloat(desp).toFixed(2)}</p>
                     <p style="font-size: 13px; color: red;">(-) Prejuízo por Perdas de Estoque: R$ ${parseFloat(perd).toFixed(2)}</p>
