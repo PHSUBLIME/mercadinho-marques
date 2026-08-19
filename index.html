@@ -115,7 +115,6 @@
 
         <!-- ================= SEÇÃO 1: DASHBOARD ================= -->
         <section id="secao-dashboard" class="secao-conteudo space-y-4">
-            <!-- CARDS COMPACTOS EM GRADE 2x2 -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
                 <div class="bg-zinc-900 border border-emerald-500/30 p-3 md:p-4 rounded-2xl shadow-md flex flex-col justify-between">
                     <span class="text-[9px] md:text-xs font-extrabold uppercase text-emerald-400 tracking-wider block">Faturamento Dia</span>
@@ -424,8 +423,8 @@
                                 <input type="date" id="u-lote-val" required class="w-full bg-zinc-800 border border-amber-500/60 rounded-xl p-2.5 text-white font-bold text-xs focus:outline-none focus:border-amber-400">
                             </div>
                             <div>
-                                <label class="block text-zinc-400 font-semibold mb-1 text-[11px]">Quantidade *</label>
-                                <input type="number" id="u-lote-qtd" required min="1" value="1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-bold text-center text-xs focus:outline-none">
+                                <label class="block text-zinc-400 font-semibold mb-1 text-[11px]">Quantidade (Aceita KG/L) *</label>
+                                <input type="number" id="u-lote-qtd" required step="any" min="0.001" value="1" placeholder="Ex: 1.5 ou 1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-bold text-center text-xs focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-zinc-400 font-semibold mb-1 text-[11px]">Prateleira / Local</label>
@@ -507,8 +506,8 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                         <div>
-                            <label class="block text-zinc-400 font-semibold mb-1">Quantidade Descartada *</label>
-                            <input type="number" id="perda-qtd" required min="1" value="1" oninput="recalcularPrejuizoPerda()" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-bold text-xs focus:outline-none">
+                            <label class="block text-zinc-400 font-semibold mb-1">Quantidade (KG/L/Un) *</label>
+                            <input type="number" id="perda-qtd" required step="any" min="0.001" value="1" oninput="recalcularPrejuizoPerda()" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-bold text-xs focus:outline-none">
                         </div>
 
                         <div>
@@ -594,14 +593,16 @@
             <div id="lista-produtos-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
         </section>
 
-        <!-- ================= SEÇÃO 9: FINANCEIRO ================= -->
+        <!-- ================= SEÇÃO 9: FINANCEIRO COM COMPARATIVO REAL DE SEMANAS ================= -->
         <section id="secao-financeiro" class="secao-conteudo hidden space-y-5">
             <div class="bg-zinc-900 p-4 md:p-8 rounded-2xl border border-zinc-800 max-w-6xl mx-auto space-y-5 shadow-2xl">
-                <div class="border-b border-zinc-800 pb-3">
-                    <h2 class="text-base md:text-xl font-black text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-wallet"></i> Visão Financeira Consolidada
-                    </h2>
-                    <p class="text-[11px] text-zinc-400 mt-0.5">Fluxo de caixa, comparativo de semanas e extrato de movimentações.</p>
+                <div class="border-b border-zinc-800 pb-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-base md:text-xl font-black text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-wallet"></i> Visão Financeira Consolidada
+                        </h2>
+                        <p class="text-[11px] text-zinc-400 mt-0.5">Fluxo de caixa, comparativo de semanas e extrato de movimentações.</p>
+                    </div>
                 </div>
 
                 <!-- CARDS DE METRICAS: DIA, SEMANA, MÊS -->
@@ -625,15 +626,15 @@
                     </div>
                 </div>
 
-                <!-- COMPARATIVO DAS SEMANAS DO MÊS -->
+                <!-- COMPARATIVO DAS SEMANAS DO MÊS (SEMANAS REAIS + MÉDIA DIÁRIA) -->
                 <div class="p-4 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-3">
-                    <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-zinc-800 pb-2">
                         <h3 class="text-xs font-black text-amber-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-trophy"></i> COMPARATIVO DE VENDAS DAS SEMANAS DO MÊS
+                            <i class="fa-solid fa-trophy"></i> COMPARATIVO DAS SEMANAS DO MÊS (CALENDÁRIO REAL)
                         </h3>
                         <span class="text-[10px] text-amber-300 font-bold" id="txt-melhor-semana">--</span>
                     </div>
-                    <div id="grid-comparativo-semanas" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs"></div>
+                    <div id="grid-comparativo-semanas" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 text-xs"></div>
                 </div>
 
                 <div class="p-3.5 bg-zinc-950 rounded-xl border border-zinc-800 flex justify-between items-center">
@@ -897,7 +898,7 @@
                     </div>
                     <div>
                         <label class="block text-zinc-400 font-semibold mb-1">Quantidade *</label>
-                        <input type="number" id="edit-lote-qtd" required min="0" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-bold text-xs focus:outline-none">
+                        <input type="number" id="edit-lote-qtd" required step="any" min="0" placeholder="Ex: 1.5 ou 1" class="w-full bg-zinc-800 border border-zinc-700 rounded-xl p-2.5 text-white font-bold text-xs focus:outline-none">
                     </div>
                 </div>
                 <div>
@@ -1388,8 +1389,6 @@
             containerLista.innerHTML = '';
 
             boletosAlertar.forEach(b => {
-                const parts = b.data_vencimento.split('-');
-                const dataFmt = `${parts[2]}/${parts[1]}`;
                 let tagStatus = '';
 
                 if (b.data_vencimento < hojeStr) {
@@ -2735,7 +2734,7 @@
             }
         }
 
-        // ================= FINANCEIRO COM COMPARATIVO SEMANAL =================
+        // ================= FINANCEIRO COM COMPARATIVO REAL DE SEMANAS (CALENDÁRIO REAL + MÉDIA) =================
         function getDatasSemana(d = new Date()) {
             const date = new Date(d);
             const day = date.getDay();
@@ -2746,6 +2745,35 @@
             sun.setDate(sun.getDate() + 6);
             sun.setHours(23,59,59,999);
             return { mon, sun };
+        }
+
+        function getSemanasCalendarioDoMes(ano, mes) {
+            const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+            let semanas = [];
+            let diaAtual = 1;
+            let numSemana = 1;
+
+            while (diaAtual <= ultimoDia) {
+                let dtInicio = new Date(ano, mes, diaAtual);
+                let dayOfWeek = dtInicio.getDay(); // 0 = Dom, 1 = Seg ...
+                
+                let diasAteDomingo = (dayOfWeek === 0) ? 0 : (7 - dayOfWeek);
+                let diaFim = Math.min(diaAtual + diasAteDomingo, ultimoDia);
+
+                semanas.push({
+                    numero: numSemana,
+                    diaInicio: diaAtual,
+                    diaFim: diaFim,
+                    qtdDias: (diaFim - diaAtual + 1),
+                    dtInicioStr: `${String(diaAtual).padStart(2,'0')}/${String(mes+1).padStart(2,'0')}`,
+                    dtFimStr: `${String(diaFim).padStart(2,'0')}/${String(mes+1).padStart(2,'0')}`,
+                    faturamento: 0
+                });
+
+                diaAtual = diaFim + 1;
+                numSemana++;
+            }
+            return semanas;
         }
 
         function renderizarFinanceiro() {
@@ -2761,7 +2789,7 @@
             let totalEntradasMes = 0;
             let totalDespesasPagasMes = 0;
 
-            let vendasSemanasDoMes = [0, 0, 0, 0, 0];
+            let semanasDoMes = getSemanasCalendarioDoMes(anoAtual, mesAtual);
 
             appData.caixa.forEach(c => {
                 if (c.data) {
@@ -2776,11 +2804,8 @@
                     if (d.getMonth() === mesAtual && d.getFullYear() === anoAtual) {
                         totalEntradasMes += val;
                         const diaDoMes = d.getDate();
-                        if (diaDoMes <= 7) vendasSemanasDoMes[0] += val;
-                        else if (diaDoMes <= 14) vendasSemanasDoMes[1] += val;
-                        else if (diaDoMes <= 21) vendasSemanasDoMes[2] += val;
-                        else if (diaDoMes <= 28) vendasSemanasDoMes[3] += val;
-                        else vendasSemanasDoMes[4] += val;
+                        const sem = semanasDoMes.find(s => diaDoMes >= s.diaInicio && diaDoMes <= s.diaFim);
+                        if (sem) sem.faturamento += val;
                     }
                 }
             });
@@ -2810,27 +2835,38 @@
             document.getElementById('fin-despesas-mes').innerText = `R$ ${totalDespesasPagasMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('fin-lucro-liquido-total').innerText = `R$ ${lucroLiquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
 
-            // COMPARATIVO SEMANAL DO MÊS
+            // COMPARATIVO SEMANAL COM MÉDIA DIÁRIA
             const containerComparativo = document.getElementById('grid-comparativo-semanas');
             if (containerComparativo) {
                 containerComparativo.innerHTML = '';
-                const nomesSemanas = ['Semana 1 (1-7)', 'Semana 2 (8-14)', 'Semana 3 (15-21)', 'Semana 4 (22-28)', 'Semana 5 (29+)'];
-                let maxVenda = Math.max(...vendasSemanasDoMes);
-                let indexMelhor = vendasSemanasDoMes.indexOf(maxVenda);
+                let melhorMedia = 0;
+                let semCampea = null;
 
-                if (maxVenda > 0 && indexMelhor >= 0) {
-                    document.getElementById('txt-melhor-semana').innerText = `🏆 Campeã: ${nomesSemanas[indexMelhor]} (R$ ${maxVenda.toFixed(2)})`;
+                semanasDoMes.forEach(s => {
+                    s.mediaDiaria = s.qtdDias > 0 ? (s.faturamento / s.qtdDias) : 0;
+                    if (s.mediaDiaria > melhorMedia) {
+                        melhorMedia = s.mediaDiaria;
+                        semCampea = s;
+                    }
+                });
+
+                if (semCampea && melhorMedia > 0) {
+                    document.getElementById('txt-melhor-semana').innerText = `🏆 Campeã por Média: Sem. ${semCampea.numero} (${semCampea.dtInicioStr}-${semCampea.dtFimStr}) - R$ ${semCampea.mediaDiaria.toFixed(2)}/dia`;
                 } else {
                     document.getElementById('txt-melhor-semana').innerText = `Sem dados suficientes este mês`;
                 }
 
-                vendasSemanasDoMes.forEach((v, idx) => {
-                    const isCampea = idx === indexMelhor && v > 0;
+                semanasDoMes.forEach(s => {
+                    const isCampea = (semCampea && semCampea.numero === s.numero && s.faturamento > 0);
                     const cardSem = document.createElement('div');
                     cardSem.className = `p-2.5 rounded-xl border ${isCampea ? 'bg-amber-950/30 border-amber-500/80' : 'bg-zinc-900 border-zinc-800'}`;
                     cardSem.innerHTML = `
-                        <span class="text-[9px] text-zinc-400 block font-bold">${nomesSemanas[idx]}</span>
-                        <strong class="${isCampea ? 'text-amber-400' : 'text-white'} font-black block text-xs mt-0.5">R$ ${v.toFixed(2)}</strong>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] text-zinc-400 font-bold">Sem. ${s.numero} (${s.dtInicioStr}-${s.dtFimStr})</span>
+                            <span class="text-[8px] text-zinc-500">${s.qtdDias}d</span>
+                        </div>
+                        <strong class="${isCampea ? 'text-amber-400' : 'text-white'} font-black block text-xs mt-0.5">R$ ${s.faturamento.toFixed(2)}</strong>
+                        <span class="text-[9px] ${isCampea ? 'text-amber-300' : 'text-emerald-400'} block font-semibold mt-0.5">Média: R$ ${s.mediaDiaria.toFixed(2)}/dia</span>
                     `;
                     containerComparativo.appendChild(cardSem);
                 });
@@ -3045,7 +3081,8 @@
                     const parts = c.data.split('-');
                     const d = new Date(parts[0], parts[1] - 1, parts[2]);
                     if (d.getMonth() === mesAtual && d.getFullYear() === anoAtual) {
-                        totalFatMes += parseFloat(c.total_bruto || 0);
+                        total
+FatMes += parseFloat(c.total_bruto || 0);
                     }
                 }
             });
@@ -3164,8 +3201,7 @@
         function imprimirRelatorioMensalPDF(mesAno, fat, desp, perd, lucro, dataEnc) {
             const areaPrint = document.getElementById('area-impressao-recibo');
             areaPrint.innerHTML = `
-                <div style="font-family: sans-serif; padding: 25px; border: 2px solid #000; border-radius: 
-12px; max-width: 600px; margin: 0 auto; background: #fff; color: #000;">
+                <div style="font-family: sans-serif; padding: 25px; border: 2px solid #000; border-radius: 12px; max-width: 600px; margin: 0 auto; background: #fff; color: #000;">
                     <h2 style="text-align: center; font-size: 20px; margin-bottom: 4px; font-weight: 900;">MERCEARIA MARQUES</h2>
                     <p style="text-align: center; font-size: 13px; margin-top: 0; color: #444;">BALANÇO CONSOLIDADO DO MÊS (${mesAno})</p>
                     <hr style="border-top: 1px dashed #000; margin: 15px 0;">
