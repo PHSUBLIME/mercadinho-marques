@@ -23,6 +23,8 @@
         #reader video { width: 100% !important; border-radius: 1rem; object-fit: cover; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* REGRA DE PROTEÇÃO PARA EVITAR BLOQUEIO DE TELA */
+        .hidden { display: none !important; }
 
         @media print {
             @page { size: A4 portrait; margin: 12mm; }
@@ -1069,15 +1071,27 @@
         }
 
         function abrirMenuMais() {
-            document.getElementById('modal-menu-mais')?.classList.remove('hidden');
+            const m = document.getElementById('modal-menu-mais');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
         }
 
         function fecharMenuMais() {
-            document.getElementById('modal-menu-mais')?.classList.add('hidden');
+            const m = document.getElementById('modal-menu-mais');
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
         }
 
         function fecharModalDetalhesHistorico() {
-            document.getElementById('modal-detalhes-historico')?.classList.add('hidden');
+            const m = document.getElementById('modal-detalhes-historico');
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
         }
 
         function confirmarAcao(titulo, mensagem, textoBotao = "Sim, Confirmar", icone = "fa-triangle-exclamation", corOk = "rose") {
@@ -1107,6 +1121,7 @@
                 }
 
                 modal.classList.remove('hidden');
+                modal.classList.add('flex');
                 setTimeout(() => {
                     box.classList.remove('scale-95', 'opacity-0');
                     box.classList.add('scale-100', 'opacity-100');
@@ -1117,6 +1132,7 @@
                     box.classList.add('scale-95', 'opacity-0');
                     setTimeout(() => {
                         modal.classList.add('hidden');
+                        modal.classList.remove('flex');
                         resolve(resposta);
                     }, 150);
                 };
@@ -1645,7 +1661,12 @@
             document.getElementById('desp-vencimento').value = getObterDataLocalISO();
             document.getElementById('desp-parcelas').value = '1';
             document.getElementById('desp-modal-titulo').innerText = "Nova Despesa ou Boleto";
-            document.getElementById('modal-despesa').classList.remove('hidden');
+            
+            const m = document.getElementById('modal-despesa');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
         }
 
         function abrirModalEditarDespesa(id) {
@@ -1659,11 +1680,20 @@
             document.getElementById('desp-vencimento').value = d.data_vencimento || getObterDataLocalISO();
             document.getElementById('desp-parcelas').value = d.total_parcelas || 1;
             document.getElementById('desp-modal-titulo').innerText = "Editar Despesa / Conta";
-            document.getElementById('modal-despesa').classList.remove('hidden');
+            
+            const m = document.getElementById('modal-despesa');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
         }
 
         function fecharModalNovaDespesa() {
-            document.getElementById('modal-despesa').classList.add('hidden');
+            const m = document.getElementById('modal-despesa');
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
         }
 
         async function salvarNovaDespesa(e) {
@@ -2181,11 +2211,19 @@
             document.getElementById('edit-lote-qtd').value = lote.quantidade || 0;
             document.getElementById('edit-lote-local').value = lote.localizacao || '';
 
-            document.getElementById('modal-editar-lote').classList.remove('hidden');
+            const m = document.getElementById('modal-editar-lote');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
         }
 
         function fecharModalEditarLote() {
-            document.getElementById('modal-editar-lote').classList.add('hidden');
+            const m = document.getElementById('modal-editar-lote');
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
         }
 
         async function salvarLoteEdicao(e) {
@@ -2421,7 +2459,12 @@
             document.getElementById('c-caderneta-valor').value = '';
             document.getElementById('c-caderneta-obs').value = '';
             document.getElementById('caderneta-modal-titulo').innerText = "Novo Cliente Fiado";
-            document.getElementById('modal-caderneta-cliente').classList.remove('hidden');
+            
+            const m = document.getElementById('modal-caderneta-cliente');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
         }
 
         function abrirModalEditarCadernetaCliente(id) {
@@ -2434,14 +2477,44 @@
             document.getElementById('c-caderneta-valor').value = c.valor_devido || 0;
             document.getElementById('c-caderneta-obs').value = c.observacoes || '';
             document.getElementById('caderneta-modal-titulo').innerText = "Editar Cliente Fiado";
-            document.getElementById('modal-caderneta-cliente').classList.remove('hidden');
+            
+            const m = document.getElementById('modal-caderneta-cliente');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
         }
 
         function fecharModalCadernetaCliente() {
-            document.getElementById('modal-caderneta-cliente').classList.add('hidden');
+            const m = document.getElementById('modal-caderneta-cliente');
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
         }
 
-       salvarLocal('caderneta', appData.caderneta);
+        async function salvarClienteCaderneta(e) {
+            e.preventDefault();
+            const cid = document.getElementById('c-caderneta-id').value;
+            const nome = document.getElementById('c-caderneta-nome').value.trim();
+            const tel = document.getElementById('c-caderneta-tel').value.trim();
+            const valor = parseNum(document.getElementById('c-caderneta-valor').value);
+            const obs = document.getElementById('c-caderneta-obs').value.trim();
+
+            if (!nome) return;
+
+            const cData = {
+                id: cid ? parseInt(cid) : Date.now(),
+                cliente_nome: nome,
+                telefone: tel,
+                valor_devido: valor,
+                observacoes: obs
+            };
+
+            if (cid) {
+                const idx = appData.caderneta.findIndex(x => x.id == cid);
+                if (idx >= 0) appData.caderneta[idx] = cData;
+                salvarLocal('caderneta', appData.caderneta);
                 try { await supabaseClient.from('mercearia_caderneta').update(cData).eq('id', cid); } catch(e){}
             } else {
                 appData.caderneta.push(cData);
@@ -2627,7 +2700,12 @@
             document.getElementById('f-prod-custo').value = '';
             document.getElementById('f-prod-venda').value = '';
             document.getElementById('prod-modal-titulo').innerText = "Novo Produto";
-            document.getElementById('modal-produto').classList.remove('hidden');
+            
+            const m = document.getElementById('modal-produto');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
         }
 
         function abrirModalEditarProduto(prodId) {
@@ -2643,10 +2721,21 @@
             document.getElementById('f-prod-venda').value = p.preco_venda || 0;
 
             document.getElementById('prod-modal-titulo').innerText = "Editar Produto";
-            document.getElementById('modal-produto').classList.remove('hidden');
+            
+            const m = document.getElementById('modal-produto');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
         }
 
-        function fecharModalProduto() { document.getElementById('modal-produto').classList.add('hidden'); }
+        function fecharModalProduto() { 
+            const m = document.getElementById('modal-produto');
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
+        }
 
         async function salvarProdutoForm(e) {
             e.preventDefault();
@@ -3018,7 +3107,10 @@
                 </div>
             `;
 
-            modal.classList.remove('hidden');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
         }
 
         async function excluirRegistroCaixa(caixaId) {
@@ -3127,7 +3219,8 @@
             container.innerHTML = '';
 
             if (appData.historicoMensal.length === 0) {
-                container.innerHTML = `<p class="text-zinc-500 italic p-4 text-center">Nenhum mês fechado até o momento.</p>`;
+                container.innerHTML = `<p class="
+text-zinc-500 italic p-4 text-center">Nenhum mês fechado até o momento.</p>`;
                 return;
             }
 
@@ -3203,7 +3296,11 @@
         // ================= CÂMERA SCANNER =================
         function abrirCameraScanner(destino) {
             destinoScanner = destino;
-            document.getElementById('modal-camera').classList.remove('hidden');
+            const m = document.getElementById('modal-camera');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+            }
 
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
@@ -3232,14 +3329,24 @@
         }
 
         function fecharCameraScanner() {
+            const m = document.getElementById('modal-camera');
             if (html5QrCode && html5QrCode.isScanning) {
                 html5QrCode.stop().then(() => {
-                    document.getElementById('modal-camera').classList.add('hidden');
+                    if (m) {
+                        m.classList.add('hidden');
+                        m.classList.remove('flex');
+                    }
                 }).catch(() => {
-                    document.getElementById('modal-camera').classList.add('hidden');
+                    if (m) {
+                        m.classList.add('hidden');
+                        m.classList.remove('flex');
+                    }
                 });
             } else {
-                document.getElementById('modal-camera').classList.add('hidden');
+                if (m) {
+                    m.classList.add('hidden');
+                    m.classList.remove('flex');
+                }
             }
         }
 
