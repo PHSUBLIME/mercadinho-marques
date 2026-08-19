@@ -104,8 +104,8 @@
                     <span class="text-[9px] text-zinc-400 block font-semibold">Caixa & Validades</span>
                 </div>
             </div>
-            <button onclick="carregarDados()" class="bg-zinc-800 text-zinc-200 p-2.5 rounded-xl text-xs border border-zinc-700">
-                <i class="fa-solid fa-rotate text-emerald-400" id="icon-sync-mobile"></i>
+            <button onclick="carregarDados()" class="bg-zinc-800 text-zinc-200 p-2.5 rounded-xl text-xs border border-zinc-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-rotate text-emerald-400" id="icon-sync-mobile"></i> Sincronizar
             </button>
         </div>
     </header>
@@ -115,7 +115,6 @@
 
         <!-- ================= SEÇÃO 1: DASHBOARD ================= -->
         <section id="secao-dashboard" class="secao-conteudo space-y-6">
-            <!-- BOTÃO DE ACESSO RÁPIDO PARA PRODUTOS NO MOBILE -->
             <div class="md:hidden flex gap-2 overflow-x-auto no-scrollbar pb-1">
                 <button onclick="navegar('produtos')" class="bg-blue-600/20 border border-blue-500/40 text-blue-300 px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 flex items-center gap-2">
                     <i class="fa-solid fa-boxes-stacked text-blue-400"></i> Catálogo de Produtos
@@ -748,7 +747,7 @@
             <span class="text-[10px]">Financeiro</span>
         </button>
 
-        <button onclick="navegar('historico')" id="nav-historico" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
+        <button onclick="navegar('historico')" id="nav-historico" class="nav-item flex flex-col items-center gap-1 text-zinc-300 font-medium shrink-0">
             <i class="fa-solid fa-clock-rotate-left text-lg text-zinc-300"></i>
             <span class="text-[10px]">Histórico</span>
         </button>
@@ -1115,7 +1114,7 @@
 
             try {
                 const resProd = await supabaseClient.from('mercearia_produtos').select('*').order('nome');
-                if (resProd.data && resProd.data.length > 0) {
+                if (resProd.data && !resProd.error) {
                     appData.produtos = resProd.data;
                     salvarLocal('produtos', resProd.data);
                 } else {
@@ -1123,7 +1122,7 @@
                 }
 
                 const resLote = await supabaseClient.from('mercearia_lotes').select('*').order('validade');
-                if (resLote.data && resLote.data.length > 0) {
+                if (resLote.data && !resLote.error) {
                     appData.lotes = resLote.data;
                     salvarLocal('lotes', resLote.data);
                 } else {
@@ -1131,7 +1130,7 @@
                 }
 
                 const resPerd = await supabaseClient.from('mercearia_perdas').select('*').order('data_perda', { ascending: false });
-                if (resPerd.data && resPerd.data.length > 0) {
+                if (resPerd.data && !resPerd.error) {
                     appData.perdas = resPerd.data;
                     salvarLocal('perdas', resPerd.data);
                 } else {
@@ -1139,7 +1138,7 @@
                 }
 
                 const resCaixa = await supabaseClient.from('mercearia_caixa').select('*').order('data', { ascending: false });
-                if (resCaixa.data && resCaixa.data.length > 0) {
+                if (resCaixa.data && !resCaixa.error) {
                     appData.caixa = resCaixa.data;
                     salvarLocal('caixa', resCaixa.data);
                 } else {
@@ -1147,7 +1146,7 @@
                 }
 
                 const resDesp = await supabaseClient.from('mercearia_despesas').select('*').order('data_vencimento', { ascending: true });
-                if (resDesp.data && resDesp.data.length > 0) {
+                if (resDesp.data && !resDesp.error) {
                     appData.despesas = resDesp.data;
                     salvarLocal('despesas', resDesp.data);
                 } else {
@@ -1155,7 +1154,7 @@
                 }
 
                 const resHist = await supabaseClient.from('mercearia_fechamentos_mensais').select('*').order('created_at', { ascending: false });
-                if (resHist.data && resHist.data.length > 0) {
+                if (resHist.data && !resHist.error) {
                     appData.historicoMensal = resHist.data;
                     salvarLocal('historicoMensal', resHist.data);
                 } else {
@@ -1163,7 +1162,7 @@
                 }
 
                 const resCad = await supabaseClient.from('mercearia_caderneta').select('*').order('cliente_nome');
-                if (resCad.data && resCad.data.length > 0) {
+                if (resCad.data && !resCad.error) {
                     appData.caderneta = resCad.data;
                     salvarLocal('caderneta', resCad.data);
                 } else {
@@ -1707,12 +1706,12 @@
         async function excluirDespesa(id) {
             const confirmou = await confirmarAcao("Excluir Conta", "Tem certeza que deseja apagar este lançamento de despesa?", "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
-                appData.despesas = appData.despesas.filter(x => x.id != id);
-                salvarLocal('despesas', appData.despesas);
-
                 try {
                     await supabaseClient.from('mercearia_despesas').delete().eq('id', id);
                 } catch(err) {}
+
+                appData.despesas = appData.despesas.filter(x => x.id != id);
+                salvarLocal('despesas', appData.despesas);
 
                 mostrarToast("Despesa removida!");
                 atualizarInterface();
@@ -2178,10 +2177,12 @@
         async function excluirLote(loteId) {
             const confirmou = await confirmarAcao("Excluir Lote", "Tem certeza que deseja apagar este lote de produtos do sistema?", "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
+                try {
+                    await supabaseClient.from('mercearia_lotes').delete().eq('id', loteId);
+                } catch(err) {}
+
                 appData.lotes = appData.lotes.filter(l => l.id != loteId);
                 salvarLocal('lotes', appData.lotes);
-
-                try { await supabaseClient.from('mercearia_lotes').delete().eq('id', loteId); } catch(err) {}
 
                 mostrarToast("Lote removido com sucesso!");
                 atualizarInterface();
@@ -2315,6 +2316,8 @@
 
             const confirmou = await confirmarAcao("Reverter Perda", "Deseja apagar esta perda do histórico e devolver a quantidade ao estoque?", "Sim, Reverter", "fa-rotate-left", "amber");
             if (confirmou) {
+                try { await supabaseClient.from('mercearia_perdas').delete().eq('id', perdaId); } catch(e) {}
+
                 const loteProd = appData.lotes.find(l => l.produto_id == p.produto_id);
                 if (loteProd) {
                     loteProd.quantidade = parseFloat(loteProd.quantidade || 0) + parseFloat(p.quantidade || 0);
@@ -2324,8 +2327,6 @@
 
                 appData.perdas = appData.perdas.filter(x => x.id != perdaId);
                 salvarLocal('perdas', appData.perdas);
-
-                try { await supabaseClient.from('mercearia_perdas').delete().eq('id', perdaId); } catch(e) {}
 
                 mostrarToast("Registro de perda revertido e estoque restaurado!");
                 atualizarInterface();
@@ -2437,9 +2438,10 @@
 
             const confirmou = await confirmarAcao("Excluir Cliente", `Tem certeza que deseja apagar "${nomeC}" da Caderneta?`, "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
+                try { await supabaseClient.from('mercearia_caderneta').delete().eq('id', id); } catch(e){}
+
                 appData.caderneta = appData.caderneta.filter(x => x.id != id);
                 salvarLocal('caderneta', appData.caderneta);
-                try { await supabaseClient.from('mercearia_caderneta').delete().eq('id', id); } catch(e){}
 
                 mostrarToast("Cliente removido da Caderneta!");
                 atualizarInterface();
@@ -2665,14 +2667,32 @@
             const prod = appData.produtos.find(p => p.id == prodId);
             const nomeP = prod ? prod.nome : 'este produto';
 
-            const confirmou = await confirmarAcao("Excluir Produto", `Tem certeza que deseja apagar "${nomeP}" e TODOS os seus lotes do sistema?`, "Sim, Apagar", "fa-trash-can", "rose");
+            const confirmou = await confirmarAcao("Excluir Produto", `Tem certeza que deseja apagar "${nomeP}" e TODOS os seus lotes e registros do sistema?`, "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
+                try {
+                    // 1. Apaga registros vinculados no Supabase antes de apagar o produto
+                    await supabaseClient.from('mercearia_lotes').delete().eq('produto_id', prodId);
+                    await supabaseClient.from('mercearia_perdas').delete().eq('produto_id', prodId);
+                    
+                    // 2. Apaga o produto do Supabase
+                    const res = await supabaseClient.from('mercearia_produtos').delete().eq('id', prodId);
+                    if (res.error) {
+                        console.error("Erro Supabase ao apagar:", res.error);
+                        mostrarToast("Erro ao excluir no banco: " + res.error.message, "erro");
+                        return;
+                    }
+                } catch(err) {
+                    console.error("Erro na exclusão:", err);
+                }
+
+                // 3. Atualiza memória e armazenamento local
                 appData.produtos = appData.produtos.filter(x => x.id != prodId);
                 appData.lotes = appData.lotes.filter(l => l.produto_id != prodId);
+                appData.perdas = appData.perdas.filter(p => p.produto_id != prodId);
+                
                 salvarLocal('produtos', appData.produtos);
                 salvarLocal('lotes', appData.lotes);
-
-                try { await supabaseClient.from('mercearia_produtos').delete().eq('id', prodId); } catch(err){}
+                salvarLocal('perdas', appData.perdas);
 
                 mostrarToast("Produto apagado com sucesso!");
                 atualizarInterface();
@@ -2882,9 +2902,10 @@
         async function excluirRegistroCaixa(caixaId) {
             const confirmou = await confirmarAcao("Excluir Caixa do Dia", "Tem certeza que deseja apagar este registro de caixa?", "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
+                try { await supabaseClient.from('mercearia_caixa').delete().eq('id', caixaId); } catch(e){}
+
                 appData.caixa = appData.caixa.filter(x => x.id != caixaId);
                 salvarLocal('caixa', appData.caixa);
-                try { await supabaseClient.from('mercearia_caixa').delete().eq('id', caixaId); } catch(e){}
 
                 mostrarToast("Registro de caixa apagado!");
                 atualizarInterface();
@@ -2968,9 +2989,10 @@
         async function excluirFechamentoMensal(id) {
             const confirmou = await confirmarAcao("Excluir Histórico Mensal", "Tem certeza que deseja apagar este relatório mensal do histórico?", "Sim, Apagar", "fa-trash-can", "rose");
             if (confirmou) {
+                try { await supabaseClient.from('mercearia_fechamentos_mensais').delete().eq('id', id); } catch(e){}
+
                 appData.historicoMensal = appData.historicoMensal.filter(x => x.id != id);
                 salvarLocal('historicoMensal', appData.historicoMensal);
-                try { await supabaseClient.from('mercearia_fechamentos_mensais').delete().eq('id', id); } catch(e){}
 
                 mostrarToast("Relatório mensal apagado!");
                 atualizarInterface();
