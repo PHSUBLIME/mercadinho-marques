@@ -2441,28 +2441,7 @@
             document.getElementById('modal-caderneta-cliente').classList.add('hidden');
         }
 
-        async function salvarClienteCaderneta(e) {
-            e.preventDefault();
-            const cid = document.getElementById('c-caderneta-id').value;
-            const nome = document.getElementById('c-caderneta-nome').value.trim();
-            const tel = document.getElementById('c-caderneta-tel').value.trim();
-            const valor = parseNum(document.getElementById('c-caderneta-valor').value);
-            const obs = document.getElementById('c-caderneta-obs').value.trim();
-
-            if (!nome) return;
-
-            const cData = {
-                id: cid ? parseInt(cid) : Date.now(),
-                cliente_nome: nome,
-                telefone: tel,
-                valor_devido: valor,
-                observacoes: obs
-            };
-
-            if (cid) {
-                const idx = appData.caderneta.findIndex(x => x.id == cid);
-                if (idx >= 0) appData.caderneta[idx] = cData;
-                salvarLocal('caderneta', appData.caderneta);
+       salvarLocal('caderneta', appData.caderneta);
                 try { await supabaseClient.from('mercearia_caderneta').update(cData).eq('id', cid); } catch(e){}
             } else {
                 appData.caderneta.push(cData);
@@ -3081,8 +3060,7 @@
                     const parts = c.data.split('-');
                     const d = new Date(parts[0], parts[1] - 1, parts[2]);
                     if (d.getMonth() === mesAtual && d.getFullYear() === anoAtual) {
-                        total
-FatMes += parseFloat(c.total_bruto || 0);
+                        totalFatMes += parseFloat(c.total_bruto || 0);
                     }
                 }
             });
