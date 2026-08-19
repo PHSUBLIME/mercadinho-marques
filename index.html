@@ -50,7 +50,7 @@
                 </div>
             </div>
 
-            <!-- MENU VERTICAL -->
+            <!-- MENU VERTICAL (DESKTOP) -->
             <nav class="space-y-1.5" id="menu-sidebar-pc">
                 <button onclick="navegar('dashboard')" id="pc-nav-dashboard" class="pc-nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-xl font-bold text-xs transition-all text-emerald-400 bg-emerald-500/10 border-l-4 border-emerald-400">
                     <i class="fa-solid fa-chart-pie text-base"></i> Painel
@@ -115,6 +115,19 @@
 
         <!-- ================= SEÇÃO 1: DASHBOARD ================= -->
         <section id="secao-dashboard" class="secao-conteudo space-y-6">
+            <!-- BOTÃO DE ACESSO RÁPIDO PARA PRODUTOS NO MOBILE -->
+            <div class="md:hidden flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                <button onclick="navegar('produtos')" class="bg-blue-600/20 border border-blue-500/40 text-blue-300 px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked text-blue-400"></i> Catálogo de Produtos
+                </button>
+                <button onclick="navegar('caderneta')" class="bg-purple-600/20 border border-purple-500/40 text-purple-300 px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 flex items-center gap-2">
+                    <i class="fa-solid fa-book text-purple-400"></i> Fiado
+                </button>
+                <button onclick="navegar('perdas')" class="bg-rose-600/20 border border-rose-500/40 text-rose-300 px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 flex items-center gap-2">
+                    <i class="fa-solid fa-dumpster text-rose-400"></i> Perdas
+                </button>
+            </div>
+
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div class="bg-emerald-950/20 border border-emerald-800/50 p-4 rounded-2xl shadow-md">
                     <span class="text-[10px] md:text-xs font-extrabold uppercase text-emerald-400 tracking-wider block">Faturamento do Dia</span>
@@ -170,7 +183,7 @@
                     <div>
                         <div class="border-b border-zinc-800 pb-3 flex justify-between items-center">
                             <h3 class="text-sm md:text-base font-black text-rose-400 flex items-center gap-2">
-                                <i class="fa-solid fa-triangle-exclamation"></i> Vencendo Esta Semana
+                                <i class="fa-solid fa-triangle-exclamation"></i> Vencendo Esta Semana (<span id="dash-criticos-count">0</span>)
                             </h3>
                             <button onclick="navegar('farol')" class="text-xs text-rose-400 hover:underline font-bold">Ver Farol →</button>
                         </div>
@@ -289,7 +302,6 @@
                     </div>
                 </div>
 
-                <!-- CARDS DE RESUMO DE DESPESAS -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
                         <span class="text-[10px] text-zinc-400 font-bold uppercase block">Despesas Pagas (Mês)</span>
@@ -305,13 +317,11 @@
                     </div>
                 </div>
 
-                <!-- CAMPO DE PESQUISA DE DESPESAS -->
                 <div class="bg-zinc-950 px-4 py-3 rounded-xl border border-zinc-800 flex items-center gap-3">
                     <i class="fa-solid fa-magnifying-glass text-rose-400 text-base"></i>
                     <input type="text" id="busca-despesas" onkeyup="renderizarDespesas()" placeholder="Pesquisar por fornecedor, descrição, tipo de pagamento ou status..." class="bg-transparent text-white text-xs md:text-sm w-full focus:outline-none">
                 </div>
 
-                <!-- TABELA DE DESPESAS -->
                 <div class="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-950">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-zinc-300">
@@ -343,6 +353,9 @@
                         </h2>
                         <p class="text-xs text-zinc-400 mt-0.5">Bipe o código do produto. Se já for cadastrado, o sistema reconhece o nome na hora.</p>
                     </div>
+                    <button onclick="navegar('produtos')" class="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 font-bold px-3 py-2 rounded-xl text-xs border border-blue-500/30 flex items-center gap-1.5">
+                        <i class="fa-solid fa-boxes-stacked"></i> Ver Produtos
+                    </button>
                 </div>
 
                 <div id="status-prod-box" class="p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs flex items-center gap-2.5">
@@ -686,33 +699,58 @@
     <!-- AREA EXCLUSIVA DE IMPRESSÃO DE PDF (A4) -->
     <div id="area-impressao-recibo" class="hidden"></div>
 
-    <!-- BARRA DE NAVEGAÇÃO MOBILE FIXA -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 flex justify-around items-center py-2.5 z-50 px-1 no-print">
-        <button onclick="navegar('dashboard')" id="nav-dashboard" class="nav-item active flex flex-col items-center gap-1 text-emerald-400 font-bold">
+    <!-- BARRA DE NAVEGAÇÃO MOBILE FIXA (DESLIZÁVEL / COMPLETA) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 flex items-center gap-5 py-2.5 px-4 overflow-x-auto no-scrollbar z-50 no-print">
+        <button onclick="navegar('dashboard')" id="nav-dashboard" class="nav-item active flex flex-col items-center gap-1 text-emerald-400 font-bold shrink-0">
             <i class="fa-solid fa-chart-pie text-lg"></i>
             <span class="text-[10px]">Painel</span>
         </button>
 
-        <button onclick="navegar('caixa')" id="nav-caixa" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium">
+        <button onclick="navegar('produtos')" id="nav-produtos" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
+            <i class="fa-solid fa-boxes-stacked text-lg text-blue-400"></i>
+            <span class="text-[10px]">Produtos</span>
+        </button>
+
+        <button onclick="navegar('caixa')" id="nav-caixa" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
             <i class="fa-solid fa-cash-register text-lg text-amber-400"></i>
             <span class="text-[10px]">Caixa</span>
         </button>
 
-        <button onclick="navegar('despesas')" id="nav-despesas" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium">
-            <i class="fa-solid fa-file-invoice-dollar text-lg text-rose-400"></i>
-            <span class="text-[10px]">Despesas</span>
-        </button>
-
-        <button onclick="navegar('bipar')" id="nav-bipar" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium">
-            <div class="w-10 h-10 bg-emerald-500 text-zinc-950 rounded-full flex items-center justify-center text-lg font-black shadow-lg -mt-5 border-2 border-zinc-950">
+        <button onclick="navegar('bipar')" id="nav-bipar" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
+            <div class="w-10 h-10 bg-emerald-500 text-zinc-950 rounded-full flex items-center justify-center text-lg font-black shadow-lg border-2 border-zinc-950">
                 <i class="fa-solid fa-plus"></i>
             </div>
             <span class="text-[10px] font-bold text-emerald-400">Bipar</span>
         </button>
 
-        <button onclick="navegar('farol')" id="nav-farol" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium">
+        <button onclick="navegar('farol')" id="nav-farol" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
             <i class="fa-solid fa-traffic-light text-lg text-rose-400"></i>
             <span class="text-[10px]">Farol</span>
+        </button>
+
+        <button onclick="navegar('despesas')" id="nav-despesas" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
+            <i class="fa-solid fa-file-invoice-dollar text-lg text-rose-400"></i>
+            <span class="text-[10px]">Despesas</span>
+        </button>
+
+        <button onclick="navegar('caderneta')" id="nav-caderneta" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
+            <i class="fa-solid fa-book text-lg text-purple-400"></i>
+            <span class="text-[10px]">Fiado</span>
+        </button>
+
+        <button onclick="navegar('perdas')" id="nav-perdas" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
+            <i class="fa-solid fa-dumpster text-lg text-rose-400"></i>
+            <span class="text-[10px]">Perdas</span>
+        </button>
+
+        <button onclick="navegar('financeiro')" id="nav-financeiro" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
+            <i class="fa-solid fa-wallet text-lg text-emerald-400"></i>
+            <span class="text-[10px]">Financeiro</span>
+        </button>
+
+        <button onclick="navegar('historico')" id="nav-historico" class="nav-item flex flex-col items-center gap-1 text-zinc-400 font-medium shrink-0">
+            <i class="fa-solid fa-clock-rotate-left text-lg text-zinc-300"></i>
+            <span class="text-[10px]">Histórico</span>
         </button>
     </nav>
 
@@ -1269,7 +1307,7 @@
                 }
             });
 
-            document.getElementById('dash-criticos-count').innerText = `${criticos} lote(s)`;
+            document.getElementById('dash-criticos-count').innerText = `${criticos}`;
             if (criticos === 0 && containerUrgente) {
                 containerUrgente.innerHTML = `<p class="text-emerald-400 font-medium italic p-2">Nenhum produto vencendo nos próximos 7 dias.</p>`;
             }
