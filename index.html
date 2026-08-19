@@ -2707,8 +2707,7 @@
                 m.classList.add('flex');
             }
         }
-
-        function abrirModalEditarProduto(prodId) {
+function abrirModalEditarProduto(prodId) {
             const p = appData.produtos.find(x => x.id == prodId);
             if (!p) return;
 
@@ -2728,7 +2727,6 @@
                 m.classList.add('flex');
             }
         }
-
         function fecharModalProduto() { 
             const m = document.getElementById('modal-produto');
             if (m) {
@@ -3176,7 +3174,6 @@
                     }
                 }
             });
-
             const lucroLiquido = totalFatMes - totalDespesasMes - totalPerdasMes;
 
             const fData = {
